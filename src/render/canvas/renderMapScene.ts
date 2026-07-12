@@ -1,47 +1,43 @@
 import type { GameState } from "../../engine/scenario/types";
 import type { MapDefinition } from "../../engine/scenario/types";
 import { resolveTerrainTile } from "../../engine/map/terrainLookup";
+import { getBaseTileSize } from "../../engine/map/viewportMath";
 import { palette } from "../sprites/placeholders";
 import { terrainPalette } from "../sprites/placeholders";
 import { renderGuardedLocations } from "./renderGuardedLocations";
-
-const DEFAULT_TILE_SIZE = 96;
-const MIN_TILE_SIZE = 10;
+import { getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
 
 export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): number {
-  if (map.width <= 8 && map.height <= 8) {
-    return DEFAULT_TILE_SIZE;
-  }
-
-  const surfaceWidth = canvas?.width ?? 896;
-  const surfaceHeight = canvas?.height ?? 640;
-  return Math.max(MIN_TILE_SIZE, Math.floor(Math.min(surfaceWidth / map.width, surfaceHeight / map.height)));
+  return getBaseTileSize(map, canvas?.width, canvas?.height);
 }
 
 export function renderMapScene(context: CanvasRenderingContext2D, state: GameState): void {
   const { map } = state.scenario;
-  const tileSize = getTileSize(map, context.canvas);
+  const metrics = getViewportRenderMetrics(state, context.canvas);
+  const tileSize = metrics.scaledTileSize;
 
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.fillStyle = "#f6ecd0";
   context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-  for (let y = 0; y < map.height; y += 1) {
-    for (let x = 0; x < map.width; x += 1) {
+  for (let y = metrics.startTileY; y < metrics.endTileY; y += 1) {
+    for (let x = metrics.startTileX; x < metrics.endTileX; x += 1) {
       const terrainTile = state.scenario.terrainRegions?.length ? resolveTerrainTile(state.scenario, { x, y }) : null;
+      const point = worldTileToCanvasPoint({ x, y }, metrics.viewport, context.canvas, map);
       context.fillStyle = terrainTile ? terrainPalette[terrainTile.terrainType] : palette.tile;
-      context.fillRect(x * tileSize, y * tileSize, tileSize - 1, tileSize - 1);
+      context.fillRect(point.x, point.y, tileSize - 1, tileSize - 1);
       context.strokeStyle = palette.tileBorder;
-      context.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+      context.strokeRect(point.x, point.y, tileSize, tileSize);
     }
   }
 
   for (const pickup of state.scenario.resourcePickups.filter((entry) => !entry.collectedState)) {
+    const point = worldTileToCanvasPoint(pickup.mapPosition, metrics.viewport, context.canvas, map);
     context.fillStyle = palette.pickup;
     context.beginPath();
     context.arc(
-      pickup.mapPosition.x * tileSize + tileSize / 2,
-      pickup.mapPosition.y * tileSize + tileSize / 2,
+      point.x + tileSize / 2,
+      point.y + tileSize / 2,
       Math.max(4, Math.floor(tileSize / 6)),
       0,
       Math.PI * 2
@@ -49,14 +45,15 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     context.fill();
   }
 
-  renderGuardedLocations(context, tileSize, state.scenario.guardedLocations);
+  renderGuardedLocations(context, tileSize, state.scenario.guardedLocations, metrics.viewport, map);
 
   for (const hero of state.scenario.heroes.filter((entry) => entry.availabilityState !== "defeated")) {
+    const point = worldTileToCanvasPoint(hero.mapPosition, metrics.viewport, context.canvas, map);
     context.fillStyle = palette.hero;
     context.beginPath();
     context.arc(
-      hero.mapPosition.x * tileSize + tileSize / 2,
-      hero.mapPosition.y * tileSize + tileSize / 2,
+      point.x + tileSize / 2,
+      point.y + tileSize / 2,
       Math.max(4, Math.floor(tileSize / 4)),
       0,
       Math.PI * 2
@@ -67,8 +64,8 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
       context.strokeStyle = "#fff";
       context.lineWidth = Math.max(1, Math.floor(tileSize / 20));
       context.strokeRect(
-        hero.mapPosition.x * tileSize + Math.max(2, Math.floor(tileSize / 8)),
-        hero.mapPosition.y * tileSize + Math.max(2, Math.floor(tileSize / 8)),
+        point.x + Math.max(2, Math.floor(tileSize / 8)),
+        point.y + Math.max(2, Math.floor(tileSize / 8)),
         tileSize - Math.max(4, Math.floor(tileSize / 4)),
         tileSize - Math.max(4, Math.floor(tileSize / 4))
       );

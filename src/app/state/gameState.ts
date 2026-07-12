@@ -1,6 +1,16 @@
 import { loadScenario, type ScenarioId } from "../../engine/scenario/loadScenario";
-import type { Battle, GameState, ScenarioDefinition } from "../../engine/scenario/types";
+import type { Battle, GameState, MapViewState, ScenarioDefinition, SceneMode } from "../../engine/scenario/types";
+import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
+
+export function createDefaultMapViewState(scenario: ScenarioDefinition): MapViewState {
+  return {
+    viewport: createViewport(scenario.map),
+    panGesture: null,
+    lastSceneMode: "map",
+    isDefaultView: true
+  };
+}
 
 export function createInitialState(scenarioId: ScenarioId = "core-map-loop"): GameState {
   const scenario = loadScenario(scenarioId);
@@ -15,7 +25,8 @@ export function createInitialState(scenarioId: ScenarioId = "core-map-loop"): Ga
     battle: null,
     messageLog: ["Aren arrives at the borderlands."],
     winnerPlayerId: null,
-    routeFeedback: null
+    routeFeedback: null,
+    mapViewState: createDefaultMapViewState(scenario)
   };
 }
 
@@ -25,13 +36,16 @@ export function appendMessage(state: GameState, message: string): GameState {
 }
 
 export function setBattleState(state: GameState, battle: Battle | null): GameState {
+  state.mapViewState.lastSceneMode = state.sceneMode;
   state.battle = battle;
   state.sceneMode = battle ? "battle" : "map";
   return state;
 }
 
 export function setScenario(state: GameState, scenario: ScenarioDefinition): GameState {
+  const previousSceneMode: SceneMode = state.sceneMode;
   state.scenario = scenario;
+  state.mapViewState.lastSceneMode = previousSceneMode;
   const winnerPlayerId = evaluateDefaultVictory(scenario);
   if (winnerPlayerId) {
     state.winnerPlayerId = winnerPlayerId;

@@ -16,6 +16,11 @@ export interface Position {
   y: number;
 }
 
+export interface ScreenPoint {
+  x: number;
+  y: number;
+}
+
 export interface MapDefinition {
   width: number;
   height: number;
@@ -60,6 +65,37 @@ export interface RouteFeedback {
   terrainLabel: string;
   movementImpact: string;
   blockedReason: string | null;
+}
+
+export interface MapViewport {
+  zoomLevel: number;
+  minZoom: number;
+  maxZoom: number;
+  zoomStep: number;
+  panOffsetX: number;
+  panOffsetY: number;
+}
+
+export interface PanGestureState {
+  originScreenX: number;
+  originScreenY: number;
+  startingPanOffsetX: number;
+  startingPanOffsetY: number;
+  isActive: boolean;
+}
+
+export interface MapViewState {
+  viewport: MapViewport;
+  panGesture: PanGestureState | null;
+  lastSceneMode: SceneMode;
+  isDefaultView: boolean;
+}
+
+export interface InteractionTarget {
+  screenPosition: ScreenPoint;
+  worldPosition: Position;
+  targetKind: "hero" | "tile" | "none";
+  targetId: string | null;
 }
 
 export interface ResourceStockpile {
@@ -179,6 +215,7 @@ export interface GameState {
   messageLog: string[];
   winnerPlayerId: string | null;
   routeFeedback: RouteFeedback | null;
+  mapViewState: MapViewState;
 }
 
 export interface GameSnapshot {

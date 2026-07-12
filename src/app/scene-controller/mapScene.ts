@@ -13,6 +13,11 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
   const state = store.getState();
   const logMessage = state.messageLog[state.messageLog.length - 1] ?? "Explore the map.";
   const terrainMode = hasTerrainRegions(state.scenario);
+  const navigationMessage = state.mapViewState.panGesture?.isActive
+    ? "Panning map view..."
+    : state.mapViewState.isDefaultView
+      ? "Use mouse wheel to zoom and middle mouse button to pan."
+      : `Map view preserved at ${state.mapViewState.viewport.zoomLevel.toFixed(2)}x.`;
   container.innerHTML = `
     ${renderMapHud(state)}
     ${renderEndTurnPanel(state)}
@@ -23,7 +28,7 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
             (state.routeFeedback ? `${state.routeFeedback.terrainLabel}: ${state.routeFeedback.movementImpact}.` : "Select a nearby tile to inspect movement cost.")
         : "Blocked sites open only after their guards fall."
     )}
-    ${renderErrorOverlay(logMessage, state.routeFeedback?.blockedReason)}
+    ${renderErrorOverlay(logMessage, state.routeFeedback?.blockedReason ?? navigationMessage)}
   `;
 
   const button = container.querySelector<HTMLButtonElement>("#end-turn-button");

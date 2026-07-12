@@ -41,13 +41,19 @@ npm run dev
 Run viewport contracts and engine integration coverage:
 
 ```powershell
-npm test
+npm run test:viewport
 ```
 
 Run browser acceptance coverage:
 
 ```powershell
-npx playwright test
+npx playwright test tests/acceptance/map-pan-navigation.spec.ts tests/acceptance/map-zoom-navigation.spec.ts tests/acceptance/map-view-interaction.spec.ts
+```
+
+Run the full viewport verification flow:
+
+```powershell
+npm run verify:viewport
 ```
 
 ## Notes
@@ -56,3 +62,4 @@ npx playwright test
 - The primary inputs for this slice are mouse-wheel zoom and middle-mouse drag panning.
 - Navigation behavior applies only to the adventure map scene in this slice.
 - The preserved view state only needs to survive within the current play session, not across page reloads.
+- The advanced terrain scenario is the best manual validation target because its default zoomed map requires both panning and post-navigation interaction.

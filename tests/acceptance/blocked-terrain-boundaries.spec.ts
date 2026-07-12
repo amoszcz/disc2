@@ -15,7 +15,17 @@ test("blocked river tiles reject movement without spending points", async ({ pag
   });
 
   const canvas = page.getByLabel("game canvas");
-  await canvas.click({ position: { x: 205, y: 105 } });
+  const riverClick = await page.evaluate(() => {
+    const store = (window as Window & { __gameStore?: { getState: () => any } }).__gameStore;
+    const state = store?.getState();
+    const viewport = state.mapViewState.viewport;
+    const scaledTileSize = 10 * viewport.zoomLevel;
+    return {
+      x: (20 - viewport.panOffsetX + 0.5) * scaledTileSize,
+      y: (10 - viewport.panOffsetY + 0.5) * scaledTileSize
+    };
+  });
+  await canvas.click({ position: riverClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("8");
   await expect(page.getByTestId("route-terrain")).toHaveText("Rivers");

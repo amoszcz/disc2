@@ -9,8 +9,10 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:terrain": "vitest run tests/contract/terrain-cost-feedback.contract.test.ts tests/contract/blocked-terrain-feedback.contract.test.ts tests/contract/terrain-ux.contract.test.ts tests/integration/foundation/terrainScenarioLoad.test.ts tests/integration/map/terrainMovementCostFlow.test.ts tests/integration/map/terrainFeedbackFlow.test.ts tests/integration/map/blockedTerrainFlow.test.ts",
+    "test:viewport": "vitest run tests/contract/map-navigation-input.contract.test.ts tests/contract/viewport-behavior.contract.test.ts tests/contract/viewport-interaction.contract.test.ts tests/integration/foundation/mapViewportStateFlow.test.ts tests/integration/map/mapPanFlow.test.ts tests/integration/map/mapZoomFlow.test.ts tests/integration/map/viewportInteractionFlow.test.ts",
     "test:acceptance": "playwright test",
     "verify:terrain": "npm run test:terrain && playwright test tests/acceptance/advanced-terrain-movement.spec.ts tests/acceptance/blocked-terrain-boundaries.spec.ts tests/acceptance/terrain-readability.spec.ts",
+    "verify:viewport": "npm run test:viewport && playwright test tests/acceptance/map-pan-navigation.spec.ts tests/acceptance/map-zoom-navigation.spec.ts tests/acceptance/map-view-interaction.spec.ts",
     "verify": "npm run test && npm run test:acceptance"
   },
   "devDependencies": {

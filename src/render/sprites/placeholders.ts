@@ -8,7 +8,8 @@ export const palette = {
   attacker: "#5376cc",
   defender: "#8b3d3d",
   text: "#23170d",
-  panel: "#fff8e6"
+  panel: "#fff8e6",
+  viewportAccent: "#2f4f74"
 } as const;
 
 export const terrainPalette = {

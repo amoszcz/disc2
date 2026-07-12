@@ -1,24 +1,36 @@
 import type { GameStore } from "../state/gameState";
 import { moveSelectedHero, selectHero } from "../../engine/map/heroActions";
-import { getTileSize } from "../../render/canvas/renderMapScene";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
+import { createInteractionTarget, createPanGesture, panViewport, zoomViewportAtPoint } from "../../engine/map/viewportMath";
+import type { ScreenPoint } from "../../engine/scenario/types";
+
+function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | WheelEvent): ScreenPoint {
+  const bounds = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / bounds.width;
+  const scaleY = canvas.height / bounds.height;
+
+  return {
+    x: (event.clientX - bounds.left) * scaleX,
+    y: (event.clientY - bounds.top) * scaleY
+  };
+}
 
 export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void {
   canvas.addEventListener("click", (event) => {
-    const bounds = canvas.getBoundingClientRect();
-    const tileSize = getTileSize(store.getState().scenario.map, canvas);
-    const scaleX = canvas.width / bounds.width;
-    const scaleY = canvas.height / bounds.height;
-    const canvasX = (event.clientX - bounds.left) * scaleX;
-    const canvasY = (event.clientY - bounds.top) * scaleY;
-    const x = Math.floor(canvasX / tileSize);
-    const y = Math.floor(canvasY / tileSize);
+    if (event.button !== 0) {
+      return;
+    }
+
+    const point = getCanvasPoint(canvas, event);
 
     store.update((state) => {
       if (state.sceneMode !== "map") {
         return;
       }
+
+      const target = createInteractionTarget(point, state.mapViewState.viewport, state.scenario.map, canvas.width, canvas.height);
+      const { x, y } = target.worldPosition;
 
       const heroAtTile = state.scenario.heroes.find(
         (hero) => hero.mapPosition.x === x && hero.mapPosition.y === y && hero.availabilityState !== "defeated"
@@ -46,5 +58,84 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
         state.messageLog.push(`The guards of ${encounter.location.name} attack.`);
       }
     });
+  });
+
+  canvas.addEventListener("mousedown", (event) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    event.preventDefault();
+    const point = getCanvasPoint(canvas, event);
+    store.update((state) => {
+      if (state.sceneMode !== "map") {
+        return;
+      }
+
+      state.mapViewState.panGesture = createPanGesture(point, state.mapViewState.viewport);
+    });
+  });
+
+  canvas.addEventListener("mousemove", (event) => {
+    const point = getCanvasPoint(canvas, event);
+    store.update((state) => {
+      if (state.sceneMode !== "map" || !state.mapViewState.panGesture?.isActive) {
+        return;
+      }
+
+      state.mapViewState.viewport = panViewport(
+        state.mapViewState.viewport,
+        state.mapViewState.panGesture,
+        point,
+        state.scenario.map,
+        canvas.width,
+        canvas.height
+      );
+      state.mapViewState.isDefaultView = false;
+    });
+  });
+
+  window.addEventListener("mouseup", (event) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    store.update((state) => {
+      if (!state.mapViewState.panGesture) {
+        return;
+      }
+
+      state.mapViewState.panGesture = null;
+    });
+  });
+
+  canvas.addEventListener(
+    "wheel",
+    (event) => {
+      event.preventDefault();
+      const point = getCanvasPoint(canvas, event);
+      store.update((state) => {
+        if (state.sceneMode !== "map") {
+          return;
+        }
+
+        state.mapViewState.viewport = zoomViewportAtPoint(
+          state.mapViewState.viewport,
+          event.deltaY,
+          point,
+          state.scenario.map,
+          canvas.width,
+          canvas.height
+        );
+        state.mapViewState.isDefaultView = false;
+      });
+    },
+    { passive: false }
+  );
+
+  canvas.addEventListener("auxclick", (event) => {
+    if (event.button === 1) {
+      event.preventDefault();
+    }
   });
 }

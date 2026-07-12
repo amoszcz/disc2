@@ -33,6 +33,9 @@ export function startGame(root: HTMLElement | null): void {
     throw new Error("Failed to initialize game shell.");
   }
 
+  canvas.style.userSelect = "none";
+  canvas.style.touchAction = "none";
+
   const context = canvas.getContext("2d");
   if (!context) {
     throw new Error("Canvas 2D context is unavailable.");
