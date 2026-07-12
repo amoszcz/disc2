@@ -7,7 +7,7 @@ import { setBattleState } from "../state/gameState";
 export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void {
   canvas.addEventListener("click", (event) => {
     const bounds = canvas.getBoundingClientRect();
-    const tileSize = getTileSize();
+    const tileSize = getTileSize(store.getState().scenario.map, canvas);
     const scaleX = canvas.width / bounds.width;
     const scaleY = canvas.height / bounds.height;
     const canvasX = (event.clientX - bounds.left) * scaleX;

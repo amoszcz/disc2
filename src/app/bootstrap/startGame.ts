@@ -3,13 +3,19 @@ import { createSceneController } from "../scene-controller/sceneController";
 import { bindMapInput } from "../scene-controller/mapInputController";
 import { drawBattleScene, renderBattleSidebar } from "../scene-controller/battleScene";
 import { drawMapScene, renderMapSidebar } from "../scene-controller/mapScene";
+import type { ScenarioId } from "../../engine/scenario/loadScenario";
+
+function resolveScenarioId(): ScenarioId {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("scenario") === "advanced-terrain-scenario" ? "advanced-terrain-scenario" : "core-map-loop";
+}
 
 export function startGame(root: HTMLElement | null): void {
   if (!root) {
     throw new Error("Missing application root.");
   }
 
-  const store = new GameStore(createInitialState());
+  const store = new GameStore(createInitialState(resolveScenarioId()));
   const sceneController = createSceneController(store.getState().sceneMode);
   (window as Window & { __gameStore?: GameStore }).__gameStore = store;
 

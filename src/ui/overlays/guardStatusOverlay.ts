@@ -1,7 +1,7 @@
-export function renderGuardStatusOverlay(message: string): string {
+export function renderGuardStatusOverlay(title: string, message: string): string {
   return `
     <div class="overlay-box" data-testid="guard-status">
-      <strong>Guarded Objective</strong>
+      <strong>${title}</strong>
       <p>${message}</p>
     </div>
   `;

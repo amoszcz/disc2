@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "Browser strategy prototype with core map loop and terrain scenario verification flows.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
+    "test:terrain": "vitest run tests/contract/terrain-cost-feedback.contract.test.ts tests/contract/blocked-terrain-feedback.contract.test.ts tests/contract/terrain-ux.contract.test.ts tests/integration/foundation/terrainScenarioLoad.test.ts tests/integration/map/terrainMovementCostFlow.test.ts tests/integration/map/terrainFeedbackFlow.test.ts tests/integration/map/blockedTerrainFlow.test.ts",
     "test:acceptance": "playwright test",
+    "verify:terrain": "npm run test:terrain && playwright test tests/acceptance/advanced-terrain-movement.spec.ts tests/acceptance/blocked-terrain-boundaries.spec.ts tests/acceptance/terrain-readability.spec.ts",
     "verify": "npm run test && npm run test:acceptance"
   },
   "devDependencies": {

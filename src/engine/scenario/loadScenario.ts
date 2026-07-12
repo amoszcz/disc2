@@ -1,7 +1,16 @@
 import type { ScenarioDefinition } from "./types";
 import { cloneScenario } from "./types";
 import { coreMapLoopScenario } from "../../content/scenarios/core-map-loop";
+import { advancedTerrainScenario } from "../../content/scenarios/advanced-terrain-scenario";
 import { isWithinBounds } from "../map/mapRules";
+import { normalizeTerrainRegions } from "../map/terrainRegions";
+
+export type ScenarioId = "core-map-loop" | "advanced-terrain-scenario";
+
+const SCENARIOS: Record<ScenarioId, ScenarioDefinition> = {
+  "core-map-loop": coreMapLoopScenario,
+  "advanced-terrain-scenario": advancedTerrainScenario
+};
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -43,10 +52,31 @@ export function validateScenario(scenario: ScenarioDefinition): void {
       assert(unitIds.has(unitId), `Guard force ${force.id} references missing unit ${unitId}.`);
     }
   }
+
+  if (scenario.terrainRegions && scenario.terrainRegions.length > 0) {
+    const normalizedRegions = normalizeTerrainRegions(scenario.terrainRegions);
+    for (const region of normalizedRegions) {
+      assert(region.coverage.kind === "rect", `Terrain region ${region.id} must use rectangular coverage.`);
+      assert(region.coverage.width > 0 && region.coverage.height > 0, `Terrain region ${region.id} must cover at least one tile.`);
+      assert(
+        isWithinBounds(scenario.map, { x: region.coverage.x, y: region.coverage.y }) &&
+          isWithinBounds(scenario.map, {
+            x: region.coverage.x + region.coverage.width - 1,
+            y: region.coverage.y + region.coverage.height - 1
+          }),
+        `Terrain region ${region.id} is out of bounds.`
+      );
+    }
+  }
 }
 
-export function loadScenario(): ScenarioDefinition {
-  const scenario = cloneScenario(coreMapLoopScenario);
+export function loadScenario(scenarioId: ScenarioId = "core-map-loop"): ScenarioDefinition {
+  const source = SCENARIOS[scenarioId];
+  if (!source) {
+    throw new Error(`Unknown scenario: ${scenarioId}`);
+  }
+
+  const scenario = cloneScenario(source);
   validateScenario(scenario);
   return scenario;
 }

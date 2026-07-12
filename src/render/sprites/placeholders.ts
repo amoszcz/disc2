@@ -10,3 +10,14 @@ export const palette = {
   text: "#23170d",
   panel: "#fff8e6"
 } as const;
+
+export const terrainPalette = {
+  road: "#c8b27a",
+  grass: "#a7c47f",
+  plains: "#d7c98b",
+  mud: "#8f6a46",
+  woods: "#5e7b49",
+  mountains: "#7b7b87",
+  lakes: "#6ca8d9",
+  rivers: "#4f7db6"
+} as const;

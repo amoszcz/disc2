@@ -1,4 +1,5 @@
 export type ResourceType = "gold";
+export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
 
 export type SceneMode = "map" | "battle" | "victory";
 export type SideKind = "player" | "enemy" | "neutral";
@@ -18,6 +19,47 @@ export interface Position {
 export interface MapDefinition {
   width: number;
   height: number;
+  defaultTerrainType?: TerrainTypeName;
+}
+
+export interface TerrainRegionCoverageRect {
+  kind: "rect";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface TerrainRegion {
+  id: string;
+  terrainType: TerrainTypeName;
+  coverage: TerrainRegionCoverageRect;
+  priority: number;
+}
+
+export interface ResolvedTerrainTile {
+  position: Position;
+  terrainType: TerrainTypeName;
+  isTraversable: boolean;
+  movementCost: number;
+}
+
+export interface RouteAttempt {
+  heroId: string;
+  fromPosition: Position;
+  toPosition: Position;
+  direction: "orthogonal" | "diagonal";
+  resolvedTerrain: ResolvedTerrainTile;
+  movementCost: number;
+  isLegal: boolean;
+  failureReason: string | null;
+}
+
+export interface RouteFeedback {
+  destinationPosition: Position;
+  terrainLabel: string;
+  movementImpact: string;
+  blockedReason: string | null;
 }
 
 export interface ResourceStockpile {
@@ -93,6 +135,7 @@ export interface ScenarioDefinition {
   id: string;
   name: string;
   map: MapDefinition;
+  terrainRegions?: TerrainRegion[];
   players: ScenarioPlayer[];
   heroes: ScenarioHero[];
   units: ScenarioUnit[];
@@ -135,6 +178,7 @@ export interface GameState {
   battle: Battle | null;
   messageLog: string[];
   winnerPlayerId: string | null;
+  routeFeedback: RouteFeedback | null;
 }
 
 export interface GameSnapshot {
