@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Core Map Loop</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Georgia, "Palatino Linotype", serif;
+        background:
+          radial-gradient(circle at top, #f7e6c6, transparent 45%),
+          linear-gradient(180deg, #ceb27b 0%, #8f6f42 100%);
+        color: #23170d;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      #app {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 16px;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .panel {
+        border: 2px solid rgba(35, 23, 13, 0.25);
+        background: rgba(255, 248, 230, 0.88);
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(35, 23, 13, 0.18);
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .sidebar {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .hud-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: inherit;
+        background: #6a4427;
+        color: #fffaf1;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .overlay-box {
+        border: 1px solid rgba(35, 23, 13, 0.2);
+        border-radius: 10px;
+        padding: 12px;
+        background: rgba(255, 253, 245, 0.92);
+      }
+
+      .queue-item {
+        padding: 6px 8px;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: rgba(106, 68, 39, 0.09);
+      }
+
+      .queue-item.active {
+        background: rgba(195, 110, 23, 0.22);
+        font-weight: 700;
+      }
+
+      @media (max-width: 960px) {
+        #app {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>

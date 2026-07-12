@@ -4,22 +4,28 @@
 
 Run the first playable browser slice for the core map loop, then execute the tests that prove movement, guarded combat, and default victory behavior.
 
-## Planned Setup
+## Setup
 
 1. Install Node.js 20 or newer.
-2. Install project dependencies after the app scaffold is added:
+2. Install project dependencies:
 
 ```powershell
 npm install
 ```
 
-3. Start the local development server:
+3. Install the Playwright Chromium browser used by the acceptance suite:
+
+```powershell
+npx playwright install chromium
+```
+
+4. Start the local development server:
 
 ```powershell
 npm run dev
 ```
 
-4. Open the local browser URL shown by the dev server.
+5. Open the local browser URL shown by the dev server.
 
 ## Expected Playable Flow
 
@@ -31,7 +37,7 @@ npm run dev
 6. Confirm the guarded location becomes accessible.
 7. Defeat the final required opposing force and confirm the scenario ends in victory.
 
-## Planned Test Commands
+## Test Commands
 
 Run engine and integration coverage:
 
@@ -56,3 +62,4 @@ npm run verify
 - The first slice is expected to use placeholder art or simple colored shapes.
 - Save and load flows are not part of this slice.
 - City screens, recruitment, and economy systems are intentionally deferred.
+- The current implementation uses a single handcrafted scenario called `Border Watch`.
