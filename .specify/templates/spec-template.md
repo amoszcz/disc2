@@ -21,6 +21,10 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+
+  Testing preference: describe the primary behavior-level proof for each story.
+  Prefer integration, contract, or acceptance-style tests over implementation-
+  detail unit tests unless the lower-level test is the only reasonable evidence.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -29,7 +33,7 @@
 
 **Why this priority**: [Explain the value and why it has this priority level]
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+**Independent Test**: [Describe the feature-level proof for this story - e.g., "Can be fully tested through [integration or acceptance flow] and delivers [specific value]"]
 
 **Acceptance Scenarios**:
 
@@ -129,3 +133,15 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Dependency assumption, e.g., "No new external library is needed beyond the existing stack"]
+
+## Out of Scope
+
+<!--
+  ACTION REQUIRED: Make boundaries explicit whenever omission is important for
+  preserving an independently valuable MVP slice or preventing scope creep.
+-->
+
+- [Explicitly excluded capability or scenario]
+- [Deferred integration, platform, or workflow]
+- [Dependency or abstraction explicitly deferred to keep the first slice small]

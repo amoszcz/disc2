@@ -24,7 +24,7 @@
 
 **Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Testing**: [e.g., pytest integration suite, XCTest UI/integration coverage, cargo test or NEEDS CLARIFICATION]
 
 **Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 
@@ -40,7 +40,21 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Spec before code: Link the driving spec and confirm any non-trivial work
+  follows the spec -> plan -> tasks flow.
+- Independent slices: Show how each user story remains independently testable and
+  valuable, and call out any cross-story dependency that cannot be avoided.
+- Feature-proving tests: Define the automated validation approach for each
+  changed behavior, preferring integration, contract, or acceptance-style
+  coverage and explaining any omitted automation.
+- Minimal dependencies, real integrations: List new dependencies, adapters, or
+  third-party integrations and justify why a simpler option or fewer libraries
+  are insufficient. State how real integration behavior will be tested.
+- Small, loosely coupled design: Identify the feature seams, module boundaries,
+  and coupling risks, and explain how the design keeps components small and
+  independently changeable.
+- Artifact consistency: Identify which templates, docs, or workflow artifacts
+  must change alongside this plan to remain constitution-compliant.
 
 ## Project Structure
 
