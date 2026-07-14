@@ -18,6 +18,12 @@ export const advancedTerrainScenario: ScenarioDefinition = {
     { id: "lake-basin", terrainType: "lakes", priority: 30, coverage: { kind: "rect", x: 26, y: 26, width: 10, height: 8 } },
     { id: "river-cross", terrainType: "rivers", priority: 40, coverage: { kind: "rect", x: 20, y: 0, width: 1, height: 64 } }
   ],
+  movementObjectRegions: [
+    { id: "bridge-causeway", objectType: "bridge", priority: 30, coverage: { kind: "rect", x: 20, y: 30, width: 1, height: 2 } },
+    { id: "milestone-detour", objectType: "milestone", priority: 20, coverage: { kind: "rect", x: 7, y: 11, width: 1, height: 1 } },
+    { id: "rubble-bog", objectType: "rubble", priority: 20, coverage: { kind: "rect", x: 15, y: 18, width: 1, height: 1 } },
+    { id: "rubble-bridge", objectType: "rubble", priority: 25, coverage: { kind: "rect", x: 20, y: 30, width: 1, height: 1 } }
+  ],
   players: [
     {
       id: "player-1",

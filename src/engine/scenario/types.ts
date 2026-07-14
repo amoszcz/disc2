@@ -1,5 +1,6 @@
 export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
+export type MovementObjectType = "bridge" | "milestone" | "rubble";
 
 export type SceneMode = "map" | "battle" | "victory";
 export type SideKind = "player" | "enemy" | "neutral";
@@ -42,6 +43,29 @@ export interface TerrainRegion {
   priority: number;
 }
 
+export interface MovementObjectRegion {
+  id: string;
+  objectType: MovementObjectType;
+  coverage: TerrainRegionCoverageRect;
+  priority: number;
+}
+
+export interface ResolvedMovementObjectEffect {
+  regionId: string;
+  objectType: MovementObjectType;
+  movementDelta: number;
+  changesPassability: boolean;
+}
+
+export interface ResolvedMovementObjectStack {
+  position: Position;
+  effects: ResolvedMovementObjectEffect[];
+  objectTypes: MovementObjectType[];
+  passabilityOverride: "traversable" | null;
+  movementDeltaTotal: number;
+  resolutionOrder: string[];
+}
+
 export interface ResolvedTerrainTile {
   position: Position;
   terrainType: TerrainTypeName;
@@ -49,12 +73,17 @@ export interface ResolvedTerrainTile {
   movementCost: number;
 }
 
+export interface ResolvedMovementTile extends ResolvedTerrainTile {
+  baseTerrainType: TerrainTypeName;
+  movementObjects: ResolvedMovementObjectStack;
+}
+
 export interface RouteAttempt {
   heroId: string;
   fromPosition: Position;
   toPosition: Position;
   direction: "orthogonal" | "diagonal";
-  resolvedTerrain: ResolvedTerrainTile;
+  resolvedTerrain: ResolvedMovementTile;
   movementCost: number;
   isLegal: boolean;
   failureReason: string | null;
@@ -65,6 +94,10 @@ export interface RouteFeedback {
   terrainLabel: string;
   movementImpact: string;
   blockedReason: string | null;
+  objectLabels: string[];
+  passabilityExplanation: string | null;
+  movementDeltaExplanation: string | null;
+  stackExplanation: string | null;
 }
 
 export interface MapViewport {
@@ -172,6 +205,7 @@ export interface ScenarioDefinition {
   name: string;
   map: MapDefinition;
   terrainRegions?: TerrainRegion[];
+  movementObjectRegions?: MovementObjectRegion[];
   players: ScenarioPlayer[];
   heroes: ScenarioHero[];
   units: ScenarioUnit[];

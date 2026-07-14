@@ -3,7 +3,9 @@ import { cloneScenario } from "./types";
 import { coreMapLoopScenario } from "../../content/scenarios/core-map-loop";
 import { advancedTerrainScenario } from "../../content/scenarios/advanced-terrain-scenario";
 import { isWithinBounds } from "../map/mapRules";
+import { normalizeMovementObjectRegions } from "../map/movementObjectRegions";
 import { normalizeTerrainRegions } from "../map/terrainRegions";
+import { resolveTerrainTile } from "../map/terrainLookup";
 
 export type ScenarioId = "core-map-loop" | "advanced-terrain-scenario";
 
@@ -66,6 +68,37 @@ export function validateScenario(scenario: ScenarioDefinition): void {
           }),
         `Terrain region ${region.id} is out of bounds.`
       );
+    }
+  }
+
+  if (scenario.movementObjectRegions && scenario.movementObjectRegions.length > 0) {
+    const normalizedRegions = normalizeMovementObjectRegions(scenario.movementObjectRegions);
+    for (const region of normalizedRegions) {
+      assert(region.coverage.kind === "rect", `Movement object region ${region.id} must use rectangular coverage.`);
+      assert(
+        region.coverage.width > 0 && region.coverage.height > 0,
+        `Movement object region ${region.id} must cover at least one tile.`
+      );
+      assert(
+        isWithinBounds(scenario.map, { x: region.coverage.x, y: region.coverage.y }) &&
+          isWithinBounds(scenario.map, {
+            x: region.coverage.x + region.coverage.width - 1,
+            y: region.coverage.y + region.coverage.height - 1
+          }),
+        `Movement object region ${region.id} is out of bounds.`
+      );
+
+      if (region.objectType === "bridge") {
+        for (let y = region.coverage.y; y < region.coverage.y + region.coverage.height; y += 1) {
+          for (let x = region.coverage.x; x < region.coverage.x + region.coverage.width; x += 1) {
+            const terrainTile = resolveTerrainTile(scenario, { x, y });
+            assert(
+              terrainTile.terrainType === "rivers",
+              `Bridge region ${region.id} can only cover river tiles.`
+            );
+          }
+        }
+      }
     }
   }
 }

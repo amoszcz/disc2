@@ -22,3 +22,15 @@ export const terrainPalette = {
   lakes: "#6ca8d9",
   rivers: "#4f7db6"
 } as const;
+
+export const movementObjectPalette = {
+  bridge: "#f5f1dd",
+  milestone: "#fff4bf",
+  rubble: "#6a4f3b"
+} as const;
+
+export const movementObjectGlyph = {
+  bridge: "=",
+  milestone: "+",
+  rubble: "x"
+} as const;

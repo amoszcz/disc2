@@ -25,6 +25,7 @@ npm run dev
 ```
 
 4. Open the local browser URL shown by the dev server, using the scenario that includes movement-object regions.
+   - Use `/?scenario=advanced-terrain-scenario` to open the built-in bridge and movement-object demo map.
 
 ## Expected Playable Flow
 
@@ -41,13 +42,13 @@ npm run dev
 Run movement-object contracts and engine integration coverage:
 
 ```powershell
-npm test
+npm run test:movement-objects
 ```
 
-Run browser acceptance coverage:
+Run the full feature verification flow, including the dedicated browser acceptance coverage:
 
 ```powershell
-npx playwright test
+npm run verify:movement-objects
 ```
 
 ## Notes

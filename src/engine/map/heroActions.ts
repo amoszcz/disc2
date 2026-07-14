@@ -1,6 +1,7 @@
 import type { GameState, Position } from "../scenario/types";
 import { isValidMove, movementCost } from "./mapRules";
 import { collectPickupIfPresent } from "./pickupResolution";
+import { hasMovementObjectRegions } from "./movementObjectLookup";
 import { buildRouteAttempt } from "./routeRules";
 import { createRouteFeedback } from "./terrainFeedback";
 import { hasTerrainRegions } from "./terrainLookup";
@@ -32,7 +33,7 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
     return { ok: false, reason: "Select a hero first." };
   }
 
-  if (hasTerrainRegions(state.scenario)) {
+  if (hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario)) {
     const routeAttempt = buildRouteAttempt(state.scenario, hero.id, hero.mapPosition, position, hero.remainingMovement);
     state.routeFeedback = createRouteFeedback(routeAttempt);
     if (!routeAttempt.isLegal) {
@@ -41,8 +42,11 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
 
     hero.mapPosition = { ...position };
     hero.remainingMovement -= routeAttempt.movementCost;
+    const movementObjectSummary = state.routeFeedback.objectLabels.length
+      ? ` using ${state.routeFeedback.objectLabels.join(" + ").toLowerCase()}`
+      : "";
     state.messageLog.push(
-      `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()} at (${position.x + 1}, ${position.y + 1}).`
+      `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()}${movementObjectSummary} at (${position.x + 1}, ${position.y + 1}).`
     );
     collectPickupIfPresent(state, hero.id);
     return { ok: true };

@@ -1,6 +1,8 @@
 import type { Position, RouteAttempt, ScenarioDefinition } from "../scenario/types";
 import { movementCost as legacyMovementCost, isWithinBounds } from "./mapRules";
-import { hasTerrainRegions, resolveTerrainTile } from "./terrainLookup";
+import { hasMovementObjectRegions } from "./movementObjectLookup";
+import { resolveMovementTile } from "./movementObjectRules";
+import { hasTerrainRegions } from "./terrainLookup";
 
 export function isAdjacent8(from: Position, to: Position): boolean {
   const dx = Math.abs(to.x - from.x);
@@ -30,8 +32,17 @@ export function buildRouteAttempt(
       resolvedTerrain: {
         position: { ...toPosition },
         terrainType: scenario.map.defaultTerrainType ?? "plains",
+        baseTerrainType: scenario.map.defaultTerrainType ?? "plains",
         isTraversable: false,
-        movementCost: Number.POSITIVE_INFINITY
+        movementCost: Number.POSITIVE_INFINITY,
+        movementObjects: {
+          position: { ...toPosition },
+          effects: [],
+          objectTypes: [],
+          passabilityOverride: null,
+          movementDeltaTotal: 0,
+          resolutionOrder: []
+        }
       },
       movementCost: Number.POSITIVE_INFINITY,
       isLegal: false,
@@ -39,10 +50,10 @@ export function buildRouteAttempt(
     };
   }
 
-  const resolvedTerrain = resolveTerrainTile(scenario, toPosition);
+  const resolvedTerrain = resolveMovementTile(scenario, toPosition);
   const movementCost = resolvedTerrain.movementCost;
 
-  if (hasTerrainRegions(scenario) && !isAdjacent8(fromPosition, toPosition)) {
+  if ((hasTerrainRegions(scenario) || hasMovementObjectRegions(scenario)) && !isAdjacent8(fromPosition, toPosition)) {
     return {
       heroId,
       fromPosition,

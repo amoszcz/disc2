@@ -17,7 +17,13 @@ export function renderMapHud(state: GameState): string {
       ${
         routeFeedback
           ? `<div class="hud-row"><strong>Terrain</strong><span data-testid="route-terrain">${routeFeedback.terrainLabel}</span></div>
-      <div class="hud-row"><strong>Route</strong><span data-testid="route-impact">${routeFeedback.movementImpact}</span></div>`
+      <div class="hud-row"><strong>Route</strong><span data-testid="route-impact">${routeFeedback.movementImpact}</span></div>
+      <div class="hud-row"><strong>Objects</strong><span data-testid="route-objects">${routeFeedback.objectLabels.join(", ") || "None"}</span></div>
+      ${
+        routeFeedback.stackExplanation
+          ? `<div class="hud-row"><strong>Effects</strong><span data-testid="route-effects">${routeFeedback.stackExplanation}</span></div>`
+          : ""
+      }`
           : ""
       }
     </div>

@@ -1,7 +1,10 @@
 import type { GameState } from "../../engine/scenario/types";
 import type { MapDefinition } from "../../engine/scenario/types";
+import { resolveMovementObjectStack } from "../../engine/map/movementObjectLookup";
 import { resolveTerrainTile } from "../../engine/map/terrainLookup";
 import { getBaseTileSize } from "../../engine/map/viewportMath";
+import { movementObjectGlyph } from "../sprites/placeholders";
+import { movementObjectPalette } from "../sprites/placeholders";
 import { palette } from "../sprites/placeholders";
 import { terrainPalette } from "../sprites/placeholders";
 import { renderGuardedLocations } from "./renderGuardedLocations";
@@ -28,6 +31,40 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
       context.fillRect(point.x, point.y, tileSize - 1, tileSize - 1);
       context.strokeStyle = palette.tileBorder;
       context.strokeRect(point.x, point.y, tileSize, tileSize);
+
+      const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
+      if (movementObjects.effects.length > 0) {
+        const primaryObject = movementObjects.effects[0];
+        context.fillStyle = movementObjectPalette[primaryObject.objectType];
+        context.fillRect(
+          point.x + Math.max(2, Math.floor(tileSize / 8)),
+          point.y + Math.max(2, Math.floor(tileSize / 8)),
+          tileSize - Math.max(4, Math.floor(tileSize / 4)),
+          Math.max(8, Math.floor(tileSize / 4))
+        );
+        context.fillStyle = primaryObject.objectType === "bridge" ? palette.text : "#fff";
+        context.font = `${Math.max(8, Math.floor(tileSize / 3))}px sans-serif`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(
+          movementObjectGlyph[primaryObject.objectType],
+          point.x + tileSize / 2,
+          point.y + Math.max(6, Math.floor(tileSize / 4))
+        );
+
+        if (movementObjects.effects.length > 1) {
+          context.fillStyle = movementObjectPalette[movementObjects.effects[1].objectType];
+          context.beginPath();
+          context.arc(
+            point.x + tileSize - Math.max(6, Math.floor(tileSize / 5)),
+            point.y + tileSize - Math.max(6, Math.floor(tileSize / 5)),
+            Math.max(4, Math.floor(tileSize / 8)),
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+        }
+      }
     }
   }
 
