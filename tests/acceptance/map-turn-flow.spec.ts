@@ -6,6 +6,7 @@ test("player can move, collect a pickup, and end the turn", async ({ page }) => 
 
   await canvas.click({ position: { x: 48, y: 240 } });
   await canvas.click({ position: { x: 144, y: 240 } });
+  await canvas.click({ position: { x: 144, y: 240 } });
 
   await expect(page.getByTestId("resource-gold")).toHaveText("10");
   await expect(page.getByTestId("remaining-movement")).toHaveText("1");

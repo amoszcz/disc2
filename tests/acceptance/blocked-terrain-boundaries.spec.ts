@@ -28,7 +28,7 @@ test("blocked river tiles reject movement without spending points", async ({ pag
   await canvas.click({ position: riverClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("8");
-  await expect(page.getByTestId("route-terrain")).toHaveText("Rivers");
-  await expect(page.getByTestId("route-impact")).toHaveText("Blocked terrain");
-  await expect(page.getByTestId("error-detail")).toHaveText("rivers cannot be traversed.");
+  await expect(page.getByTestId("route-terrain")).toHaveText("Route");
+  await expect(page.getByTestId("route-impact")).toHaveText("Route unavailable");
+  await expect(page.getByTestId("error-detail")).toHaveText("No legal route could be plotted to that destination.");
 });

@@ -24,15 +24,23 @@
   - Keep the old route without revalidation: rejected because the hero state or map legality may differ when the next confirmation happens.
   - Clear all routes at end turn: rejected because it removes the requested quality-of-life improvement.
 
-## Decision 4: Stop partial movement on the last affordable legal step and keep the destination active
+## Decision 4: Advance active routes during end turn only while legal movement remains
 
-- **Decision**: When a confirmed route costs more than the hero can currently afford, move the hero as far as possible this turn, stop on the last affordable step, and keep the destination intent available for continuation.
-- **Rationale**: This preserves consistency between preview and execution while supporting long journeys across multiple turns without introducing automatic marching.
+- **Decision**: When a hero still has movement and an active route at end turn, advance that hero automatically along the route as far as legal movement allows, then either preserve the unfinished route or complete it.
+- **Rationale**: The updated spec adds quality-of-life automation specifically at turn end, while still keeping the broader route system explicit and understandable.
+- **Alternatives considered**:
+  - Never move automatically at end turn: rejected because it ignores the updated requirement.
+  - Continue automatically across all future turns: rejected because it broadens the feature into autonomous marching beyond the requested scope.
+
+## Decision 5: Stop partial movement on the last affordable legal step and keep the destination active
+
+- **Decision**: When a confirmed route or end-turn auto-advance costs more than the hero can currently afford, move the hero as far as possible, stop on the last affordable step, and keep the destination intent available for continuation.
+- **Rationale**: This preserves consistency between preview and execution while supporting long journeys across multiple turns without introducing unbounded automation.
 - **Alternatives considered**:
   - Reject the entire route unless the hero can finish it now: rejected because the spec explicitly wants partial traversal.
-  - Automatically keep moving on later turns without another click: rejected because the spec still requires explicit confirmation clicks.
+  - Automatically keep moving on later turns without another click or end-turn trigger: rejected because the spec still keeps route continuation bounded to explicit interaction or end-turn automation.
 
-## Decision 5: Reuse existing movement legality seams for neighbor evaluation
+## Decision 6: Reuse existing movement legality seams for neighbor evaluation
 
 - **Decision**: Build pathfinding on top of the current terrain, movement-object, and blocked-tile resolution rules rather than creating a parallel legality system.
 - **Rationale**: A route preview is only trustworthy if it uses the same legality and cost logic as real hero movement.
@@ -40,7 +48,15 @@
   - A separate pathfinding-only rule table: rejected because it risks divergence from actual movement behavior.
   - Only use passability and ignore actual step cost during pathfinding: rejected because cost-weighted route choice is part of the feature value.
 
-## Decision 6: Render the route as a dotted line with a destination marker layered over the map
+## Decision 7: Clicking the route-owning hero clears the active route
+
+- **Decision**: Treat a click on the hero that owns the current route preview as an explicit cancel action that clears the active route.
+- **Rationale**: The updated spec wants a direct way to cancel a plotted route without introducing extra UI controls.
+- **Alternatives considered**:
+  - Keep hero click as selection only when a route exists: rejected because it leaves no dedicated cancel gesture in the requested interaction model.
+  - Add a separate cancel button: rejected because it adds interface surface area not requested by the feature.
+
+## Decision 8: Render the route as a dotted line with a destination marker layered over the map
 
 - **Decision**: Visualize the stored route as a dotted overlay from hero to destination and render a distinct destination marker that reads like a flag pole.
 - **Rationale**: The spec explicitly asks for a dotted path and a flagged endpoint, and this keeps route intent legible without changing the underlying terrain art.

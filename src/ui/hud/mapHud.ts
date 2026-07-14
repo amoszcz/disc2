@@ -5,6 +5,7 @@ export function renderMapHud(state: GameState): string {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
   const player = state.scenario.players.find((entry) => entry.id === state.activePlayerId);
   const routeFeedback = state.routeFeedback;
+  const routePreview = state.activeRoutePreview;
 
   return `
     <div class="overlay-box" data-testid="map-hud">
@@ -14,6 +15,14 @@ export function renderMapHud(state: GameState): string {
       <div class="hud-row"><strong>Zoom</strong><span data-testid="map-zoom">${state.mapViewState.viewport.zoomLevel.toFixed(2)}x</span></div>
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
+      ${
+        routePreview
+          ? `<div class="hud-row"><strong>Path</strong><span data-testid="route-preview-status">${routePreview.status}</span></div>
+      <div class="hud-row"><strong>Target</strong><span data-testid="route-preview-destination">(${routePreview.destinationPosition.x + 1}, ${routePreview.destinationPosition.y + 1})</span></div>
+      <div class="hud-row"><strong>Steps</strong><span data-testid="route-preview-steps">${routePreview.steps.length}</span></div>
+      <div class="hud-row"><strong>Total Cost</strong><span data-testid="route-preview-cost">${routePreview.totalMovementCost}</span></div>`
+          : ""
+      }
       ${
         routeFeedback
           ? `<div class="hud-row"><strong>Terrain</strong><span data-testid="route-terrain">${routeFeedback.terrainLabel}</span></div>

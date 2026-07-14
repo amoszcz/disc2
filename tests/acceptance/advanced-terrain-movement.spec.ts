@@ -26,6 +26,7 @@ test("player can move across road and plains on the advanced terrain scenario", 
 
   await canvas.click({ position: heroClick });
   await canvas.click({ position: roadClick });
+  await canvas.click({ position: roadClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("7");
   await expect(page.getByTestId("route-terrain")).toHaveText("Road");
@@ -42,6 +43,7 @@ test("player can move across road and plains on the advanced terrain scenario", 
     };
   });
 
+  await canvas.click({ position: plainsClick });
   await canvas.click({ position: plainsClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("5");

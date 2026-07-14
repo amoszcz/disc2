@@ -1,7 +1,8 @@
 import type { GameStore } from "../state/gameState";
-import { moveSelectedHero, selectHero } from "../../engine/map/heroActions";
+import { confirmRoutePreview, plotRoutePreview, selectHero } from "../../engine/map/heroActions";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
+import { isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../engine/map/routePreviewState";
 import { createInteractionTarget, createPanGesture, panViewport, zoomViewportAtPoint } from "../../engine/map/viewportMath";
 import type { ScreenPoint } from "../../engine/scenario/types";
 
@@ -44,10 +45,27 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
         return;
       }
 
-      const result = moveSelectedHero(state, { x, y });
+      const shouldConfirmRoute =
+        isRoutePreviewOwnedByHero(state.activeRoutePreview, state.selectedHeroId) &&
+        isSameRouteDestination(state.activeRoutePreview, { x, y });
+      const result = shouldConfirmRoute ? confirmRoutePreview(state) : plotRoutePreview(state, { x, y });
       if (!result.ok) {
         state.messageLog.push(result.reason ?? "That move is not allowed.");
         return;
+      }
+
+      if (!shouldConfirmRoute) {
+        const totalCost = state.activeRoutePreview?.totalMovementCost ?? 0;
+        state.messageLog.push(`Route plotted to (${x + 1}, ${y + 1}) costing ${totalCost} movement.`);
+        return;
+      }
+
+      if (result.routeProgress?.completionState === "completed") {
+        state.messageLog.push(`Route completed at (${x + 1}, ${y + 1}).`);
+      } else if (result.routeProgress) {
+        state.messageLog.push(
+          `Route advanced to (${result.routeProgress.finalPosition.x + 1}, ${result.routeProgress.finalPosition.y + 1}) and awaits continuation.`
+        );
       }
 
       const encounter = state.selectedHeroId

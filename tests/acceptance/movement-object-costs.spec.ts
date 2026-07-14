@@ -25,6 +25,7 @@ test("movement-object tiles change final movement costs", async ({ page }) => {
     };
   });
   await canvas.click({ position: milestoneClick });
+  await canvas.click({ position: milestoneClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("7");
   await expect(page.getByTestId("route-impact")).toHaveText("1 movement");
@@ -50,6 +51,7 @@ test("movement-object tiles change final movement costs", async ({ page }) => {
       y: (18 - viewport.panOffsetY + 0.5) * scaledTileSize
     };
   });
+  await canvas.click({ position: rubbleClick });
   await canvas.click({ position: rubbleClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("4");

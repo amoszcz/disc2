@@ -5,7 +5,7 @@ import { renderMapHud } from "../../ui/hud/mapHud";
 import { renderEndTurnPanel } from "../../ui/panels/endTurnPanel";
 import { renderGuardStatusOverlay } from "../../ui/overlays/guardStatusOverlay";
 import { renderErrorOverlay } from "../../ui/overlays/errorOverlay";
-import { advanceTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
+import { advanceTurn, carryRoutePreviewAcrossTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
 import { checkScenarioEnd } from "./checkScenarioEnd";
 import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup";
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
@@ -26,12 +26,20 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
       terrainMode ? "Route Preview" : "Guarded Objective",
       terrainMode
         ? state.routeFeedback?.blockedReason ??
-            (state.routeFeedback ? `${state.routeFeedback.terrainLabel}: ${state.routeFeedback.movementImpact}.` : "Select a nearby tile to inspect movement cost.")
+            (state.routeFeedback
+              ? `${state.routeFeedback.terrainLabel}: ${state.routeFeedback.movementImpact}.`
+              : state.activeRoutePreview
+                ? "Click the plotted destination again to confirm or continue movement."
+                : "Select a nearby tile to inspect movement cost.")
         : "Blocked sites open only after their guards fall.",
       terrainMode
         ? state.routeFeedback?.passabilityExplanation ??
             state.routeFeedback?.movementDeltaExplanation ??
             state.routeFeedback?.stackExplanation ??
+            state.routeFeedback?.previewMessage ??
+            (state.activeRoutePreview
+              ? `Route to (${state.activeRoutePreview.destinationPosition.x + 1}, ${state.activeRoutePreview.destinationPosition.y + 1}) is ready.`
+              : null) ??
             (state.routeFeedback?.objectLabels.length ? `Objects here: ${state.routeFeedback.objectLabels.join(", ")}.` : null)
         : null
     )}
@@ -52,6 +60,10 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
         currentState.scenario.heroes.find((hero) => hero.ownerPlayerId === nextPlayerId && hero.availabilityState !== "defeated")?.id ??
         null;
       currentState.routeFeedback = null;
+      currentState.activeRoutePreview = carryRoutePreviewAcrossTurn(
+        currentState.activeRoutePreview,
+        currentState.scenario.heroes.find((hero) => hero.id === currentState.activeRoutePreview?.heroId)?.mapPosition ?? null
+      );
       setScenario(currentState, currentState.scenario);
       appendMessage(currentState, "The next side takes its turn.");
       checkScenarioEnd(currentState);

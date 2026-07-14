@@ -25,6 +25,7 @@ test("bridge tiles allow crossing while nearby unbridged river tiles stay blocke
     };
   });
   await canvas.click({ position: bridgeClick });
+  await canvas.click({ position: bridgeClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("7");
   await expect(page.getByTestId("route-objects")).toHaveText("Bridge");
@@ -52,6 +53,6 @@ test("bridge tiles allow crossing while nearby unbridged river tiles stay blocke
   });
   await canvas.click({ position: riverClick });
 
-  await expect(page.getByTestId("route-impact")).toHaveText("Blocked terrain");
-  await expect(page.getByTestId("error-detail")).toHaveText("rivers cannot be traversed.");
+  await expect(page.getByTestId("route-impact")).toHaveText("Route unavailable");
+  await expect(page.getByTestId("error-detail")).toHaveText("No legal route could be plotted to that destination.");
 });

@@ -6,6 +6,7 @@ import { getBaseTileSize } from "../../engine/map/viewportMath";
 import { movementObjectGlyph } from "../sprites/placeholders";
 import { movementObjectPalette } from "../sprites/placeholders";
 import { palette } from "../sprites/placeholders";
+import { routePreviewPalette } from "../sprites/placeholders";
 import { terrainPalette } from "../sprites/placeholders";
 import { renderGuardedLocations } from "./renderGuardedLocations";
 import { getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
@@ -66,6 +67,47 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
         }
       }
     }
+  }
+
+  const routePreview = state.activeRoutePreview;
+  const routeOwner = routePreview ? state.scenario.heroes.find((hero) => hero.id === routePreview.heroId) : null;
+  if (routePreview && routeOwner && routePreview.steps.length > 0) {
+    const pathPoints = [routeOwner.mapPosition, ...routePreview.steps.map((step) => step.position)].map((position) =>
+      worldTileToCanvasPoint(position, metrics.viewport, context.canvas, map)
+    );
+    context.strokeStyle = routePreviewPalette.line;
+    context.lineWidth = Math.max(2, Math.floor(tileSize / 14));
+    context.setLineDash([Math.max(4, Math.floor(tileSize / 5)), Math.max(3, Math.floor(tileSize / 7))]);
+    context.beginPath();
+    context.moveTo(pathPoints[0].x + tileSize / 2, pathPoints[0].y + tileSize / 2);
+    for (const point of pathPoints.slice(1)) {
+      context.lineTo(point.x + tileSize / 2, point.y + tileSize / 2);
+    }
+    context.stroke();
+    context.setLineDash([]);
+
+    for (const point of pathPoints.slice(1, -1)) {
+      context.fillStyle = routePreviewPalette.dot;
+      context.beginPath();
+      context.arc(point.x + tileSize / 2, point.y + tileSize / 2, Math.max(2, Math.floor(tileSize / 10)), 0, Math.PI * 2);
+      context.fill();
+    }
+
+    const destinationPoint = pathPoints[pathPoints.length - 1];
+    context.strokeStyle = routePreviewPalette.pole;
+    context.lineWidth = Math.max(2, Math.floor(tileSize / 18));
+    context.beginPath();
+    context.moveTo(destinationPoint.x + tileSize / 2, destinationPoint.y + tileSize - Math.max(4, Math.floor(tileSize / 8)));
+    context.lineTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(4, Math.floor(tileSize / 10)));
+    context.stroke();
+    context.fillStyle = routePreviewPalette.flag;
+    context.beginPath();
+    context.moveTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(4, Math.floor(tileSize / 10)));
+    context.lineTo(destinationPoint.x + tileSize - Math.max(4, Math.floor(tileSize / 10)), destinationPoint.y + Math.max(8, Math.floor(tileSize / 4)));
+    context.lineTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(10, Math.floor(tileSize / 3)));
+    context.closePath();
+    context.fill();
+    context.lineWidth = 1;
   }
 
   for (const pickup of state.scenario.resourcePickups.filter((entry) => !entry.collectedState)) {

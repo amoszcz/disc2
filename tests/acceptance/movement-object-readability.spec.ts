@@ -25,6 +25,7 @@ test("stacked movement objects explain the final route result", async ({ page })
     };
   });
   await canvas.click({ position: stackedClick });
+  await canvas.click({ position: stackedClick });
 
   await expect(page.getByTestId("route-objects")).toHaveText("Bridge, Rubble");
   await expect(page.getByTestId("route-effects")).toHaveText("Bridge + Rubble combine for a final cost of 2.");

@@ -98,6 +98,37 @@ export interface RouteFeedback {
   passabilityExplanation: string | null;
   movementDeltaExplanation: string | null;
   stackExplanation: string | null;
+  routeMode?: "move" | "preview" | "continuation" | "blocked";
+  routeStepCount?: number;
+  routeTotalMovement?: number;
+  previewMessage?: string | null;
+}
+
+export interface RouteStep {
+  position: Position;
+  movementCost: number;
+  terrainLabel: string;
+  objectLabels: string[];
+}
+
+export interface RoutePreview {
+  heroId: string;
+  destinationPosition: Position;
+  steps: RouteStep[];
+  totalMovementCost: number;
+  status: "previewed" | "partial" | "continuation";
+  lastValidatedFromPosition: Position;
+  isAwaitingConfirmation: boolean;
+}
+
+export interface RouteProgressResult {
+  traversedSteps: RouteStep[];
+  finalPosition: Position;
+  movementSpent: number;
+  remainingSteps: RouteStep[];
+  completionState: "completed" | "partial" | "blocked";
+  failureReason: string | null;
+  encounteredBlockedLocation: boolean;
 }
 
 export interface MapViewport {
@@ -249,6 +280,7 @@ export interface GameState {
   messageLog: string[];
   winnerPlayerId: string | null;
   routeFeedback: RouteFeedback | null;
+  activeRoutePreview: RoutePreview | null;
   mapViewState: MapViewState;
 }
 

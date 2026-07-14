@@ -37,6 +37,7 @@ test("player can still select and move after zooming or panning, and the view is
   });
 
   await canvas.click({ position: roadClick });
+  await canvas.click({ position: roadClick });
   await expect(page.getByTestId("remaining-movement")).toHaveText("7");
 
   const preserved = await page.evaluate(() => {

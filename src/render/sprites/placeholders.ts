@@ -34,3 +34,10 @@ export const movementObjectGlyph = {
   milestone: "+",
   rubble: "x"
 } as const;
+
+export const routePreviewPalette = {
+  line: "#f3f0d1",
+  dot: "#d46a3d",
+  flag: "#b33636",
+  pole: "#f1e7c7"
+} as const;

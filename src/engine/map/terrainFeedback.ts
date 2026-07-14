@@ -1,4 +1,4 @@
-import type { RouteAttempt, RouteFeedback } from "../scenario/types";
+import type { RouteAttempt, RouteFeedback, RoutePreview } from "../scenario/types";
 import { terrainLabel } from "./terrainLookup";
 
 function movementObjectLabel(objectType: RouteFeedback["objectLabels"][number]): string {
@@ -42,6 +42,37 @@ export function createRouteFeedback(routeAttempt: RouteAttempt): RouteFeedback {
         ? `${objectLabels.join(" + ")} combine for a final cost of ${routeAttempt.movementCost}.`
         : objectLabels.length === 1
           ? `${objectLabels[0]} affects this tile.`
-          : null
+          : null,
+    routeMode: routeAttempt.isLegal ? "move" : "blocked"
+  };
+}
+
+export function createRoutePreviewFeedback(routePreview: RoutePreview): RouteFeedback {
+  const destinationStep = routePreview.steps[routePreview.steps.length - 1];
+  const movementImpact =
+    routePreview.status === "continuation"
+      ? `${routePreview.totalMovementCost} movement remaining`
+      : `${routePreview.totalMovementCost} movement total`;
+
+  return {
+    destinationPosition: { ...routePreview.destinationPosition },
+    terrainLabel: destinationStep?.terrainLabel ?? "Route",
+    movementImpact,
+    blockedReason: null,
+    objectLabels: destinationStep?.objectLabels ?? [],
+    passabilityExplanation:
+      routePreview.status === "continuation"
+        ? "Click the same destination again to continue this journey."
+        : "Click the same destination again to confirm this route.",
+    movementDeltaExplanation: null,
+    stackExplanation:
+      routePreview.steps.length > 0 ? `${routePreview.steps.length} step${routePreview.steps.length === 1 ? "" : "s"} plotted.` : null,
+    routeMode: routePreview.status === "continuation" ? "continuation" : "preview",
+    routeStepCount: routePreview.steps.length,
+    routeTotalMovement: routePreview.totalMovementCost,
+    previewMessage:
+      routePreview.status === "continuation"
+        ? "Route retained for later continuation."
+        : "Route preview ready for confirmation."
   };
 }

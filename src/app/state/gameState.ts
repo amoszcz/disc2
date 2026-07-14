@@ -26,6 +26,7 @@ export function createInitialState(scenarioId: ScenarioId = "core-map-loop"): Ga
     messageLog: ["Aren arrives at the borderlands."],
     winnerPlayerId: null,
     routeFeedback: null,
+    activeRoutePreview: null,
     mapViewState: createDefaultMapViewState(scenario)
   };
 }

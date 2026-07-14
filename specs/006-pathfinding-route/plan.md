@@ -1,109 +1,127 @@
-# Implementation Plan: Pathfinding Route Preview
+# Implementation Plan: [FEATURE]
 
-**Branch**: `005-bridge-movement-objects` | **Date**: 2026-07-14 | **Spec**: [spec.md](/C:/programy/disc2/specs/006-pathfinding-route/spec.md)
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/specs/006-pathfinding-route/spec.md`
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: The active branch currently remains `005-bridge-movement-objects` while planning is being produced for feature `006-pathfinding-route`. The design below targets the new spec directory and should ideally be implemented from a matching feature branch before coding starts.
+**Note**: This template is filled in by the `/speckit-plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-Extend the existing TypeScript/Vite browser strategy prototype with weighted map pathfinding, preview-first route interaction, and persistent multi-turn route intent. A first click on a destination should calculate and display the shortest legal route by total movement cost, a second click on that same destination should commit movement along the stored route, and partial traversal should stop on the last affordable step while keeping the destination visible for later continuation. The feature will be proven with Vitest integration and contract coverage for route computation, preview ownership, and continuation behavior, plus Playwright acceptance tests for click-to-preview, click-to-confirm, and multi-turn route persistence.
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
 
-**Primary Dependencies**: Existing Vite app tooling, Vitest for integration and contract tests, Playwright for browser acceptance coverage
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
 
-**Storage**: In-memory runtime state plus static scenario content files stored in the repository
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 
-**Testing**: Vitest contract and integration suites for weighted route calculation, preview confirmation state, and partial route continuation, plus Playwright acceptance tests for route plotting, confirmation, and cross-turn persistence
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-**Target Platform**: Modern desktop browsers with mouse and keyboard input
+**Testing**: [e.g., pytest integration suite, XCTest UI/integration coverage, cargo test or NEEDS CLARIFICATION]
 
-**Project Type**: Single-project web application
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 
-**Performance Goals**: Keep route plotting and canvas rendering responsive on the existing 64x64 scenario scale while recalculating weighted routes on click-driven interaction
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
 
-**Constraints**: Browser-only runtime, Canvas 2D rendering, no backend service, no new third-party pathfinding library, reuse the existing terrain, movement-object, and guard legality rules, preserve explicit second-click confirmation, and keep route intent stable across end-turn transitions until replaced, invalidated, or completed
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 
-**Scale/Scope**: One selected-hero pathfinding flow shared by the current adventure map, including reachable preview, confirmation, partial movement, route persistence, and destination replacement behavior
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
+
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Spec before code: Pass. The driving spec is [spec.md](/C:/programy/disc2/specs/006-pathfinding-route/spec.md), and implementation should proceed through this plan and a dedicated `tasks.md` before behavior changes begin.
-- Independent slices: Pass. US1 delivers route preview without committing movement and is independently valuable for planning. US2 adds confirmation and partial route traversal on top of the stored preview. US3 adds cross-turn persistence and route continuation. The intentional dependency is that US2 and US3 build on the preview state introduced in US1.
-- Feature-proving tests: Pass. US1 will be proven with integration and browser acceptance flows that validate reachable and unreachable route preview behavior. US2 will be proven with route-confirmation integration tests plus acceptance coverage for partial traversal and no-recalculation confirmation behavior. US3 will be proven with contract and acceptance tests covering route ownership, end-turn persistence, and destination replacement.
-- Minimal dependencies, real integrations: Pass. No new libraries are required beyond the existing Vite, Vitest, and Playwright toolchain. Weighted routefinding will be implemented as a focused engine seam instead of adding an external pathfinding package.
-- Small, loosely coupled design: Pass. Path computation, preview state, route rendering, and click-confirmation orchestration can live in distinct seams so the map engine, scene controller, and canvas rendering stay locally understandable.
-- Artifact consistency: Pass. This plan adds `research.md`, `data-model.md`, `quickstart.md`, and `contracts/` for feature `006`, and updates `AGENTS.md` to point to this new active plan.
-
-### Post-Design Constitution Check
-
-- Spec before code: Still passes. The design remains anchored to click-driven route preview and continuation rather than broadening into automation or multiplayer path queues.
-- Independent slices: Still passes. Preview, confirmation/partial traversal, and cross-turn continuation remain separable user stories with independent proofs.
-- Feature-proving tests: Still passes. The design exposes public seams for weighted route generation, preview ownership, and click-driven continuation that can be exercised through integration and acceptance coverage.
-- Minimal dependencies, real integrations: Still passes. The feature uses only the existing TypeScript/Vite/Vitest/Playwright stack and reuses the current movement-rule pipeline.
-- Small, loosely coupled design: Still passes. The design isolates pathfinding from hero mutation and keeps rendering/interaction concerns behind narrow state and controller seams.
-- Artifact consistency: Still passes. Plan, research, data model, contracts, quickstart, and AGENTS all describe the same preview-confirm-continue route workflow.
+- Spec before code: Link the driving spec and confirm any non-trivial work
+  follows the spec -> plan -> tasks flow.
+- Independent slices: Show how each user story remains independently testable and
+  valuable, and call out any cross-story dependency that cannot be avoided.
+- Feature-proving tests: Define the automated validation approach for each
+  changed behavior, preferring integration, contract, or acceptance-style
+  coverage and explaining any omitted automation.
+- Minimal dependencies, real integrations: List new dependencies, adapters, or
+  third-party integrations and justify why a simpler option or fewer libraries
+  are insufficient. State how real integration behavior will be tested.
+- Small, loosely coupled design: Identify the feature seams, module boundaries,
+  and coupling risks, and explain how the design keeps components small and
+  independently changeable.
+- Artifact consistency: Identify which templates, docs, or workflow artifacts
+  must change alongside this plan to remain constitution-compliant.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/006-pathfinding-route/
-|-- plan.md
-|-- research.md
-|-- data-model.md
-|-- quickstart.md
-|-- contracts/
-|   |-- route-preview-state.md
-|   `-- route-preview-ux.md
-`-- tasks.md
+specs/[###-feature]/
+├── plan.md              # This file (/speckit-plan command output)
+├── research.md          # Phase 0 output (/speckit-plan command)
+├── data-model.md        # Phase 1 output (/speckit-plan command)
+├── quickstart.md        # Phase 1 output (/speckit-plan command)
+├── contracts/           # Phase 1 output (/speckit-plan command)
+└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
-|-- app/
-|   |-- scene-controller/
-|   |   `-- mapInputController.ts
-|   `-- state/
-|       `-- gameState.ts
-|-- engine/
-|   |-- map/
-|   |   |-- heroActions.ts
-|   |   |-- routeRules.ts
-|   |   |-- routePathfinding.ts
-|   |   |-- routePreviewState.ts
-|   |   `-- terrainFeedback.ts
-|   `-- scenario/
-|       `-- types.ts
-|-- render/
-|   |-- canvas/
-|   |   `-- renderMapScene.ts
-|   `-- sprites/
-|       `-- placeholders.ts
-|-- ui/
-|   |-- hud/
-|   |   `-- mapHud.ts
-|   `-- overlays/
-|       `-- guardStatusOverlay.ts
-`-- main.ts
+├── models/
+├── services/
+├── cli/
+└── lib/
 
 tests/
-|-- acceptance/
-|-- contract/
-`-- integration/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
+
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Keep the existing single frontend web application and extend the current adventure-map engine with a dedicated weighted-pathfinding seam in `src/engine/map/`. Add a preview-state seam for route ownership and continuation, wire click behavior through `mapInputController.ts`, and limit UI changes to route rendering plus HUD/overlay explanation.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
-No constitution violations currently require justification.
+> **Fill ONLY if Constitution Check has violations that must be justified**
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
