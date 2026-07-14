@@ -1,11 +1,12 @@
 import type { GameStore } from "../state/gameState";
-import { appendMessage, setScenario } from "../state/gameState";
+import { appendMessage, setBattleState, setScenario } from "../state/gameState";
 import { renderMapScene } from "../../render/canvas/renderMapScene";
 import { renderMapHud } from "../../ui/hud/mapHud";
 import { renderEndTurnPanel } from "../../ui/panels/endTurnPanel";
 import { renderGuardStatusOverlay } from "../../ui/overlays/guardStatusOverlay";
 import { renderErrorOverlay } from "../../ui/overlays/errorOverlay";
-import { advanceTurn, carryRoutePreviewAcrossTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
+import { advanceTurn, autoAdvanceActiveRouteBeforeTurnEnd, carryRoutePreviewAcrossTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
+import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { checkScenarioEnd } from "./checkScenarioEnd";
 import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup";
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
@@ -53,6 +54,23 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
 
   button.onclick = () => {
     store.update((currentState) => {
+      const turnEndRouteResult = autoAdvanceActiveRouteBeforeTurnEnd(currentState);
+      const routeOwnerId = currentState.activeRoutePreview?.heroId ?? currentState.selectedHeroId;
+      const routeOwner = routeOwnerId
+        ? currentState.scenario.heroes.find((hero) => hero.id === routeOwnerId)
+        : null;
+
+      if (turnEndRouteResult?.ok && routeOwnerId) {
+        const encounter = startGuardEncounter(currentState, routeOwnerId);
+        if (encounter.ok) {
+          currentState.activeRoutePreview = null;
+          currentState.routeFeedback = null;
+          setBattleState(currentState, encounter.battle);
+          appendMessage(currentState, `The guards of ${encounter.location.name} attack.`);
+          return;
+        }
+      }
+
       const nextPlayerId = advanceTurn(currentState.scenario, currentState.activePlayerId);
       resetMovementForActivePlayer(currentState.scenario, nextPlayerId);
       currentState.activePlayerId = nextPlayerId;
@@ -65,7 +83,19 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
         currentState.scenario.heroes.find((hero) => hero.id === currentState.activeRoutePreview?.heroId)?.mapPosition ?? null
       );
       setScenario(currentState, currentState.scenario);
-      appendMessage(currentState, "The next side takes its turn.");
+      if (turnEndRouteResult?.ok && turnEndRouteResult.routeProgress) {
+        const progress = turnEndRouteResult.routeProgress;
+        const ownerName = routeOwner?.name ?? "The hero";
+        const destination = `(${progress.finalPosition.x + 1}, ${progress.finalPosition.y + 1})`;
+        appendMessage(
+          currentState,
+          progress.completionState === "completed"
+            ? `${ownerName} auto-advanced to ${destination} before the turn ended and completed the route.`
+            : `${ownerName} auto-advanced to ${destination} before the turn ended and awaits continuation.`
+        );
+      } else {
+        appendMessage(currentState, "The next side takes its turn.");
+      }
       checkScenarioEnd(currentState);
     });
   };

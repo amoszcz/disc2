@@ -1,4 +1,6 @@
-import type { Position, RoutePreview, ScenarioDefinition } from "../scenario/types";
+import type { GameState, Position, RoutePreview, ScenarioDefinition } from "../scenario/types";
+import type { HeroActionResult } from "../map/heroActions";
+import { autoAdvanceRoutePreview } from "../map/heroActions";
 import { markRoutePreviewForContinuation } from "../map/routePreviewState";
 
 export function resetMovementForActivePlayer(scenario: ScenarioDefinition, activePlayerId: string): ScenarioDefinition {
@@ -28,4 +30,26 @@ export function carryRoutePreviewAcrossTurn(
   }
 
   return markRoutePreviewForContinuation(routePreview, heroPosition, routePreview.steps);
+}
+
+export function autoAdvanceActiveRouteBeforeTurnEnd(state: GameState): HeroActionResult | null {
+  const routePreview = state.activeRoutePreview;
+  if (!routePreview || routePreview.steps.length === 0) {
+    return null;
+  }
+
+  const hero = state.scenario.heroes.find((entry) => entry.id === routePreview.heroId);
+  if (!hero || hero.availabilityState === "defeated" || hero.ownerPlayerId !== state.activePlayerId) {
+    return null;
+  }
+
+  if (hero.remainingMovement <= 0) {
+    return null;
+  }
+
+  const previousSelectedHeroId = state.selectedHeroId;
+  state.selectedHeroId = hero.id;
+  const result = autoAdvanceRoutePreview(state);
+  state.selectedHeroId = previousSelectedHeroId;
+  return result;
 }

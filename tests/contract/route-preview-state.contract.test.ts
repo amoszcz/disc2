@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { createInitialState } from "../../src/app/state/gameState";
+import { clearOwnedRoutePreview, plotRoutePreview } from "../../src/engine/map/heroActions";
 import { createRoutePreview, isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../src/engine/map/routePreviewState";
 
 describe("route preview state contract", () => {
@@ -18,5 +20,18 @@ describe("route preview state contract", () => {
     ]);
 
     expect(isRoutePreviewOwnedByHero(preview, "hero-2")).toBe(false);
+  });
+
+  test("clicking the owning hero can clear the active route without moving the hero", () => {
+    const state = createInitialState("advanced-terrain-scenario");
+    const startingPosition = { ...state.scenario.heroes[0].mapPosition };
+    expect(plotRoutePreview(state, { x: 7, y: 11 }).ok).toBe(true);
+
+    const result = clearOwnedRoutePreview(state, "hero-1");
+
+    expect(result.ok).toBe(true);
+    expect(state.activeRoutePreview).toBeNull();
+    expect(state.scenario.heroes[0].mapPosition).toEqual(startingPosition);
+    expect(state.scenario.heroes[0].remainingMovement).toBe(8);
   });
 });

@@ -10,6 +10,8 @@ function movementObjectLabel(objectType: RouteFeedback["objectLabels"][number]):
     case "rubble":
       return "Rubble";
   }
+
+  return objectType;
 }
 
 export function createRouteFeedback(routeAttempt: RouteAttempt): RouteFeedback {

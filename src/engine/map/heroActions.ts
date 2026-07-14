@@ -2,7 +2,7 @@ import type { GameState, Position, RouteProgressResult, RouteStep } from "../sce
 import { findGuardedLocationAtHero, isLocationBlocked } from "./guardRules";
 import { isValidMove, movementCost, positionsEqual } from "./mapRules";
 import { collectPickupIfPresent } from "./pickupResolution";
-import { createRoutePreview, isRoutePreviewOwnedByHero, markRoutePreviewCompleted, markRoutePreviewForContinuation } from "./routePreviewState";
+import { clearRoutePreview, createRoutePreview, isRoutePreviewOwnedByHero, markRoutePreviewForContinuation } from "./routePreviewState";
 import { findShortestRoute } from "./routePathfinding";
 import { hasMovementObjectRegions } from "./movementObjectLookup";
 import { buildRouteAttempt } from "./routeRules";
@@ -14,6 +14,8 @@ export interface HeroActionResult {
   reason?: string;
   routeProgress?: RouteProgressResult;
 }
+
+type RouteAdvanceTrigger = "manual" | "end-turn";
 
 export function selectHero(state: GameState, heroId: string): HeroActionResult {
   const hero = state.scenario.heroes.find((entry) => entry.id === heroId);
@@ -27,6 +29,16 @@ export function selectHero(state: GameState, heroId: string): HeroActionResult {
     return { ok: false, reason: "That hero has been defeated." };
   }
   state.selectedHeroId = heroId;
+  state.routeFeedback = null;
+  return { ok: true };
+}
+
+export function clearOwnedRoutePreview(state: GameState, heroId: string): HeroActionResult {
+  if (!isRoutePreviewOwnedByHero(state.activeRoutePreview, heroId)) {
+    return { ok: false, reason: "That hero does not own an active route." };
+  }
+
+  state.activeRoutePreview = clearRoutePreview();
   state.routeFeedback = null;
   return { ok: true };
 }
@@ -60,7 +72,7 @@ export function plotRoutePreview(state: GameState, destination: Position): HeroA
   return { ok: true };
 }
 
-export function confirmRoutePreview(state: GameState): HeroActionResult {
+function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigger): HeroActionResult {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
   const routePreview = state.activeRoutePreview;
   if (!hero || !routePreview) {
@@ -148,7 +160,8 @@ export function confirmRoutePreview(state: GameState): HeroActionResult {
     remainingSteps,
     completionState: remainingSteps.length === 0 && !encounteredBlockedLocation ? "completed" : "partial",
     failureReason: null,
-    encounteredBlockedLocation
+    encounteredBlockedLocation,
+    triggerSource
   };
 
   if (routeProgress.completionState === "completed") {
@@ -159,6 +172,14 @@ export function confirmRoutePreview(state: GameState): HeroActionResult {
   }
 
   return { ok: true, routeProgress };
+}
+
+export function confirmRoutePreview(state: GameState): HeroActionResult {
+  return advanceRoutePreview(state, "manual");
+}
+
+export function autoAdvanceRoutePreview(state: GameState): HeroActionResult {
+  return advanceRoutePreview(state, "end-turn");
 }
 
 export function moveSelectedHero(state: GameState, position: Position): HeroActionResult {

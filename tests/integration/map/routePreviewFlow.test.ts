@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { createInitialState } from "../../../src/app/state/gameState";
-import { plotRoutePreview } from "../../../src/engine/map/heroActions";
+import { clearOwnedRoutePreview, plotRoutePreview } from "../../../src/engine/map/heroActions";
 
 describe("route preview flow", () => {
   test("plots a reachable route without spending movement", () => {
@@ -33,5 +33,18 @@ describe("route preview flow", () => {
     expect(result.ok).toBe(false);
     expect(state.activeRoutePreview).toBeNull();
     expect(state.routeFeedback?.blockedReason).toBe("No legal route could be plotted to that destination.");
+  });
+
+  test("clears an active route when the owning hero is clicked", () => {
+    const state = createInitialState("advanced-terrain-scenario");
+    const startingPosition = { ...state.scenario.heroes[0].mapPosition };
+    expect(plotRoutePreview(state, { x: 7, y: 11 }).ok).toBe(true);
+
+    const result = clearOwnedRoutePreview(state, "hero-1");
+
+    expect(result.ok).toBe(true);
+    expect(state.activeRoutePreview).toBeNull();
+    expect(state.routeFeedback).toBeNull();
+    expect(state.scenario.heroes[0].mapPosition).toEqual(startingPosition);
   });
 });

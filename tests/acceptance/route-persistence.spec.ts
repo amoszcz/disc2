@@ -16,15 +16,16 @@ test("unfinished routes remain visible after end turn and can continue on the ne
   });
 
   await canvas.click({ position: farDestinationClick });
-  await canvas.click({ position: farDestinationClick });
 
-  await expect(page.getByTestId("route-preview-status")).toHaveText("continuation");
+  await expect(page.getByTestId("route-preview-status")).toHaveText("previewed");
   const beforeTurn = await page.getByTestId("route-preview-destination").textContent();
+  const stepsBeforeTurn = await page.getByTestId("route-preview-steps").textContent();
 
   await page.getByTestId("end-turn-button").click();
 
   await expect(page.getByTestId("route-preview-status")).toHaveText("continuation");
   await expect(page.getByTestId("route-preview-destination")).toHaveText(beforeTurn ?? "");
+  await expect(page.getByTestId("route-preview-steps")).not.toHaveText(stepsBeforeTurn ?? "");
 
   await canvas.click({ position: farDestinationClick });
 

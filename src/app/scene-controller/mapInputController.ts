@@ -1,5 +1,5 @@
 import type { GameStore } from "../state/gameState";
-import { confirmRoutePreview, plotRoutePreview, selectHero } from "../../engine/map/heroActions";
+import { clearOwnedRoutePreview, confirmRoutePreview, plotRoutePreview, selectHero } from "../../engine/map/heroActions";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
 import { isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../engine/map/routePreviewState";
@@ -38,6 +38,17 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
       );
 
       if (heroAtTile) {
+        if (isRoutePreviewOwnedByHero(state.activeRoutePreview, heroAtTile.id)) {
+          const clearResult = clearOwnedRoutePreview(state, heroAtTile.id);
+          if (!clearResult.ok && clearResult.reason) {
+            state.messageLog.push(clearResult.reason);
+            return;
+          }
+          selectHero(state, heroAtTile.id);
+          state.messageLog.push(`${heroAtTile.name}'s plotted route was cleared.`);
+          return;
+        }
+
         const result = selectHero(state, heroAtTile.id);
         if (!result.ok && result.reason) {
           state.messageLog.push(result.reason);

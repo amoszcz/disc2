@@ -129,6 +129,7 @@ export interface RouteProgressResult {
   completionState: "completed" | "partial" | "blocked";
   failureReason: string | null;
   encounteredBlockedLocation: boolean;
+  triggerSource: "manual" | "end-turn";
 }
 
 export interface MapViewport {
