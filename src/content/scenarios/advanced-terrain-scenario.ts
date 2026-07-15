@@ -3,6 +3,7 @@ import type { ScenarioDefinition } from "../../engine/scenario/types";
 export const advancedTerrainScenario: ScenarioDefinition = {
   id: "advanced-terrain-scenario",
   name: "Broken Causeway",
+  description: "A larger terrain-heavy scenario focused on roads, rivers, and movement-object interactions.",
   map: {
     width: 64,
     height: 64,

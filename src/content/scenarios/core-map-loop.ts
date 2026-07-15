@@ -3,6 +3,7 @@ import type { ScenarioDefinition } from "../../engine/scenario/types";
 export const coreMapLoopScenario: ScenarioDefinition = {
   id: "core-map-loop",
   name: "Border Watch",
+  description: "A compact frontier skirmish with a guarded mine close to the starting hero.",
   map: {
     width: 5,
     height: 5

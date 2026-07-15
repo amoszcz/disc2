@@ -48,13 +48,13 @@ npm run dev
 Run the menu-focused contract and integration coverage:
 
 ```bash
-npm run test
+npm run test:menu
 ```
 
-Run the browser acceptance coverage after the feature-specific specs are added:
+Run the feature-specific browser verification flow:
 
 ```bash
-npm run test:acceptance
+npm run verify:menu
 ```
 
 ## Notes

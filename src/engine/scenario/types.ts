@@ -2,7 +2,7 @@ export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
 export type MovementObjectType = "bridge" | "milestone" | "rubble";
 
-export type SceneMode = "map" | "battle" | "victory";
+export type SceneMode = "menu" | "map" | "battle" | "victory";
 export type SideKind = "player" | "enemy" | "neutral";
 export type LocationType = "resource-site";
 export type AccessState = "blocked" | "open";
@@ -238,6 +238,7 @@ export interface VictoryCondition {
 export interface ScenarioDefinition {
   id: string;
   name: string;
+  description: string;
   map: MapDefinition;
   terrainRegions?: TerrainRegion[];
   movementObjectRegions?: MovementObjectRegion[];
@@ -248,6 +249,12 @@ export interface ScenarioDefinition {
   guardedLocations: GuardedLocation[];
   guardForces: GuardForce[];
   victoryCondition: VictoryCondition;
+}
+
+export interface ScenarioOption {
+  id: string;
+  label: string;
+  description: string;
 }
 
 export interface BattleParticipant {
@@ -310,6 +317,8 @@ export interface Battle {
 
 export interface GameState {
   scenario: ScenarioDefinition;
+  activeScenarioId: string | null;
+  availableScenarioOptions: ScenarioOption[];
   activePlayerId: string;
   selectedHeroId: string | null;
   sceneMode: SceneMode;

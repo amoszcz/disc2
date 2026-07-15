@@ -15,6 +15,7 @@ Define the player-visible contract for initial menu entry and scenario selection
 - Selecting a scenario must start that scenario and remove the main menu from view.
 - Starting one scenario must not accidentally open a different scenario.
 - Reopening the application or returning to the main menu must make the same scenario choices available again unless future features intentionally change availability.
+- Menu-first launch must remain the default behavior when no scenario query override is provided.
 
 ## Usability Signals
 

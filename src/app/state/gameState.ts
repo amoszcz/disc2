@@ -1,4 +1,4 @@
-import { loadScenario, type ScenarioId } from "../../engine/scenario/loadScenario";
+import { getDefaultScenarioId, getScenarioOptions, loadScenario, type ScenarioId } from "../../engine/scenario/loadScenario";
 import type { Battle, GameState, MapViewState, ScenarioDefinition, SceneMode } from "../../engine/scenario/types";
 import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
@@ -12,16 +12,18 @@ export function createDefaultMapViewState(scenario: ScenarioDefinition): MapView
   };
 }
 
-export function createInitialState(scenarioId: ScenarioId = "core-map-loop"): GameState {
+function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameState {
   const scenario = loadScenario(scenarioId);
   const activePlayerId = scenario.players.find((player) => player.kind === "player")?.id ?? scenario.players[0].id;
   const selectedHeroId = scenario.heroes.find((hero) => hero.ownerPlayerId === activePlayerId)?.id ?? null;
 
   return {
     scenario,
+    activeScenarioId: scenarioId,
+    availableScenarioOptions: getScenarioOptions(),
     activePlayerId,
     selectedHeroId,
-    sceneMode: "map",
+    sceneMode,
     battle: null,
     messageLog: ["Aren arrives at the borderlands."],
     winnerPlayerId: null,
@@ -29,6 +31,19 @@ export function createInitialState(scenarioId: ScenarioId = "core-map-loop"): Ga
     activeRoutePreview: null,
     mapViewState: createDefaultMapViewState(scenario)
   };
+}
+
+export function createInitialState(scenarioId: ScenarioId = getDefaultScenarioId()): GameState {
+  return createSessionState(scenarioId, "map");
+}
+
+export function createMenuState(): GameState {
+  const defaultScenarioId = getDefaultScenarioId();
+  const menuState = createSessionState(defaultScenarioId, "menu");
+  menuState.activeScenarioId = null;
+  menuState.selectedHeroId = null;
+  menuState.messageLog = ["Choose a scenario to begin."];
+  return menuState;
 }
 
 export function appendMessage(state: GameState, message: string): GameState {
@@ -52,6 +67,40 @@ export function setScenario(state: GameState, scenario: ScenarioDefinition): Gam
     state.winnerPlayerId = winnerPlayerId;
     state.sceneMode = "victory";
   }
+  return state;
+}
+
+export function startScenarioSession(state: GameState, scenarioId: ScenarioId): GameState {
+  const nextState = createInitialState(scenarioId);
+  state.scenario = nextState.scenario;
+  state.activeScenarioId = nextState.activeScenarioId;
+  state.availableScenarioOptions = nextState.availableScenarioOptions;
+  state.activePlayerId = nextState.activePlayerId;
+  state.selectedHeroId = nextState.selectedHeroId;
+  state.sceneMode = nextState.sceneMode;
+  state.battle = nextState.battle;
+  state.messageLog = nextState.messageLog;
+  state.winnerPlayerId = nextState.winnerPlayerId;
+  state.routeFeedback = nextState.routeFeedback;
+  state.activeRoutePreview = nextState.activeRoutePreview;
+  state.mapViewState = nextState.mapViewState;
+  return state;
+}
+
+export function returnToMainMenu(state: GameState): GameState {
+  const nextState = createMenuState();
+  state.scenario = nextState.scenario;
+  state.activeScenarioId = nextState.activeScenarioId;
+  state.availableScenarioOptions = nextState.availableScenarioOptions;
+  state.activePlayerId = nextState.activePlayerId;
+  state.selectedHeroId = nextState.selectedHeroId;
+  state.sceneMode = nextState.sceneMode;
+  state.battle = nextState.battle;
+  state.messageLog = nextState.messageLog;
+  state.winnerPlayerId = nextState.winnerPlayerId;
+  state.routeFeedback = nextState.routeFeedback;
+  state.activeRoutePreview = nextState.activeRoutePreview;
+  state.mapViewState = nextState.mapViewState;
   return state;
 }
 

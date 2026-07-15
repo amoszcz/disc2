@@ -18,8 +18,8 @@
 
 **Purpose**: Prepare menu-focused verification entry points and align active feature documentation
 
-- [ ] T001 Add start-menu-focused verification scripts in `package.json`
-- [ ] T002 Align menu feature execution notes in `specs/008-start-menu/quickstart.md`
+- [X] T001 Add start-menu-focused verification scripts in `package.json`
+- [X] T002 Align menu feature execution notes in `specs/008-start-menu/quickstart.md`
 
 ---
 
@@ -29,11 +29,11 @@
 
 **CRITICAL**: No user story work should begin before this phase is complete
 
-- [ ] T003 Extend scene-mode, menu-state, and scenario-option types in `src/engine/scenario/types.ts`
-- [ ] T004 [P] Centralize available scenario catalog metadata in `src/engine/scenario/loadScenario.ts`
-- [ ] T005 [P] Refactor initial-state creation into reusable scenario-session start/reset helpers in `src/app/state/gameState.ts`
-- [ ] T006 [P] Extend the root scene controller to support a main-menu scene in `src/app/scene-controller/sceneController.ts`
-- [ ] T007 Add foundational menu/session transition coverage in `tests/integration/foundation/gameStateFlow.test.ts`
+- [X] T003 Extend scene-mode, menu-state, and scenario-option types in `src/engine/scenario/types.ts`
+- [X] T004 [P] Centralize available scenario catalog metadata in `src/engine/scenario/loadScenario.ts`
+- [X] T005 [P] Refactor initial-state creation into reusable scenario-session start/reset helpers in `src/app/state/gameState.ts`
+- [X] T006 [P] Extend the root scene controller to support a main-menu scene in `src/app/scene-controller/sceneController.ts`
+- [X] T007 Add foundational menu/session transition coverage in `tests/integration/foundation/gameStateFlow.test.ts`
 
 **Checkpoint**: Menu scene and fresh-session seams are ready for player-facing scenario selection
 
@@ -47,17 +47,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Add main-menu UX contract coverage in `tests/contract/gameplay-ui.menu.contract.test.ts`
-- [ ] T009 [P] [US1] Add scenario-selection integration coverage in `tests/integration/menu/menuScenarioSelectionFlow.test.ts`
-- [ ] T010 [P] [US1] Add browser coverage for menu-first launch and scenario start in `tests/acceptance/start-menu-selection.spec.ts`
+- [X] T008 [P] [US1] Add main-menu UX contract coverage in `tests/contract/gameplay-ui.menu.contract.test.ts`
+- [X] T009 [P] [US1] Add scenario-selection integration coverage in `tests/integration/menu/menuScenarioSelectionFlow.test.ts`
+- [X] T010 [P] [US1] Add browser coverage for menu-first launch and scenario start in `tests/acceptance/start-menu-selection.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Render the main menu shell and scenario launch actions in `src/app/bootstrap/startGame.ts`
-- [ ] T012 [P] [US1] Add menu and scenario-start UI helpers in `src/ui/overlays/mainMenu.ts`
-- [ ] T013 [P] [US1] Expose scenario labels and descriptions for menu presentation in `src/content/scenarios/core-map-loop.ts`
-- [ ] T014 [P] [US1] Expose scenario labels and descriptions for menu presentation in `src/content/scenarios/advanced-terrain-scenario.ts`
-- [ ] T015 [US1] Wire menu selection into fresh scenario-session startup in `src/app/state/gameState.ts`
+- [X] T011 [P] [US1] Render the main menu shell and scenario launch actions in `src/app/bootstrap/startGame.ts`
+- [X] T012 [P] [US1] Add menu and scenario-start UI helpers in `src/ui/overlays/mainMenu.ts`
+- [X] T013 [P] [US1] Expose scenario labels and descriptions for menu presentation in `src/content/scenarios/core-map-loop.ts`
+- [X] T014 [P] [US1] Expose scenario labels and descriptions for menu presentation in `src/content/scenarios/advanced-terrain-scenario.ts`
+- [X] T015 [US1] Wire menu selection into fresh scenario-session startup in `src/app/state/gameState.ts`
 
 **Checkpoint**: User Story 1 is independently playable as a menu-first launch flow with explicit scenario selection
 
@@ -71,16 +71,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] Add scenario-session return contract coverage in `tests/contract/scenario-session-state.contract.test.ts`
-- [ ] T017 [P] [US2] Add completion-to-menu integration coverage in `tests/integration/menu/menuReturnFlow.test.ts`
-- [ ] T018 [P] [US2] Add browser coverage for return-to-menu and fresh replay in `tests/acceptance/start-menu-return.spec.ts`
+- [X] T016 [P] [US2] Add scenario-session return contract coverage in `tests/contract/scenario-session-state.contract.test.ts`
+- [X] T017 [P] [US2] Add completion-to-menu integration coverage in `tests/integration/menu/menuReturnFlow.test.ts`
+- [X] T018 [P] [US2] Add browser coverage for return-to-menu and fresh replay in `tests/acceptance/start-menu-return.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Add completion-screen return-to-menu action in `src/app/bootstrap/startGame.ts`
-- [ ] T020 [P] [US2] Add end-of-scenario return control markup in `src/ui/overlays/victoryMenu.ts`
-- [ ] T021 [US2] Route completed scenario sessions back to the main menu and clear active session state in `src/app/state/gameState.ts`
-- [ ] T022 [US2] Preserve existing completion detection while enabling menu return flow in `src/engine/victory/checkVictory.ts`
+- [X] T019 [P] [US2] Add completion-screen return-to-menu action in `src/app/bootstrap/startGame.ts`
+- [X] T020 [P] [US2] Add end-of-scenario return control markup in `src/ui/overlays/victoryMenu.ts`
+- [X] T021 [US2] Route completed scenario sessions back to the main menu and clear active session state in `src/app/state/gameState.ts`
+- [X] T022 [US2] Preserve existing completion detection while enabling menu return flow in `src/engine/victory/checkVictory.ts`
 
 **Checkpoint**: User Stories 1 and 2 together provide a complete loop from menu to scenario completion and back to menu
 
@@ -90,10 +90,10 @@
 
 **Purpose**: Finish shared wording, verification, and artifact consistency for the menu slice
 
-- [ ] T023 [P] Update menu interaction wording and expectations in `specs/008-start-menu/contracts/main-menu-ux.md`
-- [ ] T024 [P] Update scenario session lifecycle details in `specs/008-start-menu/contracts/scenario-session-state.md`
-- [ ] T025 Run start-menu verification commands documented in `specs/008-start-menu/quickstart.md`
-- [ ] T026 Verify `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md` remain aligned in `specs/008-start-menu/tasks.md`
+- [X] T023 [P] Update menu interaction wording and expectations in `specs/008-start-menu/contracts/main-menu-ux.md`
+- [X] T024 [P] Update scenario session lifecycle details in `specs/008-start-menu/contracts/scenario-session-state.md`
+- [X] T025 Run start-menu verification commands documented in `specs/008-start-menu/quickstart.md`
+- [X] T026 Verify `spec.md`, `plan.md`, `data-model.md`, `contracts/`, and `tasks.md` remain aligned in `specs/008-start-menu/tasks.md`
 
 ---
 

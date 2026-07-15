@@ -14,6 +14,7 @@ Define the application-state contract for scenario session creation, completion,
 
 - When a scenario reaches its existing completion condition, the application must enter an end-of-scenario state.
 - The completion view must expose an action that returns the player to the main menu.
+- Returning to the menu after a completion state must clear any direct scenario query override from the browser location.
 
 ## Return-To-Menu Contract
 
