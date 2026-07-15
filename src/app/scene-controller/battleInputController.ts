@@ -1,29 +1,168 @@
 import type { GameStore } from "../state/gameState";
-import { advanceBattleQueue, canBattleContinue, performAttack } from "../../engine/battle/battleTurnEngine";
+import {
+  activeBattleUnitIsPlayerControlled,
+  advanceBattleQueue,
+  canBattleContinue,
+  canBattleStrike,
+  getActingBattleSide,
+  performAutomaticBattleAction,
+  performDefendAction,
+  performStrikeAction,
+  trySelectBattleTarget
+} from "../../engine/battle/battleTurnEngine";
+import { findBattleFormationSlotByUnitId, getBattleCanvasSlotCenter, BATTLE_SLOT_HEIGHT, BATTLE_SLOT_WIDTH } from "../../engine/battle/battleFormation";
+import { getBattleUnit } from "../../engine/battle/battleTargeting";
 import { resolveBattleOutcome } from "../../engine/battle/resolveBattleOutcome";
 import { applyBattleOutcome } from "../state/applyBattleOutcome";
 import { checkScenarioEnd } from "./checkScenarioEnd";
+import type { GameState, ScreenPoint } from "../../engine/scenario/types";
 
-export function bindBattleInput(button: HTMLButtonElement, store: GameStore): void {
-  button.addEventListener("click", () => {
+function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent): ScreenPoint {
+  const bounds = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / bounds.width;
+  const scaleY = canvas.height / bounds.height;
+
+  return {
+    x: (event.clientX - bounds.left) * scaleX,
+    y: (event.clientY - bounds.top) * scaleY
+  };
+}
+
+function resolveBattleConclusion(state: GameState): boolean {
+  if (!state.battle || canBattleContinue(state, state.battle)) {
+    return false;
+  }
+
+  resolveBattleOutcome(state, state.battle);
+  applyBattleOutcome(state);
+  state.battle = null;
+  state.sceneMode = "map";
+  checkScenarioEnd(state);
+  return true;
+}
+
+function continueBattleUntilPlayerTurn(state: GameState): void {
+  while (state.battle && !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+    const message = performAutomaticBattleAction(state, state.battle);
+    state.messageLog.push(message);
+
+    if (resolveBattleConclusion(state)) {
+      return;
+    }
+
+    advanceBattleQueue(state, state.battle);
+  }
+}
+
+function resolvePlayerBattleAction(state: GameState, message: string): void {
+  state.messageLog.push(message);
+
+  if (resolveBattleConclusion(state)) {
+    return;
+  }
+
+  if (!state.battle) {
+    return;
+  }
+
+  advanceBattleQueue(state, state.battle);
+  continueBattleUntilPlayerTurn(state);
+}
+
+function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string | null {
+  const battle = state.battle;
+  if (!battle) {
+    return null;
+  }
+
+  for (const participant of battle.participants) {
+    const slot = findBattleFormationSlotByUnitId(battle.formation, participant.unitId);
+    if (!slot) {
+      continue;
+    }
+
+    const unit = getBattleUnit(state, participant.unitId);
+    if (unit.defeatState || unit.currentHealth <= 0) {
+      continue;
+    }
+
+    const center = getBattleCanvasSlotCenter(slot);
+    const minX = center.x - BATTLE_SLOT_WIDTH / 2;
+    const maxX = center.x + BATTLE_SLOT_WIDTH / 2;
+    const minY = center.y - BATTLE_SLOT_HEIGHT / 2;
+    const maxY = center.y + BATTLE_SLOT_HEIGHT / 2;
+
+    if (point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY) {
+      return participant.unitId;
+    }
+  }
+
+  return null;
+}
+
+export function bindBattleActionInput(container: HTMLElement, store: GameStore): void {
+  const strikeButton = container.querySelector<HTMLButtonElement>("#battle-attack-button");
+  const defendButton = container.querySelector<HTMLButtonElement>("#battle-defend-button");
+
+  if (strikeButton) {
+    strikeButton.onclick = () => {
+      store.update((state) => {
+        if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+          return;
+        }
+
+        if (!canBattleStrike(state, state.battle)) {
+          state.messageLog.push("Select a legal target before striking.");
+          return;
+        }
+
+        const message = performStrikeAction(state, state.battle);
+        resolvePlayerBattleAction(state, message);
+      });
+    };
+  }
+
+  if (defendButton) {
+    defendButton.onclick = () => {
+      store.update((state) => {
+        if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+          return;
+        }
+
+        const message = performDefendAction(state, state.battle);
+        resolvePlayerBattleAction(state, message);
+      });
+    };
+  }
+}
+
+export function bindBattleCanvasInput(canvas: HTMLCanvasElement, store: GameStore): void {
+  canvas.addEventListener("click", (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    const point = getCanvasPoint(canvas, event);
     store.update((state) => {
-      if (state.sceneMode !== "battle" || !state.battle) {
+      if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
         return;
       }
 
-      const message = performAttack(state, state.battle);
-      state.messageLog.push(message);
-
-      if (!canBattleContinue(state, state.battle)) {
-        resolveBattleOutcome(state, state.battle);
-        applyBattleOutcome(state);
-        state.battle = null;
-        state.sceneMode = "map";
-        checkScenarioEnd(state);
+      const targetUnitId = findClickedBattleUnitId(state, point);
+      if (!targetUnitId) {
         return;
       }
 
-      advanceBattleQueue(state, state.battle);
+      const actingSide = getActingBattleSide(state.battle);
+      const clickedSide = state.battle.participants.find((entry) => entry.unitId === targetUnitId)?.side;
+      if (!clickedSide || clickedSide === actingSide) {
+        return;
+      }
+
+      if (trySelectBattleTarget(state, state.battle, targetUnitId)) {
+        const target = getBattleUnit(state, targetUnitId);
+        state.messageLog.push(`${target.name} is selected as the strike target.`);
+      }
     });
   });
 }

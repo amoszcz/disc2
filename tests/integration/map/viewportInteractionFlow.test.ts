@@ -28,8 +28,16 @@ describe("viewport interaction flow", () => {
         attackingHeroId: "hero-1",
         defendingForceId: "guard-force-1",
         participants: [],
+        formation: {
+          rows: 3,
+          columns: 4,
+          attackerSlots: [],
+          defenderSlots: []
+        },
         turnQueue: [],
         activeUnitId: "",
+        targetingState: null,
+        defendStates: [],
         battleState: "active",
         outcome: null
       }

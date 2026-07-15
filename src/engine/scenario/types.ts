@@ -11,6 +11,8 @@ export type ActionState = "ready" | "spent" | "defeated";
 export type BattleState = "active" | "resolved";
 export type BattleOutcomeWinner = "attacker" | "defender";
 export type VictoryType = "eliminate-all-enemies";
+export type BattleSide = "attacker" | "defender";
+export type AttackCategory = "melee" | "ranged" | "area";
 
 export interface Position {
   x: number;
@@ -197,6 +199,7 @@ export interface ScenarioUnit {
   maxHealth: number;
   currentHealth: number;
   attackValue: number;
+  attackCategory: AttackCategory;
   actionState: ActionState;
   defeatState: boolean;
 }
@@ -249,8 +252,38 @@ export interface ScenarioDefinition {
 
 export interface BattleParticipant {
   unitId: string;
-  side: "attacker" | "defender";
+  side: BattleSide;
   orderKey: number;
+}
+
+export interface BattleFormationSlot {
+  side: BattleSide;
+  rowIndex: number;
+  columnIndex: number;
+  unitId: string | null;
+  isOccupied: boolean;
+}
+
+export interface BattleFormation {
+  rows: number;
+  columns: number;
+  attackerSlots: BattleFormationSlot[];
+  defenderSlots: BattleFormationSlot[];
+}
+
+export interface BattleTargetingState {
+  activeUnitId: string;
+  selectedTargetUnitId: string | null;
+  legalTargetUnitIds: string[];
+  canStrike: boolean;
+  canDefend: boolean;
+}
+
+export interface BattleDefendState {
+  unitId: string;
+  damageMultiplier: number;
+  expiresOnUnitTurnId: string;
+  isActive: boolean;
 }
 
 export interface BattleOutcome {
@@ -266,8 +299,11 @@ export interface Battle {
   attackingHeroId: string;
   defendingForceId: string;
   participants: BattleParticipant[];
+  formation: BattleFormation;
   turnQueue: string[];
   activeUnitId: string;
+  targetingState: BattleTargetingState | null;
+  defendStates: BattleDefendState[];
   battleState: BattleState;
   outcome: BattleOutcome | null;
 }

@@ -9,7 +9,13 @@ export const palette = {
   defender: "#8b3d3d",
   text: "#23170d",
   panel: "#fff8e6",
-  viewportAccent: "#2f4f74"
+  viewportAccent: "#2f4f74",
+  battleSlot: "#e8d6b8",
+  battleSlotBorder: "#8e7351",
+  battleActive: "#ffd166",
+  battleLegal: "#69a96f",
+  battleSelected: "#f25f5c",
+  battleDefending: "#7bdff2"
 } as const;
 
 export const terrainPalette = {

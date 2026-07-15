@@ -13,9 +13,11 @@ test("clearing a guarded location returns the player to an open site", async ({ 
 
   await expect(page.getByTestId("battle-hud")).toBeVisible();
 
-  for (let index = 0; index < 5; index += 1) {
-    await page.getByTestId("battle-attack-button").click();
-  }
+  await canvas.click({ position: { x: 508, y: 266 } });
+  await page.getByTestId("battle-attack-button").click();
+  await page.getByTestId("battle-attack-button").click();
+  await canvas.click({ position: { x: 508, y: 116 } });
+  await page.getByTestId("battle-attack-button").click();
 
   await expect(page.getByTestId("victory-panel")).toBeVisible();
 });

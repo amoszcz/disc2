@@ -1,6 +1,7 @@
 import { GameStore, createInitialState } from "../state/gameState";
 import { createSceneController } from "../scene-controller/sceneController";
 import { bindMapInput } from "../scene-controller/mapInputController";
+import { bindBattleCanvasInput } from "../scene-controller/battleInputController";
 import { drawBattleScene, renderBattleSidebar } from "../scene-controller/battleScene";
 import { drawMapScene, renderMapSidebar } from "../scene-controller/mapScene";
 import type { ScenarioId } from "../../engine/scenario/loadScenario";
@@ -42,6 +43,7 @@ export function startGame(root: HTMLElement | null): void {
   }
 
   bindMapInput(canvas, store);
+  bindBattleCanvasInput(canvas, store);
 
   store.subscribe((state) => {
     sceneController.setMode(state.sceneMode);

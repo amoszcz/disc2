@@ -35,7 +35,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       mapPosition: { x: 0, y: 2 },
       movementPerTurn: 2,
       remainingMovement: 2,
-      unitIds: ["hero-unit-1", "hero-unit-2"],
+      unitIds: ["hero-unit-1", "hero-unit-2", "hero-unit-3"],
       experience: 0,
       availabilityState: "ready"
     }
@@ -49,6 +49,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       maxHealth: 10,
       currentHealth: 10,
       attackValue: 4,
+      attackCategory: "melee",
       actionState: "ready",
       defeatState: false
     },
@@ -60,6 +61,19 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       maxHealth: 8,
       currentHealth: 8,
       attackValue: 4,
+      attackCategory: "ranged",
+      actionState: "ready",
+      defeatState: false
+    },
+    {
+      id: "hero-unit-3",
+      name: "Mage",
+      ownerSideId: "player-1",
+      agility: 8,
+      maxHealth: 7,
+      currentHealth: 7,
+      attackValue: 3,
+      attackCategory: "area",
       actionState: "ready",
       defeatState: false
     },
@@ -71,6 +85,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       maxHealth: 7,
       currentHealth: 7,
       attackValue: 3,
+      attackCategory: "melee",
       actionState: "ready",
       defeatState: false
     },
@@ -82,6 +97,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       maxHealth: 6,
       currentHealth: 6,
       attackValue: 2,
+      attackCategory: "ranged",
       actionState: "ready",
       defeatState: false
     }

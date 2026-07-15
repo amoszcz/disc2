@@ -18,8 +18,8 @@
 
 **Purpose**: Prepare combat-specific scripts, docs, and feature-scoped verification entry points
 
-- [ ] T001 Add combat-focused verification scripts in `package.json`
-- [ ] T002 Align combat feature execution notes in `specs/007-combat-grid/quickstart.md`
+- [x] T001 Add combat-focused verification scripts in `package.json`
+- [x] T002 Align combat feature execution notes in `specs/007-combat-grid/quickstart.md`
 
 ---
 
@@ -29,12 +29,12 @@
 
 **CRITICAL**: No user story work should begin before this phase is complete
 
-- [ ] T003 Extend battle, unit, formation, attack-category, and defend-state types in `src/engine/scenario/types.ts`
-- [ ] T004 [P] Create fixed-slot formation building and lookup helpers in `src/engine/battle/battleFormation.ts`
-- [ ] T005 [P] Create legal-target resolution helpers for melee, ranged, and area attacks in `src/engine/battle/battleTargeting.ts`
-- [ ] T006 [P] Extend battle creation to assign units into 3x4 formation slots and initialize targeting state in `src/engine/battle/createBattle.ts`
-- [ ] T007 [P] Extend shared game state for selected battle target and battle interaction state in `src/app/state/gameState.ts`
-- [ ] T008 Add foundational battle formation and targeting-state coverage in `tests/integration/battle/battleEngineFlow.test.ts`
+- [x] T003 Extend battle, unit, formation, attack-category, and defend-state types in `src/engine/scenario/types.ts`
+- [x] T004 [P] Create fixed-slot formation building and lookup helpers in `src/engine/battle/battleFormation.ts`
+- [x] T005 [P] Create legal-target resolution helpers for melee, ranged, and area attacks in `src/engine/battle/battleTargeting.ts`
+- [x] T006 [P] Extend battle creation to assign units into 3x4 formation slots and initialize targeting state in `src/engine/battle/createBattle.ts`
+- [x] T007 [P] Extend shared game state for selected battle target and battle interaction state in `src/app/state/gameState.ts`
+- [x] T008 Add foundational battle formation and targeting-state coverage in `tests/integration/battle/battleEngineFlow.test.ts`
 
 **Checkpoint**: Formation layout and battle targeting seams are ready for player-facing combat interactions
 
@@ -48,17 +48,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add battle targeting-state contract coverage in `tests/contract/battle-targeting-state.contract.test.ts`
-- [ ] T010 [P] [US1] Add selected-target strike flow integration coverage in `tests/integration/battle/battleTargetSelectionFlow.test.ts`
-- [ ] T011 [P] [US1] Add browser target-selection and strike interaction coverage in `tests/acceptance/battle-target-selection.spec.ts`
+- [x] T009 [P] [US1] Add battle targeting-state contract coverage in `tests/contract/battle-targeting-state.contract.test.ts`
+- [x] T010 [P] [US1] Add selected-target strike flow integration coverage in `tests/integration/battle/battleTargetSelectionFlow.test.ts`
+- [x] T011 [P] [US1] Add browser target-selection and strike interaction coverage in `tests/acceptance/battle-target-selection.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Handle battle target selection and strike action input in `src/app/scene-controller/battleInputController.ts`
-- [ ] T013 [P] [US1] Render battle formation slots, legal targets, and selected target state in `src/render/canvas/renderBattleScene.ts`
-- [ ] T014 [P] [US1] Show active unit, selected target, and strike readiness in `src/ui/overlays/battleHud.ts`
-- [ ] T015 [US1] Resolve selected-target strike actions and queue advancement in `src/engine/battle/battleTurnEngine.ts`
-- [ ] T016 [US1] Wire target-selection state refresh into battle scene updates in `src/app/scene-controller/battleScene.ts`
+- [x] T012 [P] [US1] Handle battle target selection and strike action input in `src/app/scene-controller/battleInputController.ts`
+- [x] T013 [P] [US1] Render battle formation slots, legal targets, and selected target state in `src/render/canvas/renderBattleScene.ts`
+- [x] T014 [P] [US1] Show active unit, selected target, and strike readiness in `src/ui/overlays/battleHud.ts`
+- [x] T015 [US1] Resolve selected-target strike actions and queue advancement in `src/engine/battle/battleTurnEngine.ts`
+- [x] T016 [US1] Wire target-selection state refresh into battle scene updates in `src/app/scene-controller/battleScene.ts`
 
 **Checkpoint**: User Story 1 is independently playable as explicit target selection plus strike resolution
 
@@ -72,17 +72,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Add attack-category targeting contract coverage in `tests/contract/battle-attack-types.contract.test.ts`
-- [ ] T018 [P] [US2] Add melee, ranged, and area targeting integration coverage in `tests/integration/battle/battleAttackTypesFlow.test.ts`
-- [ ] T019 [P] [US2] Add browser coverage for attack-type targeting behavior in `tests/acceptance/battle-attack-types.spec.ts`
+- [x] T017 [P] [US2] Add attack-category targeting contract coverage in `tests/contract/battle-attack-types.contract.test.ts`
+- [x] T018 [P] [US2] Add melee, ranged, and area targeting integration coverage in `tests/integration/battle/battleAttackTypesFlow.test.ts`
+- [x] T019 [P] [US2] Add browser coverage for attack-type targeting behavior in `tests/acceptance/battle-attack-types.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Extend unit data with attack-category assignments in `src/engine/scenario/types.ts`
-- [ ] T021 [P] [US2] Implement melee column scanning, ranged selection, and area coverage logic in `src/engine/battle/battleTargeting.ts`
-- [ ] T022 [P] [US2] Apply attack-category damage resolution paths in `src/engine/battle/battleTurnEngine.ts`
-- [ ] T023 [US2] Show attack-category-specific targeting feedback in `src/ui/overlays/battleHud.ts`
-- [ ] T024 [US2] Update battle scene highlighting for legal targets by attack type in `src/render/canvas/renderBattleScene.ts`
+- [x] T020 [P] [US2] Extend unit data with attack-category assignments in `src/engine/scenario/types.ts`
+- [x] T021 [P] [US2] Implement melee column scanning, ranged selection, and area coverage logic in `src/engine/battle/battleTargeting.ts`
+- [x] T022 [P] [US2] Apply attack-category damage resolution paths in `src/engine/battle/battleTurnEngine.ts`
+- [x] T023 [US2] Show attack-category-specific targeting feedback in `src/ui/overlays/battleHud.ts`
+- [x] T024 [US2] Update battle scene highlighting for legal targets by attack type in `src/render/canvas/renderBattleScene.ts`
 
 **Checkpoint**: User Stories 1 and 2 together provide manual targeting with correct melee, ranged, and area rules
 
@@ -96,17 +96,17 @@
 
 ### Tests for User Story 3
 
-- [ ] T025 [P] [US3] Add defend-state contract coverage in `tests/contract/battle-defend-state.contract.test.ts`
-- [ ] T026 [P] [US3] Add defend mitigation and expiration integration coverage in `tests/integration/battle/battleDefendFlow.test.ts`
-- [ ] T027 [P] [US3] Add browser defend-action coverage in `tests/acceptance/battle-defend.spec.ts`
+- [x] T025 [P] [US3] Add defend-state contract coverage in `tests/contract/battle-defend-state.contract.test.ts`
+- [x] T026 [P] [US3] Add defend mitigation and expiration integration coverage in `tests/integration/battle/battleDefendFlow.test.ts`
+- [x] T027 [P] [US3] Add browser defend-action coverage in `tests/acceptance/battle-defend.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T028 [P] [US3] Add defend-state tracking and expiration handling in `src/engine/battle/battleTurnEngine.ts`
-- [ ] T029 [P] [US3] Add defend action input and turn-spend behavior in `src/app/scene-controller/battleInputController.ts`
-- [ ] T030 [P] [US3] Apply defend mitigation during incoming damage resolution in `src/engine/battle/battleTurnEngine.ts`
-- [ ] T031 [US3] Show defend availability and protected-unit status in `src/ui/overlays/battleHud.ts`
-- [ ] T032 [US3] Render defended-unit visual feedback in `src/render/canvas/renderBattleScene.ts`
+- [x] T028 [P] [US3] Add defend-state tracking and expiration handling in `src/engine/battle/battleTurnEngine.ts`
+- [x] T029 [P] [US3] Add defend action input and turn-spend behavior in `src/app/scene-controller/battleInputController.ts`
+- [x] T030 [P] [US3] Apply defend mitigation during incoming damage resolution in `src/engine/battle/battleTurnEngine.ts`
+- [x] T031 [US3] Show defend availability and protected-unit status in `src/ui/overlays/battleHud.ts`
+- [x] T032 [US3] Render defended-unit visual feedback in `src/render/canvas/renderBattleScene.ts`
 
 **Checkpoint**: All three user stories are independently testable, including defend mitigation and expiration
 
@@ -116,10 +116,10 @@
 
 **Purpose**: Finish shared presentation, verification, and artifact consistency for the combat slice
 
-- [ ] T033 [P] Add battle-formation palette and slot markers in `src/render/sprites/placeholders.ts`
-- [ ] T034 [P] Update battle UX wording and tactical feedback details in `specs/007-combat-grid/contracts/battle-formation-ux.md`
-- [ ] T035 Run combat-focused verification commands documented in `specs/007-combat-grid/quickstart.md`
-- [ ] T036 Verify `spec.md`, `data-model.md`, `contracts/`, and `tasks.md` remain aligned in `specs/007-combat-grid/tasks.md`
+- [x] T033 [P] Add battle-formation palette and slot markers in `src/render/sprites/placeholders.ts`
+- [x] T034 [P] Update battle UX wording and tactical feedback details in `specs/007-combat-grid/contracts/battle-formation-ux.md`
+- [x] T035 Run combat-focused verification commands documented in `specs/007-combat-grid/quickstart.md`
+- [x] T036 Verify `spec.md`, `data-model.md`, `contracts/`, and `tasks.md` remain aligned in `specs/007-combat-grid/tasks.md`
 
 ---
 

@@ -1,3 +1,5 @@
+import { createBattleFormation } from "./battleFormation";
+import { createBattleTargetingState } from "./battleTargeting";
 import type { Battle, BattleParticipant, GameState, ScenarioUnit } from "../scenario/types";
 
 function createParticipant(unit: ScenarioUnit, side: "attacker" | "defender"): BattleParticipant {
@@ -36,14 +38,23 @@ export function createBattle(state: GameState, heroId: string, guardForceId: str
     unit.actionState = "ready";
   }
 
-  return {
+  const battle: Battle = {
     id: `battle-${guardForceId}`,
     attackingHeroId: heroId,
     defendingForceId: guardForceId,
     participants,
+    formation: createBattleFormation(
+      attackerUnits.map((unit) => unit.id),
+      defenderUnits.map((unit) => unit.id)
+    ),
     turnQueue: participants.map((participant) => participant.unitId),
     activeUnitId: participants[0]?.unitId ?? "",
+    targetingState: null,
+    defendStates: [],
     battleState: "active",
     outcome: null
   };
+
+  battle.targetingState = createBattleTargetingState(state, battle, battle.activeUnitId);
+  return battle;
 }
