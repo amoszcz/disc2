@@ -1,4 +1,4 @@
-import type { ScenarioDefinition } from "./types";
+import type { ScenarioDefinition, ScenarioOption } from "./types";
 import { cloneScenario } from "./types";
 import { coreMapLoopScenario } from "../../content/scenarios/core-map-loop";
 import { advancedTerrainScenario } from "../../content/scenarios/advanced-terrain-scenario";
@@ -13,6 +13,19 @@ const SCENARIOS: Record<ScenarioId, ScenarioDefinition> = {
   "core-map-loop": coreMapLoopScenario,
   "advanced-terrain-scenario": advancedTerrainScenario
 };
+
+const SCENARIO_OPTIONS: ScenarioOption[] = [
+  {
+    id: "core-map-loop",
+    label: coreMapLoopScenario.name,
+    description: coreMapLoopScenario.description
+  },
+  {
+    id: "advanced-terrain-scenario",
+    label: advancedTerrainScenario.name,
+    description: advancedTerrainScenario.description
+  }
+];
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -112,4 +125,16 @@ export function loadScenario(scenarioId: ScenarioId = "core-map-loop"): Scenario
   const scenario = cloneScenario(source);
   validateScenario(scenario);
   return scenario;
+}
+
+export function getScenarioOptions(): ScenarioOption[] {
+  return cloneScenario(SCENARIO_OPTIONS);
+}
+
+export function getDefaultScenarioId(): ScenarioId {
+  return "core-map-loop";
+}
+
+export function isScenarioId(value: string | null): value is ScenarioId {
+  return value === "core-map-loop" || value === "advanced-terrain-scenario";
 }

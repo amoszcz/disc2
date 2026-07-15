@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("player selects a legal battle target before striking", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?scenario=core-map-loop");
   const canvas = page.getByLabel("game canvas");
 
   await canvas.click({ position: { x: 48, y: 240 } });
