@@ -4,13 +4,15 @@ import type {
   MapViewport,
   PanGestureState,
   Position,
-  ScreenPoint
+  ScreenPoint,
+  ZoomGestureState
 } from "../scenario/types";
 
 const SMALL_MAP_THRESHOLD = 8;
 const DEFAULT_TILE_SIZE = 96;
 const MIN_BASE_TILE_SIZE = 10;
 const LARGE_MAP_DEFAULT_ZOOM = 2;
+const TOUCH_ZOOM_DISTANCE_THRESHOLD = 12;
 
 export function getBaseTileSize(map: MapDefinition, canvasWidth = 896, canvasHeight = 640): number {
   if (map.width <= SMALL_MAP_THRESHOLD && map.height <= SMALL_MAP_THRESHOLD) {
@@ -39,6 +41,21 @@ export function createPanGesture(origin: ScreenPoint, viewport: MapViewport): Pa
     originScreenY: origin.y,
     startingPanOffsetX: viewport.panOffsetX,
     startingPanOffsetY: viewport.panOffsetY,
+    isActive: true
+  };
+}
+
+export function createZoomGesture(
+  firstPointerId: number,
+  secondPointerId: number,
+  firstPoint: ScreenPoint,
+  secondPoint: ScreenPoint
+): ZoomGestureState {
+  return {
+    pointerIds: [firstPointerId, secondPointerId],
+    anchorScreenPoint: getMidpoint(firstPoint, secondPoint),
+    initialDistance: getDistance(firstPoint, secondPoint),
+    lastDistance: getDistance(firstPoint, secondPoint),
     isActive: true
   };
 }
@@ -135,6 +152,44 @@ export function zoomViewportAtPoint(
   );
 }
 
+export function zoomViewportWithTouchGesture(
+  viewport: MapViewport,
+  gesture: ZoomGestureState,
+  firstPoint: ScreenPoint,
+  secondPoint: ScreenPoint,
+  map: MapDefinition,
+  canvasWidth = 896,
+  canvasHeight = 640
+): { viewport: MapViewport; zoomGesture: ZoomGestureState; interactionType: "zoom-in" | "zoom-out" | null } {
+  const anchor = getMidpoint(firstPoint, secondPoint);
+  const distance = getDistance(firstPoint, secondPoint);
+  const nextGesture: ZoomGestureState = {
+    ...gesture,
+    anchorScreenPoint: anchor,
+    lastDistance: distance
+  };
+  const distanceDelta = distance - gesture.lastDistance;
+  if (Math.abs(distanceDelta) < TOUCH_ZOOM_DISTANCE_THRESHOLD) {
+    return { viewport, zoomGesture: nextGesture, interactionType: null };
+  }
+
+  const interactionType = distanceDelta > 0 ? "zoom-in" : "zoom-out";
+  const nextViewport = zoomViewportAtPoint(
+    viewport,
+    interactionType === "zoom-in" ? -100 : 100,
+    anchor,
+    map,
+    canvasWidth,
+    canvasHeight
+  );
+
+  return {
+    viewport: nextViewport,
+    zoomGesture: nextGesture,
+    interactionType: nextViewport.zoomLevel === viewport.zoomLevel ? null : interactionType
+  };
+}
+
 export function screenPointToWorldPoint(
   point: ScreenPoint,
   viewport: MapViewport,
@@ -195,4 +250,15 @@ export function createInteractionTarget(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function getDistance(firstPoint: ScreenPoint, secondPoint: ScreenPoint): number {
+  return Math.hypot(secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y);
+}
+
+function getMidpoint(firstPoint: ScreenPoint, secondPoint: ScreenPoint): ScreenPoint {
+  return {
+    x: (firstPoint.x + secondPoint.x) / 2,
+    y: (firstPoint.y + secondPoint.y) / 2
+  };
 }

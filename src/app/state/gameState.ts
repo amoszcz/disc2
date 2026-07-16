@@ -12,6 +12,7 @@ export function createDefaultMapViewState(scenario: ScenarioDefinition): MapView
       getDefaultResponsiveCanvasView().pixelHeight
     ),
     panGesture: null,
+    zoomGesture: null,
     lastSceneMode: "map",
     isDefaultView: true
   };

@@ -64,9 +64,9 @@
 
 ## Phase 4: User Story 2 - Play Core Turns With Touch Controls (Priority: P1)
 
-**Goal**: Let mobile players complete map and battle actions through touch-capable controls only
+**Goal**: Let mobile players complete map and battle actions through touch-capable controls only, including two-finger map zoom
 
-**Independent Test**: Play through a scenario on a mobile-sized browser viewport using touch-capable interactions only, verifying hero selection, route planning, turn completion, and battle actions all work without hover, mouse wheel, or middle mouse input
+**Independent Test**: Play through a scenario on a mobile-sized browser viewport using touch-capable interactions only, verifying hero selection, route planning, two-finger map zoom, turn completion, and battle actions all work without hover, mouse wheel, or middle mouse input
 
 ### Tests for User Story 2
 
@@ -74,6 +74,9 @@
 - [X] T016 [P] [US2] Add touch map interaction integration coverage in `tests/integration/mobile/mobileMapTouchFlow.test.ts`
 - [X] T017 [P] [US2] Add touch battle interaction integration coverage in `tests/integration/mobile/mobileBattleTouchFlow.test.ts`
 - [X] T018 [P] [US2] Add browser coverage for touch-only gameplay flow in `tests/acceptance/mobile-gameplay-flow.spec.ts`
+- [X] T036 [P] [US2] Add contract coverage for two-finger in-canvas zoom behavior in `tests/contract/touch-session-controls.contract.test.ts`
+- [X] T037 [P] [US2] Add integration coverage for two-finger map zoom state changes in `tests/integration/mobile/mobileMapTouchFlow.test.ts`
+- [X] T038 [P] [US2] Add browser coverage for two-finger zoom without page zoom in `tests/acceptance/mobile-gameplay-flow.spec.ts`
 
 ### Implementation for User Story 2
 
@@ -82,8 +85,12 @@
 - [X] T021 [P] [US2] Update map HUD and action messaging for mobile controls in `src/ui/hud/mapHud.ts`
 - [X] T022 [P] [US2] Update battle action layout and targeting guidance for mobile controls in `src/ui/overlays/battleHud.ts`
 - [X] T023 [US2] Keep end-turn action reachable in mobile gameplay layouts in `src/ui/panels/endTurnPanel.ts`
+- [X] T039 [US2] Add two-finger map zoom gesture handling to the mobile input pipeline in `src/app/scene-controller/mapInputController.ts`
+- [X] T040 [P] [US2] Extend mobile touch interaction state to track active zoom gestures in `src/engine/scenario/types.ts`
+- [X] T041 [P] [US2] Preserve viewport zoom bounds and anchor behavior during touch gestures in `src/engine/map/viewportMath.ts`
+- [X] T042 [US2] Update mobile map guidance to describe two-finger zoom availability in `src/ui/hud/mapHud.ts`
 
-**Checkpoint**: User Story 2 is independently playable as a touch-capable mobile gameplay loop
+**Checkpoint**: User Story 2 is independently playable as a touch-capable mobile gameplay loop with direct two-finger zoom
 
 ---
 
@@ -151,6 +158,7 @@
 - `T004`, `T005`, and `T006` can run in parallel after `T003`
 - Test tasks within each story marked `[P]` can run in parallel
 - UI and controller tasks marked `[P]` can run in parallel once the shared seams exist
+- `T036`, `T037`, and `T038` can run in parallel before the new zoom implementation tasks close US2
 
 ---
 
@@ -175,11 +183,18 @@ T015 Add touch session controls contract coverage in tests/contract/touch-sessio
 T016 Add touch map interaction integration coverage in tests/integration/mobile/mobileMapTouchFlow.test.ts
 T017 Add touch battle interaction integration coverage in tests/integration/mobile/mobileBattleTouchFlow.test.ts
 T018 Add browser coverage for touch-only gameplay flow in tests/acceptance/mobile-gameplay-flow.spec.ts
+T036 Add contract coverage for two-finger in-canvas zoom behavior in tests/contract/touch-session-controls.contract.test.ts
+T037 Add integration coverage for two-finger map zoom state changes in tests/integration/mobile/mobileMapTouchFlow.test.ts
+T038 Add browser coverage for two-finger zoom without page zoom in tests/acceptance/mobile-gameplay-flow.spec.ts
 
 T019 Replace mouse-only map input handling with touch-capable interactions in src/app/scene-controller/mapInputController.ts
 T020 Replace mouse-only battle canvas targeting with touch-capable interactions in src/app/scene-controller/battleInputController.ts
 T021 Update map HUD and action messaging for mobile controls in src/ui/hud/mapHud.ts
 T022 Update battle action layout and targeting guidance for mobile controls in src/ui/overlays/battleHud.ts
+T039 Add two-finger map zoom gesture handling to the mobile input pipeline in src/app/scene-controller/mapInputController.ts
+T040 Extend mobile touch interaction state to track active zoom gestures in src/engine/scenario/types.ts
+T041 Preserve viewport zoom bounds and anchor behavior during touch gestures in src/engine/map/viewportMath.ts
+T042 Update mobile map guidance to describe two-finger zoom availability in src/ui/hud/mapHud.ts
 ```
 
 ---

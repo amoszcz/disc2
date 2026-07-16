@@ -106,6 +106,90 @@ export async function dragCanvas(page: Page, from: { x: number; y: number }, to:
   );
 }
 
+export async function pinchCanvas(
+  page: Page,
+  firstFrom: { x: number; y: number },
+  firstTo: { x: number; y: number },
+  secondFrom: { x: number; y: number },
+  secondTo: { x: number; y: number }
+): Promise<void> {
+  await page.evaluate(
+    ({ firstStart, firstEnd, secondStart, secondEnd }) => {
+      const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
+      if (!canvas) {
+        throw new Error("Canvas was not available.");
+      }
+
+      canvas.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          pointerId: 11,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: firstStart.x,
+          clientY: firstStart.y
+        })
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          pointerId: 12,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: secondStart.x,
+          clientY: secondStart.y
+        })
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointermove", {
+          pointerId: 11,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: firstEnd.x,
+          clientY: firstEnd.y
+        })
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointermove", {
+          pointerId: 12,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: secondEnd.x,
+          clientY: secondEnd.y
+        })
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointerup", {
+          pointerId: 11,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: firstEnd.x,
+          clientY: firstEnd.y
+        })
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointerup", {
+          pointerId: 12,
+          pointerType: "touch",
+          bubbles: true,
+          cancelable: true,
+          clientX: secondEnd.x,
+          clientY: secondEnd.y
+        })
+      );
+    },
+    {
+      firstStart: firstFrom,
+      firstEnd: firstTo,
+      secondStart: secondFrom,
+      secondEnd: secondTo
+    }
+  );
+}
+
 export async function getViewportState(page: Page): Promise<{ x: number; y: number; zoom: number }> {
   return page.evaluate(() => {
     const store = (window as Window & { __gameStore?: { getState: () => any } }).__gameStore;

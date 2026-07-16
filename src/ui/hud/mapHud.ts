@@ -8,7 +8,7 @@ export function renderMapHud(state: GameState): string {
   const routePreview = state.activeRoutePreview;
   const isMobile = state.mobileLayoutState.layoutMode === "mobile";
   const controlsMessage = isMobile
-    ? "Tap to select or confirm. Drag the map to pan. Use zoom buttons if the view is tight."
+    ? "Tap to select or confirm. Drag with one finger to pan. Use two fingers or the zoom buttons to zoom."
     : "Click to select or confirm. Use the mouse wheel to zoom and middle mouse drag to pan.";
 
   return `

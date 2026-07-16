@@ -159,9 +159,18 @@ export interface PanGestureState {
   hasMoved?: boolean;
 }
 
+export interface ZoomGestureState {
+  pointerIds: [number, number];
+  anchorScreenPoint: ScreenPoint;
+  initialDistance: number;
+  lastDistance: number;
+  isActive: boolean;
+}
+
 export interface MapViewState {
   viewport: MapViewport;
   panGesture: PanGestureState | null;
+  zoomGesture: ZoomGestureState | null;
   lastSceneMode: SceneMode;
   isDefaultView: boolean;
 }

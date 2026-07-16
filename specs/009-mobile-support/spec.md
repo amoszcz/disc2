@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "add mobile support for the game. it should be possible to play it in mobile browser"
+**Input**: User description: "add mobile support for the game. it should be possible to play it in mobile browser" and follow-up update: "in mobile, allow two-finger gestures to zoom in and out"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -38,7 +38,8 @@ As a mobile player, I can perform the existing core gameplay actions through tou
 
 1. **Given** a scenario is active on mobile, **When** the player selects units, tiles, or action controls, **Then** the game accepts those inputs without relying on hover, right-click, or keyboard shortcuts.
 2. **Given** a scenario is active on mobile, **When** the player performs the inputs needed to inspect and navigate the map view, **Then** the map remains navigable within the mobile viewport.
-3. **Given** a battle scene is active on mobile, **When** the player chooses battle actions and targets, **Then** the full battle flow can be completed using touch-capable controls.
+3. **Given** a scenario is active on mobile, **When** the player uses a two-finger zoom gesture on the map, **Then** the view zooms in or out predictably without triggering unintended page zoom or breaking the active session.
+4. **Given** a battle scene is active on mobile, **When** the player chooses battle actions and targets, **Then** the full battle flow can be completed using touch-capable controls.
 
 ---
 
@@ -63,6 +64,7 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - What happens when a finger tap lands near a small control or map target? Required controls should remain operable without precision comparable to a mouse cursor.
 - What happens when the player uses the game on a narrow phone viewport rather than a tablet-sized screen? The core menu, map, battle, and end-of-scenario actions should still be reachable.
 - What happens when the browser applies default touch behaviors such as page zooming or scrolling? Core gameplay interactions should not be blocked by unintended browser gestures.
+- What happens when the player begins a two-finger zoom gesture near the edge of the play surface or changes finger spacing quickly? The map zoom should remain bounded, stable, and should not cause runaway browser or canvas scaling.
 
 ## Requirements *(mandatory)*
 
@@ -74,6 +76,7 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - **FR-004**: The system MUST preserve the existing scenario-selection and scenario-start flow when accessed from mobile.
 - **FR-005**: The system MUST provide touch-capable interactions for the existing core gameplay actions required to complete a scenario.
 - **FR-006**: The system MUST allow players on mobile to select units, select map destinations, and confirm turn-progressing actions through touch-capable controls.
+- **FR-006a**: The system MUST allow players on mobile to zoom the map in and out through a two-finger gesture on the main play surface during active scenario play.
 - **FR-007**: The system MUST allow players on mobile to access and complete battle actions, including choosing actions and targets, through touch-capable controls.
 - **FR-008**: The system MUST keep required gameplay controls visible or reachable within a mobile-friendly layout during active play.
 - **FR-009**: The system MUST avoid relying on hover-only affordances for any action required to start, play, complete, or exit a scenario on mobile.
@@ -82,12 +85,14 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - **FR-012**: The system MUST keep the end-of-scenario state and return-to-menu action usable on mobile.
 - **FR-013**: The system MUST allow a player to return to the main menu after scenario completion on mobile and start another fresh scenario run.
 - **FR-014**: The system MUST prevent unintended page scrolling, browser zooming, or other default browser touch behaviors from blocking required in-game interactions.
+- **FR-014a**: The system MUST ensure that the in-game two-finger zoom gesture affects the map view rather than the browser page zoom while the gesture is performed on the main play surface.
 - **FR-015**: The system MUST maintain text, controls, and action labels at a readable size for supported mobile play.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Mobile Session**: A gameplay session accessed through a mobile web browser, including menu navigation, active scenario play, and completion return flow.
 - **Touch Interaction**: A direct player input on a touch-screen device used to activate controls, select map targets, navigate the viewport, or progress battle and menu actions.
+- **Mobile Zoom Gesture**: A two-finger interaction on the main play surface that changes map zoom level during active mobile play.
 - **Mobile Layout State**: The visible arrangement of the main play surface and supporting controls for a given mobile viewport size or orientation.
 - **Viewport Change Event**: A change in available screen space during mobile play, such as device rotation or browser chrome expansion/collapse, that requires the interface to remain usable.
 
@@ -97,6 +102,7 @@ As a mobile player, I can continue playing when my device viewport changes so th
 
 - **SC-001**: In mobile-browser acceptance testing, 100% of fresh launches reach a readable main menu and can start a scenario without mouse or keyboard input.
 - **SC-002**: In mobile gameplay acceptance testing, 100% of required core actions for at least one full scenario completion can be performed using touch-capable controls only.
+- **SC-002a**: In mobile map-navigation acceptance testing, 100% of tested two-finger zoom-in and zoom-out gestures change the map view as intended without invoking browser page zoom.
 - **SC-003**: In mobile layout testing across supported narrow and rotated viewports, 100% of required menu, gameplay, battle, and completion actions remain reachable without horizontal page scrolling.
 - **SC-004**: In viewport-change testing, 100% of tested orientation and mobile viewport size changes preserve the active session without forcing a reload.
 - **SC-005**: In usability testing, at least 90% of players can start a scenario, take a turn, complete a battle interaction, and return to the menu on mobile without external instructions.

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { dragCanvas, getTileClientPoint, getViewportState, tapElement, touchCanvasPoint } from "./mobileTestUtils";
+import { dragCanvas, getTileClientPoint, getViewportState, pinchCanvas, tapElement, touchCanvasPoint } from "./mobileTestUtils";
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
@@ -25,6 +25,20 @@ test("player can use touch-capable controls for map navigation and battle action
   );
   const afterPan = await getViewportState(page);
   expect(afterPan.x >= beforePan.x || afterPan.y >= beforePan.y).toBeTruthy();
+
+  const beforeZoom = await getViewportState(page);
+  const pageScaleBefore = await page.evaluate(() => window.visualViewport?.scale ?? 1);
+  await pinchCanvas(
+    page,
+    { x: heroPoint.x - 30, y: heroPoint.y },
+    { x: heroPoint.x - 70, y: heroPoint.y },
+    { x: heroPoint.x + 30, y: heroPoint.y },
+    { x: heroPoint.x + 70, y: heroPoint.y }
+  );
+  const afterZoom = await getViewportState(page);
+  const pageScaleAfter = await page.evaluate(() => window.visualViewport?.scale ?? 1);
+  expect(afterZoom.zoom).toBeGreaterThan(beforeZoom.zoom);
+  expect(pageScaleAfter).toBe(pageScaleBefore);
 
   await tapElement(page.getByTestId("end-turn-button"));
   await expect(page.getByTestId("route-preview-status")).toContainText(/continuation|partial/);

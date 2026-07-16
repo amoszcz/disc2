@@ -23,7 +23,7 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
       : "Panning map view..."
     : state.mapViewState.isDefaultView
       ? isMobile
-        ? "Tap heroes or tiles. Drag the map to pan. Use the zoom buttons when needed."
+        ? "Tap heroes or tiles. Drag with one finger to pan. Use two fingers or the zoom buttons when needed."
         : "Use mouse wheel to zoom and middle mouse button to pan."
       : `Map view preserved at ${state.mapViewState.viewport.zoomLevel.toFixed(2)}x.`;
   container.innerHTML = `
