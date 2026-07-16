@@ -22,6 +22,20 @@ interface TemplateBounds {
   height: number;
 }
 
+function getContainedBounds(
+  bounds: TemplateBounds,
+  sourceWidth: number,
+  sourceHeight: number,
+  verticalAlign: "center" | "bottom" = "center"
+): TemplateBounds {
+  const scale = Math.min(bounds.width / sourceWidth, bounds.height / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  const x = bounds.x + (bounds.width - width) / 2;
+  const y = verticalAlign === "bottom" ? bounds.y + bounds.height - height : bounds.y + (bounds.height - height) / 2;
+  return { x, y, width, height };
+}
+
 interface RenderDiagnosticEntry {
   subjectKind: VisualSubjectDescriptor["subjectKind"];
   subjectType: string;
@@ -49,6 +63,7 @@ function getFallbackTemplate(
     resolvedFrom: `${subjectKind}:fallback`,
     assetKind: "fallback",
     assetSource: null,
+    spriteFrame: null,
     fallbackStyle: fallback.fallbackStyle,
     readabilityLabel: fallback.readabilityLabel,
     intendedContexts: fallback.intendedContexts.includes(sceneContext) ? fallback.intendedContexts : [sceneContext],
@@ -71,6 +86,7 @@ function toResolvedTemplate(
       resolvedFrom: `${subject.subjectKind}:${subject.subjectType}`,
       assetKind: template.assetKind,
       assetSource: template.assetSource,
+      spriteFrame: template.spriteFrame ?? null,
       fallbackStyle: template.fallbackStyle,
       readabilityLabel: template.readabilityLabel,
       intendedContexts: template.intendedContexts,
@@ -304,7 +320,30 @@ export function drawResolvedVisualTemplate(
   const image = resolvedTemplate.assetKind === "dedicated" ? getTemplateImage(resolvedTemplate.assetSource) : null;
 
   if (image) {
-    context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
+    if (resolvedTemplate.spriteFrame) {
+      const destinationBounds =
+        resolvedTemplate.fallbackStyle.shape === "tile"
+          ? bounds
+          : getContainedBounds(
+              bounds,
+              resolvedTemplate.spriteFrame.sourceWidth,
+              resolvedTemplate.spriteFrame.sourceHeight,
+              "bottom"
+            );
+      context.drawImage(
+        image,
+        resolvedTemplate.spriteFrame.sourceX,
+        resolvedTemplate.spriteFrame.sourceY,
+        resolvedTemplate.spriteFrame.sourceWidth,
+        resolvedTemplate.spriteFrame.sourceHeight,
+        destinationBounds.x,
+        destinationBounds.y,
+        destinationBounds.width,
+        destinationBounds.height
+      );
+    } else {
+      context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
+    }
     return;
   }
 

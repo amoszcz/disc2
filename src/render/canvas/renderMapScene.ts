@@ -52,10 +52,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
           primaryTemplate
         );
         drawResolvedVisualTemplate(context, primaryTemplate, {
-          x: point.x + Math.max(2, Math.floor(tileSize / 8)),
-          y: point.y + Math.max(2, Math.floor(tileSize / 8)),
-          width: tileSize - Math.max(4, Math.floor(tileSize / 4)),
-          height: Math.max(8, Math.floor(tileSize / 3))
+          x: point.x + tileSize * 0.08,
+          y: point.y + tileSize * 0.16,
+          width: tileSize * 0.84,
+          height: tileSize * 0.68
         });
 
         if (movementObjects.effects.length > 1) {
@@ -65,10 +65,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
             secondaryTemplate
           );
           drawResolvedVisualTemplate(context, secondaryTemplate, {
-            x: point.x + tileSize - Math.max(12, Math.floor(tileSize / 3)),
-            y: point.y + tileSize - Math.max(12, Math.floor(tileSize / 3)),
-            width: Math.max(8, Math.floor(tileSize / 4)),
-            height: Math.max(8, Math.floor(tileSize / 4))
+            x: point.x + tileSize * 0.58,
+            y: point.y + tileSize * 0.52,
+            width: tileSize * 0.28,
+            height: tileSize * 0.28
           });
         }
       }
@@ -148,10 +148,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     const heroTemplate = resolveHeroVisualTemplate(hero);
     recordVisualTemplateDiagnostic({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, heroTemplate);
     drawResolvedVisualTemplate(context, heroTemplate, {
-      x: point.x + tileSize * 0.1,
-      y: point.y + tileSize * 0.1,
-      width: tileSize * 0.8,
-      height: tileSize * 0.8
+      x: point.x + tileSize * 0.08,
+      y: point.y + tileSize * 0.06,
+      width: tileSize * 0.84,
+      height: tileSize * 0.84
     });
 
     if (state.selectedHeroId === hero.id) {

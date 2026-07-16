@@ -59,6 +59,9 @@
 - [x] T014 [US1] Integrate resolver-driven hero, pickup-adjacent object, and movement-object visuals into `src/render/canvas/renderMapScene.ts`
 - [x] T015 [US1] Integrate resolver-driven guarded-location visuals into `src/render/canvas/renderGuardedLocations.ts`
 - [x] T016 [US1] Add shared image loading and render helper support for unit and object templates in `src/render/sprites/visualTemplateResolver.ts`
+- [x] T016a [US1] Extend catalog mappings to support shared sprite-sheet regions with explicit crop coordinates in `src/render/sprites/visualTemplateCatalog.ts`
+- [x] T016b [US1] Update render helper support to draw sprite-sheet entries with crop-aware placement in `src/render/sprites/visualTemplateResolver.ts`
+- [x] T016c [US1] Refine map-scene placement for hero and movement-object sprite-sheet visuals in `src/render/canvas/renderMapScene.ts`
 
 **Checkpoint**: User Story 1 is independently functional with dedicated visuals for current units and map objects plus battle/map readability preserved
 
@@ -83,6 +86,7 @@
 - [x] T022 [US2] Integrate resolver-driven terrain tile rendering into `src/render/canvas/renderMapScene.ts`
 - [x] T023 [US2] Adjust viewport-aware tile drawing support for dedicated tile templates in `src/render/canvas/viewportRender.ts`
 - [x] T024 [US2] Update shared visual-template resolver support for terrain-specific map rendering in `src/render/sprites/visualTemplateResolver.ts`
+- [x] T024a [US2] Replace approximate terrain sprite-sheet crop bounds with measured tile coordinates in `src/render/sprites/visualTemplateCatalog.ts`
 
 **Checkpoint**: User Stories 1 and 2 together deliver dedicated visuals for current units, objects, and terrain with readable map and battle scenes
 
@@ -214,3 +218,4 @@ T029 Preserve and normalize category-level fallback metadata in src/render/sprit
 - `[P]` tasks target different files or independent seams and are good parallel candidates
 - `[US1]`, `[US2]`, and `[US3]` preserve traceability back to the spec’s user stories
 - The first slice intentionally stays within current scenarios and supported content types instead of building a future-proof art pipeline
+- The implemented slice now supports a mixed asset strategy: standalone dedicated assets, shared sprite-sheet regions, and category-level fallback placeholders

@@ -76,10 +76,12 @@ As a developer or tester, I can keep using simple placeholder visuals while impr
 - **FR-006**: The system MUST keep supported unit types visually distinguishable from other unit types during normal play.
 - **FR-007**: The system MUST keep supported map object types visually distinguishable from surrounding terrain during normal play.
 - **FR-008**: The system MUST keep supported terrain tile types visually distinguishable from one another during normal play.
-- **FR-009**: The system MUST allow dedicated visual templates to be stored as standalone reusable image assets for units, objects, and tiles.
+- **FR-009**: The system MUST allow dedicated visual templates to be stored either as standalone reusable image assets or as mapped regions within a shared sprite sheet for units, objects, and tiles.
 - **FR-010**: The system MUST support the project's initial dedicated visual templates being simple, slightly more advanced evolutions of the current placeholder style rather than requiring final polished artwork immediately.
 - **FR-011**: The system MUST render scenes successfully even when the available visual set mixes dedicated templates and fallback placeholders.
 - **FR-012**: The system MUST keep battle scenes, map scenes, and terrain-heavy scenarios readable when dedicated visual templates are introduced.
+- **FR-013**: The system MUST support explicit mapping metadata for dedicated assets when the render source is a shared sprite sheet, including crop coordinates required to select the correct visual region.
+- **FR-014**: The system MUST preserve fallback rendering for supported subjects whose shared-sheet entry is missing, incomplete, or intentionally left on standalone assets during incremental rollout.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -88,6 +90,7 @@ As a developer or tester, I can keep using simple placeholder visuals while impr
 - **Tile Visual Template**: The dedicated reusable visual definition for a terrain tile type such as road, plains, grass, mud, woods, mountains, lakes, or rivers.
 - **Fallback Visual Template**: A simplified placeholder presentation used when a dedicated template is not yet available or not currently being used for testing.
 - **Visual Template Mapping**: The content mapping that determines which dedicated or fallback template is used for each supported unit, object, or tile type.
+- **Sprite Sheet Mapping Metadata**: The crop-coordinate definition that maps a supported unit, object, hero, guarded location, or terrain tile to an exact region inside a shared image sheet.
 
 ## Success Criteria *(mandatory)*
 
@@ -105,7 +108,7 @@ As a developer or tester, I can keep using simple placeholder visuals while impr
 - The first slice only needs slightly more advanced dedicated templates than the current placeholders and does not require final production-grade art.
 - The current placeholder visuals remain acceptable as temporary fallback content for testing and incomplete asset coverage.
 - The initial dedicated visual set is intended for the currently supported units, map object types, and terrain tile types already present in the repository.
-- Reusable image asset files may be provided in project-supported formats such as SVG or PNG as long as they serve the dedicated-template and fallback goals of this feature.
+- Reusable image asset files may be provided in project-supported formats such as SVG or PNG, whether as standalone files or as entries inside a shared sprite sheet, as long as they serve the dedicated-template and fallback goals of this feature.
 
 ## Out of Scope
 

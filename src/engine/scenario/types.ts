@@ -40,11 +40,19 @@ export interface VisualFallbackStyle {
   shape: VisualFallbackShape;
 }
 
+export interface VisualSpriteFrame {
+  sourceX: number;
+  sourceY: number;
+  sourceWidth: number;
+  sourceHeight: number;
+}
+
 export interface VisualTemplateDefinition {
   templateId: string;
   visualCategory: VisualCategory;
   assetKind: VisualAssetKind;
   assetSource: string | null;
+  spriteFrame?: VisualSpriteFrame | null;
   fallbackStyle: VisualFallbackStyle;
   readabilityLabel: string;
   intendedContexts: VisualSceneContext[];
@@ -55,6 +63,7 @@ export interface VisualTemplateResolverResult {
   resolvedFrom: string;
   assetKind: VisualAssetKind;
   assetSource: string | null;
+  spriteFrame?: VisualSpriteFrame | null;
   fallbackStyle: VisualFallbackStyle;
   readabilityLabel: string;
   intendedContexts: VisualSceneContext[];

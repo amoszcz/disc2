@@ -6,7 +6,7 @@
 
 ## Summary
 
-Replace the current placeholder-only battlefield, map-object, hero, and terrain rendering with a small asset-template system that can choose dedicated visuals per unit, map object, and tile type while preserving the existing placeholder path as a safe fallback. The feature should keep the current Canvas 2D rendering flow, add reusable asset mappings for the currently supported scenario content, and keep rendering and tests stable even when only part of the dedicated visual set is present.
+Replace the current placeholder-only battlefield, map-object, hero, and terrain rendering with a small asset-template system that can choose dedicated visuals per unit, map object, and tile type while preserving the existing placeholder path as a safe fallback. The feature should keep the current Canvas 2D rendering flow, add reusable asset mappings for the currently supported scenario content, support both standalone assets and shared sprite-sheet regions, and keep rendering and tests stable even when only part of the dedicated visual set is present.
 
 ## Technical Context
 
@@ -14,7 +14,7 @@ Replace the current placeholder-only battlefield, map-object, hero, and terrain 
 
 **Primary Dependencies**: Existing Vite browser app, browser-native Canvas 2D rendering, existing scenario/type definitions
 
-**Storage**: Repository file assets plus in-memory runtime mappings
+**Storage**: Repository image assets plus in-memory runtime mappings, including optional sprite-sheet crop metadata
 
 **Testing**: Vitest contract and integration suites, Playwright acceptance coverage, and lightweight rendering-state verification through public render seams
 
@@ -45,8 +45,8 @@ Replace the current placeholder-only battlefield, map-object, hero, and terrain 
 - Independent slices: Still passes. Units/objects, terrain tiles, and fallback behavior remain separable stories that can be validated independently once the shared mapping seam exists.
 - Feature-proving tests: Still passes. The design exposes public seams for template selection, fallback resolution, and map/battle rendering behavior that can be exercised through contract, integration, and acceptance coverage.
 - Minimal dependencies, real integrations: Still passes. Existing browser asset loading and Canvas 2D rendering remain sufficient, and the design avoids introducing rendering middleware or third-party sprite systems.
-- Small, loosely coupled design: Still passes. The feature can be implemented through a narrow asset-template registry plus scene-level render helpers instead of spreading visual-selection logic across unrelated gameplay modules.
-- Artifact consistency: Still passes. The plan, research, data model, contracts, and quickstart all describe the same dedicated-template plus fallback-rendering slice.
+- Small, loosely coupled design: Still passes. The feature can be implemented through a narrow asset-template registry plus scene-level render helpers, with optional sprite-frame metadata, instead of spreading visual-selection logic across unrelated gameplay modules.
+- Artifact consistency: Still passes. The plan, research, data model, contracts, and quickstart all describe the same dedicated-template plus fallback-rendering slice, including shared-sheet mappings where useful.
 
 ## Project Structure
 
@@ -92,7 +92,7 @@ tests/
 └── integration/
 ```
 
-**Structure Decision**: Keep the existing single frontend application and extend the current renderer with a small visual-template catalog plus resolver under `src/render/sprites/`. Map and battle scenes should ask the resolver for dedicated or fallback visuals rather than hardcoding colors and glyphs inline. This keeps gameplay state untouched while isolating asset selection in one rendering-focused seam.
+**Structure Decision**: Keep the existing single frontend application and extend the current renderer with a small visual-template catalog plus resolver under `src/render/sprites/`. Map and battle scenes should ask the resolver for dedicated or fallback visuals rather than hardcoding colors and glyphs inline. The catalog should support both one-file-per-asset entries and shared-sheet entries with explicit crop bounds. This keeps gameplay state untouched while isolating asset selection in one rendering-focused seam.
 
 ## Complexity Tracking
 
