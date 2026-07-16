@@ -14,6 +14,7 @@
     "test:viewport": "vitest run tests/contract/map-navigation-input.contract.test.ts tests/contract/viewport-behavior.contract.test.ts tests/contract/viewport-interaction.contract.test.ts tests/integration/foundation/mapViewportStateFlow.test.ts tests/integration/map/mapPanFlow.test.ts tests/integration/map/mapZoomFlow.test.ts tests/integration/map/viewportInteractionFlow.test.ts",
     "test:combat": "vitest run tests/contract/gameplay-ui.battle.contract.test.ts tests/contract/battle-targeting-state.contract.test.ts tests/contract/battle-attack-types.contract.test.ts tests/contract/battle-defend-state.contract.test.ts tests/integration/battle/battleEngineFlow.test.ts tests/integration/battle/battleTargetSelectionFlow.test.ts tests/integration/battle/battleAttackTypesFlow.test.ts tests/integration/battle/battleDefendFlow.test.ts",
     "test:menu": "vitest run tests/contract/gameplay-ui.menu.contract.test.ts tests/contract/scenario-session-state.contract.test.ts tests/integration/foundation/gameStateFlow.test.ts tests/integration/menu/menuScenarioSelectionFlow.test.ts tests/integration/menu/menuReturnFlow.test.ts",
+    "test:mobile": "vitest run tests/contract/gameplay-ui.mobile-layout.contract.test.ts tests/contract/touch-session-controls.contract.test.ts tests/contract/mobile-viewport-continuity.contract.test.ts tests/integration/foundation/mobileLayoutFlow.test.ts tests/integration/mobile/mobileMenuLaunchFlow.test.ts tests/integration/mobile/mobileMapTouchFlow.test.ts tests/integration/mobile/mobileBattleTouchFlow.test.ts tests/integration/mobile/mobileViewportResizeFlow.test.ts",
     "test:acceptance": "playwright test",
     "verify:pathfinding": "npm run test:pathfinding && playwright test tests/acceptance/route-preview.spec.ts tests/acceptance/route-confirmation.spec.ts tests/acceptance/route-persistence.spec.ts",
     "verify:terrain": "npm run test:terrain && playwright test tests/acceptance/advanced-terrain-movement.spec.ts tests/acceptance/blocked-terrain-boundaries.spec.ts tests/acceptance/terrain-readability.spec.ts",
@@ -21,6 +22,7 @@
     "verify:viewport": "npm run test:viewport && playwright test tests/acceptance/map-pan-navigation.spec.ts tests/acceptance/map-zoom-navigation.spec.ts tests/acceptance/map-view-interaction.spec.ts",
     "verify:combat": "npm run test:combat && playwright test tests/acceptance/battle-resolution.spec.ts tests/acceptance/guarded-location.spec.ts tests/acceptance/battle-target-selection.spec.ts tests/acceptance/battle-attack-types.spec.ts tests/acceptance/battle-defend.spec.ts",
     "verify:menu": "npm run test:menu && playwright test tests/acceptance/start-menu-selection.spec.ts tests/acceptance/start-menu-return.spec.ts",
+    "verify:mobile": "npm run test:mobile && playwright test tests/acceptance/mobile-start-menu.spec.ts tests/acceptance/mobile-gameplay-flow.spec.ts tests/acceptance/mobile-viewport-continuity.spec.ts",
     "verify": "npm run test && npm run test:acceptance"
   },
   "devDependencies": {

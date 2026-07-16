@@ -6,7 +6,9 @@ import { isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../engine/
 import { createInteractionTarget, createPanGesture, panViewport, zoomViewportAtPoint } from "../../engine/map/viewportMath";
 import type { ScreenPoint } from "../../engine/scenario/types";
 
-function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | WheelEvent): ScreenPoint {
+const TOUCH_PAN_THRESHOLD = 12;
+
+function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | WheelEvent | PointerEvent): ScreenPoint {
   const bounds = canvas.getBoundingClientRect();
   const scaleX = canvas.width / bounds.width;
   const scaleY = canvas.height / bounds.height;
@@ -17,76 +19,92 @@ function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | WheelEven
   };
 }
 
+function handleMapTap(store: GameStore, point: ScreenPoint): void {
+  store.update((state) => {
+    if (state.sceneMode !== "map") {
+      return;
+    }
+
+    const target = createInteractionTarget(
+      point,
+      state.mapViewState.viewport,
+      state.scenario.map,
+      state.responsiveCanvasView.pixelWidth,
+      state.responsiveCanvasView.pixelHeight
+    );
+    const { x, y } = target.worldPosition;
+
+    state.lastTouchInteraction = {
+      interactionType: "tap",
+      screenPosition: point,
+      targetKind: target.targetKind,
+      targetId: target.targetId,
+      gesturePhase: "end"
+    };
+
+    const heroAtTile = state.scenario.heroes.find(
+      (hero) => hero.mapPosition.x === x && hero.mapPosition.y === y && hero.availabilityState !== "defeated"
+    );
+
+    if (heroAtTile) {
+      if (isRoutePreviewOwnedByHero(state.activeRoutePreview, heroAtTile.id)) {
+        const clearResult = clearOwnedRoutePreview(state, heroAtTile.id);
+        if (!clearResult.ok && clearResult.reason) {
+          state.messageLog.push(clearResult.reason);
+          return;
+        }
+        selectHero(state, heroAtTile.id);
+        state.messageLog.push(`${heroAtTile.name}'s plotted route was cleared.`);
+        return;
+      }
+
+      const result = selectHero(state, heroAtTile.id);
+      if (!result.ok && result.reason) {
+        state.messageLog.push(result.reason);
+      }
+      return;
+    }
+
+    const shouldConfirmRoute =
+      isRoutePreviewOwnedByHero(state.activeRoutePreview, state.selectedHeroId) &&
+      isSameRouteDestination(state.activeRoutePreview, { x, y });
+    const result = shouldConfirmRoute ? confirmRoutePreview(state) : plotRoutePreview(state, { x, y });
+    if (!result.ok) {
+      state.messageLog.push(result.reason ?? "That move is not allowed.");
+      return;
+    }
+
+    if (!shouldConfirmRoute) {
+      const totalCost = state.activeRoutePreview?.totalMovementCost ?? 0;
+      state.messageLog.push(`Route plotted to (${x + 1}, ${y + 1}) costing ${totalCost} movement.`);
+      return;
+    }
+
+    if (result.routeProgress?.completionState === "completed") {
+      state.messageLog.push(`Route completed at (${x + 1}, ${y + 1}).`);
+    } else if (result.routeProgress) {
+      state.messageLog.push(
+        `Route advanced to (${result.routeProgress.finalPosition.x + 1}, ${result.routeProgress.finalPosition.y + 1}) and awaits continuation.`
+      );
+    }
+
+    const encounter = state.selectedHeroId
+      ? startGuardEncounter(state, state.selectedHeroId)
+      : { ok: false as const, reason: "No hero is selected." };
+    if (encounter.ok) {
+      setBattleState(state, encounter.battle);
+      state.messageLog.push(`The guards of ${encounter.location.name} attack.`);
+    }
+  });
+}
+
 export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void {
   canvas.addEventListener("click", (event) => {
     if (event.button !== 0) {
       return;
     }
 
-    const point = getCanvasPoint(canvas, event);
-
-    store.update((state) => {
-      if (state.sceneMode !== "map") {
-        return;
-      }
-
-      const target = createInteractionTarget(point, state.mapViewState.viewport, state.scenario.map, canvas.width, canvas.height);
-      const { x, y } = target.worldPosition;
-
-      const heroAtTile = state.scenario.heroes.find(
-        (hero) => hero.mapPosition.x === x && hero.mapPosition.y === y && hero.availabilityState !== "defeated"
-      );
-
-      if (heroAtTile) {
-        if (isRoutePreviewOwnedByHero(state.activeRoutePreview, heroAtTile.id)) {
-          const clearResult = clearOwnedRoutePreview(state, heroAtTile.id);
-          if (!clearResult.ok && clearResult.reason) {
-            state.messageLog.push(clearResult.reason);
-            return;
-          }
-          selectHero(state, heroAtTile.id);
-          state.messageLog.push(`${heroAtTile.name}'s plotted route was cleared.`);
-          return;
-        }
-
-        const result = selectHero(state, heroAtTile.id);
-        if (!result.ok && result.reason) {
-          state.messageLog.push(result.reason);
-        }
-        return;
-      }
-
-      const shouldConfirmRoute =
-        isRoutePreviewOwnedByHero(state.activeRoutePreview, state.selectedHeroId) &&
-        isSameRouteDestination(state.activeRoutePreview, { x, y });
-      const result = shouldConfirmRoute ? confirmRoutePreview(state) : plotRoutePreview(state, { x, y });
-      if (!result.ok) {
-        state.messageLog.push(result.reason ?? "That move is not allowed.");
-        return;
-      }
-
-      if (!shouldConfirmRoute) {
-        const totalCost = state.activeRoutePreview?.totalMovementCost ?? 0;
-        state.messageLog.push(`Route plotted to (${x + 1}, ${y + 1}) costing ${totalCost} movement.`);
-        return;
-      }
-
-      if (result.routeProgress?.completionState === "completed") {
-        state.messageLog.push(`Route completed at (${x + 1}, ${y + 1}).`);
-      } else if (result.routeProgress) {
-        state.messageLog.push(
-          `Route advanced to (${result.routeProgress.finalPosition.x + 1}, ${result.routeProgress.finalPosition.y + 1}) and awaits continuation.`
-        );
-      }
-
-      const encounter = state.selectedHeroId
-        ? startGuardEncounter(state, state.selectedHeroId)
-        : { ok: false as const, reason: "No hero is selected." };
-      if (encounter.ok) {
-        setBattleState(state, encounter.battle);
-        state.messageLog.push(`The guards of ${encounter.location.name} attack.`);
-      }
-    });
+    handleMapTap(store, getCanvasPoint(canvas, event));
   });
 
   canvas.addEventListener("mousedown", (event) => {
@@ -117,8 +135,8 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
         state.mapViewState.panGesture,
         point,
         state.scenario.map,
-        canvas.width,
-        canvas.height
+        state.responsiveCanvasView.pixelWidth,
+        state.responsiveCanvasView.pixelHeight
       );
       state.mapViewState.isDefaultView = false;
     });
@@ -153,8 +171,8 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
           event.deltaY,
           point,
           state.scenario.map,
-          canvas.width,
-          canvas.height
+          state.responsiveCanvasView.pixelWidth,
+          state.responsiveCanvasView.pixelHeight
         );
         state.mapViewState.isDefaultView = false;
       });
@@ -167,4 +185,106 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
       event.preventDefault();
     }
   });
+
+  canvas.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    const point = getCanvasPoint(canvas, event);
+    canvas.setPointerCapture(event.pointerId);
+    store.update((state) => {
+      if (state.sceneMode !== "map") {
+        return;
+      }
+
+      state.lastTouchInteraction = {
+        interactionType: "tap",
+        screenPosition: point,
+        targetKind: "none",
+        targetId: null,
+        gesturePhase: "start"
+      };
+      state.mapViewState.panGesture = createPanGesture(point, state.mapViewState.viewport);
+      state.mapViewState.panGesture.pointerId = event.pointerId;
+      state.mapViewState.panGesture.pointerType = event.pointerType;
+      state.mapViewState.panGesture.hasMoved = false;
+    });
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    const point = getCanvasPoint(canvas, event);
+    store.update((state) => {
+      if (state.sceneMode !== "map" || !state.mapViewState.panGesture?.isActive) {
+        return;
+      }
+      if (state.mapViewState.panGesture.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const deltaX = point.x - state.mapViewState.panGesture.originScreenX;
+      const deltaY = point.y - state.mapViewState.panGesture.originScreenY;
+      if (!state.mapViewState.panGesture.hasMoved && Math.hypot(deltaX, deltaY) < TOUCH_PAN_THRESHOLD) {
+        return;
+      }
+
+      state.mapViewState.panGesture.hasMoved = true;
+      state.mapViewState.viewport = panViewport(
+        state.mapViewState.viewport,
+        state.mapViewState.panGesture,
+        point,
+        state.scenario.map,
+        state.responsiveCanvasView.pixelWidth,
+        state.responsiveCanvasView.pixelHeight
+      );
+      state.mapViewState.isDefaultView = false;
+      state.lastTouchInteraction = {
+        interactionType: "drag",
+        screenPosition: point,
+        targetKind: "none",
+        targetId: null,
+        gesturePhase: "move"
+      };
+    });
+  });
+
+  const finishPointerInteraction = (event: PointerEvent): void => {
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    const point = getCanvasPoint(canvas, event);
+    if (canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+
+    let shouldTap = false;
+    store.update((state) => {
+      const gesture = state.mapViewState.panGesture;
+      if (!gesture || gesture.pointerId !== event.pointerId) {
+        return;
+      }
+
+      shouldTap = !gesture.hasMoved;
+      state.mapViewState.panGesture = null;
+      state.lastTouchInteraction = {
+        interactionType: shouldTap ? "tap" : "drag",
+        screenPosition: point,
+        targetKind: "none",
+        targetId: null,
+        gesturePhase: "end"
+      };
+    });
+
+    if (shouldTap) {
+      handleMapTap(store, point);
+    }
+  };
+
+  canvas.addEventListener("pointerup", finishPointerInteraction);
+  canvas.addEventListener("pointercancel", finishPointerInteraction);
 }

@@ -5,6 +5,8 @@ import { bindBattleCanvasInput } from "../scene-controller/battleInputController
 import { drawBattleScene, renderBattleSidebar } from "../scene-controller/battleScene";
 import { drawMapScene, renderMapSidebar } from "../scene-controller/mapScene";
 import { isScenarioId, type ScenarioId } from "../../engine/scenario/loadScenario";
+import { createViewport } from "../../engine/map/viewportMath";
+import { measureGameShellLayout, normalizeViewportForState } from "../../render/canvas/viewportRender";
 import { renderMainMenu } from "../../ui/overlays/mainMenu";
 import { renderVictoryMenu } from "../../ui/overlays/victoryMenu";
 
@@ -19,12 +21,18 @@ function drawMenuScene(context: CanvasRenderingContext2D, canvas: HTMLCanvasElem
   context.fillStyle = "#f7ecd6";
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#23170d";
-  context.font = "52px Georgia";
-  context.fillText("disc2", 338, 180);
-  context.font = "24px Georgia";
-  context.fillText("Select a scenario to begin", 272, 236);
-  context.font = "16px Georgia";
-  context.fillText("Use the menu on the right to launch a fresh session.", 246, 286);
+  context.textAlign = "center";
+  context.font = `700 ${Math.max(34, Math.floor(canvas.width / 14))}px Georgia`;
+  context.fillText("disc2", canvas.width / 2, Math.max(120, Math.floor(canvas.height * 0.28)));
+  context.font = `${Math.max(18, Math.floor(canvas.width / 34))}px Georgia`;
+  context.fillText("Select a scenario to begin", canvas.width / 2, Math.max(176, Math.floor(canvas.height * 0.38)));
+  context.font = `${Math.max(14, Math.floor(canvas.width / 52))}px Georgia`;
+  context.fillText(
+    "Use the action panel to launch a fresh session.",
+    canvas.width / 2,
+    Math.max(218, Math.floor(canvas.height * 0.47))
+  );
+  context.textAlign = "start";
 }
 
 export function startGame(root: HTMLElement | null): void {
@@ -38,7 +46,7 @@ export function startGame(root: HTMLElement | null): void {
   (window as Window & { __gameStore?: GameStore }).__gameStore = store;
 
   root.innerHTML = `
-    <section class="panel">
+    <section class="panel game-surface-panel" id="game-surface-panel">
       <canvas id="game-canvas" width="896" height="640" aria-label="game canvas"></canvas>
     </section>
     <aside class="panel sidebar" id="sidebar"></aside>
@@ -46,8 +54,9 @@ export function startGame(root: HTMLElement | null): void {
 
   const canvas = root.querySelector<HTMLCanvasElement>("#game-canvas");
   const sidebar = root.querySelector<HTMLElement>("#sidebar");
+  const canvasPanel = root.querySelector<HTMLElement>("#game-surface-panel");
 
-  if (!canvas || !sidebar) {
+  if (!canvas || !sidebar || !canvasPanel) {
     throw new Error("Failed to initialize game shell.");
   }
 
@@ -62,9 +71,45 @@ export function startGame(root: HTMLElement | null): void {
   bindMapInput(canvas, store);
   bindBattleCanvasInput(canvas, store);
 
+  let lastLayoutSignature = "";
+  const syncResponsiveLayout = (): void => {
+    const nextLayout = measureGameShellLayout(root, canvasPanel, canvas);
+    const layoutSignature = JSON.stringify(nextLayout);
+    if (layoutSignature === lastLayoutSignature) {
+      return;
+    }
+
+    lastLayoutSignature = layoutSignature;
+    store.update((state) => {
+      state.mobileLayoutState = nextLayout.mobileLayoutState;
+      state.responsiveCanvasView = nextLayout.responsiveCanvasView;
+      if (state.sceneMode === "menu") {
+        state.mapViewState.viewport = createViewport(
+          state.scenario.map,
+          nextLayout.responsiveCanvasView.pixelWidth,
+          nextLayout.responsiveCanvasView.pixelHeight
+        );
+        state.mapViewState.isDefaultView = true;
+      } else {
+        state.mapViewState.viewport = normalizeViewportForState(state);
+      }
+    });
+  };
+
+  window.addEventListener("resize", syncResponsiveLayout);
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(() => {
+      syncResponsiveLayout();
+    });
+    observer.observe(root);
+    observer.observe(canvasPanel);
+  }
+
   store.subscribe((state) => {
     sceneController.setMode(state.sceneMode);
     sidebar.dataset.scene = sceneController.getMode();
+    root.dataset.layoutMode = state.mobileLayoutState.layoutMode;
+    root.dataset.sidebarPlacement = state.mobileLayoutState.sidebarPlacement;
     if (sceneController.getMode() === "menu") {
       drawMenuScene(context, canvas);
       sidebar.innerHTML = renderMainMenu(state);
@@ -113,4 +158,6 @@ export function startGame(root: HTMLElement | null): void {
     drawMapScene(store, context);
     renderMapSidebar(store, sidebar);
   });
+
+  syncResponsiveLayout();
 }

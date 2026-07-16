@@ -4,13 +4,15 @@ import { getBattleParticipant, getBattleUnit, getUnitAttackCategory, isPlayerCon
 import { palette } from "../sprites/placeholders";
 
 function drawFormationSlot(context: CanvasRenderingContext2D, slot: BattleFormationSlot): void {
-  const center = getBattleCanvasSlotCenter(slot);
+  const center = getBattleCanvasSlotCenter(slot, context.canvas.width, context.canvas.height);
+  const slotWidth = (BATTLE_SLOT_WIDTH * context.canvas.width) / 896;
+  const slotHeight = (BATTLE_SLOT_HEIGHT * context.canvas.height) / 640;
   context.save();
   context.fillStyle = palette.battleSlot;
   context.strokeStyle = palette.battleSlotBorder;
   context.lineWidth = 2;
-  context.fillRect(center.x - BATTLE_SLOT_WIDTH / 2, center.y - BATTLE_SLOT_HEIGHT / 2, BATTLE_SLOT_WIDTH, BATTLE_SLOT_HEIGHT);
-  context.strokeRect(center.x - BATTLE_SLOT_WIDTH / 2, center.y - BATTLE_SLOT_HEIGHT / 2, BATTLE_SLOT_WIDTH, BATTLE_SLOT_HEIGHT);
+  context.fillRect(center.x - slotWidth / 2, center.y - slotHeight / 2, slotWidth, slotHeight);
+  context.strokeRect(center.x - slotWidth / 2, center.y - slotHeight / 2, slotWidth, slotHeight);
   context.restore();
 }
 
@@ -27,11 +29,14 @@ function drawUnitCard(
 
   const unit = getBattleUnit(state, slot.unitId);
   const isAlive = !unit.defeatState && unit.currentHealth > 0;
-  const center = getBattleCanvasSlotCenter(slot);
-  const left = center.x - BATTLE_SLOT_WIDTH / 2 + 4;
-  const top = center.y - BATTLE_SLOT_HEIGHT / 2 + 4;
-  const width = BATTLE_SLOT_WIDTH - 8;
-  const height = BATTLE_SLOT_HEIGHT - 8;
+  const center = getBattleCanvasSlotCenter(slot, context.canvas.width, context.canvas.height);
+  const slotWidth = (BATTLE_SLOT_WIDTH * context.canvas.width) / 896;
+  const slotHeight = (BATTLE_SLOT_HEIGHT * context.canvas.height) / 640;
+  const inset = Math.max(4, Math.round(slotWidth * 0.05));
+  const left = center.x - slotWidth / 2 + inset;
+  const top = center.y - slotHeight / 2 + inset;
+  const width = slotWidth - inset * 2;
+  const height = slotHeight - inset * 2;
   const isActive = state.battle?.activeUnitId === unit.id;
   const isLegalTarget = legalTargetUnitIds.includes(unit.id);
   const isSelectedTarget = selectedTargetUnitId === unit.id;
@@ -54,14 +59,14 @@ function drawUnitCard(
   }
 
   context.fillStyle = "#ffffff";
-  context.font = "bold 13px Georgia";
-  context.fillText(unit.name, left + 6, top + 20, width - 12);
-  context.font = "12px Georgia";
-  context.fillText(`${unit.currentHealth}/${unit.maxHealth} HP`, left + 6, top + 38);
+  context.font = `bold ${Math.max(11, Math.floor(slotHeight * 0.24))}px Georgia`;
+  context.fillText(unit.name, left + 6, top + Math.max(18, Math.floor(slotHeight * 0.32)), width - 12);
+  context.font = `${Math.max(10, Math.floor(slotHeight * 0.2))}px Georgia`;
+  context.fillText(`${unit.currentHealth}/${unit.maxHealth} HP`, left + 6, top + Math.max(34, Math.floor(slotHeight * 0.62)));
 
   if (isAlive) {
     context.fillStyle = "#f8e7b0";
-    context.fillText(getUnitAttackCategory(state, unit.id).toUpperCase(), left + 6, top + 52);
+    context.fillText(getUnitAttackCategory(state, unit.id).toUpperCase(), left + 6, top + Math.max(48, Math.floor(slotHeight * 0.88)));
   }
 
   context.restore();
@@ -86,10 +91,14 @@ export function renderBattleScene(context: CanvasRenderingContext2D, state: Game
   const controlLabel = isPlayerControlledBattleUnit(state, actingUnit.id) ? "Player Turn" : "Enemy Turn";
 
   context.fillStyle = palette.text;
-  context.font = "28px Georgia";
-  context.fillText("Guard Battle", 24, 42);
-  context.font = "16px Georgia";
-  context.fillText(`${controlLabel}: ${actingUnit.name} (${actingSideLabel})`, 24, 70);
+  context.font = `${Math.max(22, Math.floor(context.canvas.width / 32))}px Georgia`;
+  context.fillText("Guard Battle", 24, Math.max(38, Math.floor(context.canvas.height * 0.07)));
+  context.font = `${Math.max(13, Math.floor(context.canvas.width / 56))}px Georgia`;
+  context.fillText(
+    `${controlLabel}: ${actingUnit.name} (${actingSideLabel})`,
+    24,
+    Math.max(64, Math.floor(context.canvas.height * 0.11))
+  );
 
   for (const slot of battle.formation.attackerSlots) {
     drawFormationSlot(context, slot);
@@ -108,7 +117,7 @@ export function renderBattleScene(context: CanvasRenderingContext2D, state: Game
   }
 
   context.fillStyle = palette.text;
-  context.font = "16px Georgia";
-  context.fillText("Attackers", 96, 594);
-  context.fillText("Defenders", 648, 594);
+  context.font = `${Math.max(13, Math.floor(context.canvas.width / 56))}px Georgia`;
+  context.fillText("Attackers", Math.max(56, Math.floor(context.canvas.width * 0.11)), Math.floor(context.canvas.height * 0.93));
+  context.fillText("Defenders", Math.floor(context.canvas.width * 0.72), Math.floor(context.canvas.height * 0.93));
 }

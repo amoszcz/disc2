@@ -15,6 +15,7 @@ export function renderBattleHud(state: GameState): string {
   const defendState = battle.defendStates.find((entry) => entry.unitId === activeUnit.id && entry.isActive);
   const isPlayerTurn = isPlayerControlledBattleUnit(state, activeUnit.id);
   const strikeReady = isPlayerTurn ? canBattleStrike(state, battle) : false;
+  const isMobile = state.mobileLayoutState.layoutMode === "mobile";
   const queueHtml = battle.turnQueue
     .map((unitId) => {
       const unit = state.scenario.units.find((entry) => entry.id === unitId);
@@ -31,7 +32,9 @@ export function renderBattleHud(state: GameState): string {
       : selectedTarget
         ? `${selectedTarget.name} selected.`
         : targetingState?.legalTargetUnitIds.length
-          ? "Click a highlighted enemy to select a strike target."
+          ? isMobile
+            ? "Tap a highlighted enemy to select a strike target."
+            : "Click a highlighted enemy to select a strike target."
           : "No legal strike target is available.";
 
   return `
@@ -45,8 +48,11 @@ export function renderBattleHud(state: GameState): string {
         <strong>Turn Queue</strong>
         <div data-testid="battle-queue">${queueHtml}</div>
       </div>
+      <p class="control-tip" data-testid="battle-control-tip">
+        ${isMobile ? "Tap an enemy card to target it, then use Strike or Defend." : "Select a target on the canvas, then use Strike or Defend."}
+      </p>
       <p data-testid="battle-target-message">${targetMessage}</p>
-      <div class="hud-row">
+      <div class="hud-row action-row">
         <button type="button" id="battle-attack-button" data-testid="battle-attack-button" ${!isPlayerTurn || !strikeReady ? "disabled" : ""}>Strike</button>
         <button type="button" id="battle-defend-button" data-testid="battle-defend-button" ${!isPlayerTurn ? "disabled" : ""}>Defend</button>
       </div>

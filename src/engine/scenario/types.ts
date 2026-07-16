@@ -24,6 +24,11 @@ export interface ScreenPoint {
   y: number;
 }
 
+export type LayoutMode = "desktop" | "mobile";
+export type SidebarPlacement = "right" | "bottom";
+export type InteractionType = "tap" | "drag" | "zoom-in" | "zoom-out";
+export type GesturePhase = "start" | "move" | "end";
+
 export interface MapDefinition {
   width: number;
   height: number;
@@ -149,6 +154,9 @@ export interface PanGestureState {
   startingPanOffsetX: number;
   startingPanOffsetY: number;
   isActive: boolean;
+  pointerId?: number;
+  pointerType?: string;
+  hasMoved?: boolean;
 }
 
 export interface MapViewState {
@@ -163,6 +171,31 @@ export interface InteractionTarget {
   worldPosition: Position;
   targetKind: "hero" | "tile" | "none";
   targetId: string | null;
+}
+
+export interface TouchInteraction {
+  interactionType: InteractionType;
+  screenPosition: ScreenPoint;
+  targetKind: InteractionTarget["targetKind"];
+  targetId: string | null;
+  gesturePhase: GesturePhase;
+}
+
+export interface MobileLayoutState {
+  viewportWidth: number;
+  viewportHeight: number;
+  layoutMode: LayoutMode;
+  sidebarPlacement: SidebarPlacement;
+  canvasDisplayWidth: number;
+  canvasDisplayHeight: number;
+}
+
+export interface ResponsiveCanvasView {
+  pixelWidth: number;
+  pixelHeight: number;
+  displayWidth: number;
+  displayHeight: number;
+  deviceScaleFactor: number;
 }
 
 export interface ResourceStockpile {
@@ -328,6 +361,9 @@ export interface GameState {
   routeFeedback: RouteFeedback | null;
   activeRoutePreview: RoutePreview | null;
   mapViewState: MapViewState;
+  mobileLayoutState: MobileLayoutState;
+  responsiveCanvasView: ResponsiveCanvasView;
+  lastTouchInteraction: TouchInteraction | null;
 }
 
 export interface GameSnapshot {
