@@ -4,6 +4,7 @@ import {
   createMobileLayoutState,
   createResponsiveCanvasView,
   normalizeViewportForState,
+  resolveCanvasDisplaySize,
   resolveLayoutMode,
   resolveSidebarPlacement
 } from "../../../src/render/canvas/viewportRender";
@@ -23,6 +24,13 @@ describe("mobile layout foundation flow", () => {
     expect(state.mobileLayoutState.sidebarPlacement).toBe("bottom");
     expect(state.responsiveCanvasView.pixelWidth).toBe(716);
     expect(state.responsiveCanvasView.pixelHeight).toBe(840);
+  });
+
+  test("derives mobile canvas height from viewport bounds instead of the live panel height", () => {
+    const measured = resolveCanvasDisplaySize(390, 844, 358, "mobile");
+
+    expect(measured.displayWidth).toBe(358);
+    expect(measured.displayHeight).toBe(358);
   });
 
   test("normalizes a persisted map viewport against live mobile canvas size", () => {

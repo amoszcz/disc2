@@ -21,6 +21,7 @@ const MOBILE_CANVAS_HEIGHT_RATIO = 0.68;
 const MIN_CANVAS_HEIGHT = 320;
 const DESKTOP_CANVAS_WIDTH = 896;
 const DESKTOP_CANVAS_HEIGHT = 640;
+const MOBILE_SHELL_HORIZONTAL_PADDING = 32;
 
 export function resolveLayoutMode(viewportWidth: number): LayoutMode {
   return viewportWidth <= MOBILE_BREAKPOINT ? "mobile" : "desktop";
@@ -79,6 +80,32 @@ export function getDefaultMobileLayoutState(): MobileLayoutState {
   );
 }
 
+export function resolveCanvasDisplaySize(
+  viewportWidth: number,
+  viewportHeight: number,
+  panelWidth: number,
+  layoutMode: LayoutMode
+): { displayWidth: number; displayHeight: number } {
+  const fallbackWidth =
+    layoutMode === "mobile" ? Math.max(1, viewportWidth - MOBILE_SHELL_HORIZONTAL_PADDING) : DESKTOP_CANVAS_WIDTH;
+  const displayWidth = panelWidth > 0 ? panelWidth : fallbackWidth;
+
+  if (layoutMode === "mobile") {
+    return {
+      displayWidth,
+      displayHeight: Math.max(
+        MIN_CANVAS_HEIGHT,
+        Math.floor(Math.min(viewportHeight * MOBILE_CANVAS_HEIGHT_RATIO, displayWidth))
+      )
+    };
+  }
+
+  return {
+    displayWidth,
+    displayHeight: Math.floor((displayWidth * DESKTOP_CANVAS_HEIGHT) / DESKTOP_CANVAS_WIDTH)
+  };
+}
+
 export function measureGameShellLayout(
   root: HTMLElement,
   canvasPanel: HTMLElement,
@@ -89,13 +116,12 @@ export function measureGameShellLayout(
   const viewportWidth = Math.max(window.innerWidth, Math.round(rootBounds.width));
   const viewportHeight = Math.max(window.innerHeight, Math.round(rootBounds.height));
   const layoutMode = resolveLayoutMode(viewportWidth);
-  const displayWidth =
-    panelBounds.width > 0 ? panelBounds.width : layoutMode === "mobile" ? viewportWidth - 32 : DESKTOP_CANVAS_WIDTH;
-  const fallbackHeight =
-    layoutMode === "mobile"
-      ? Math.max(MIN_CANVAS_HEIGHT, Math.floor(Math.min(viewportHeight * MOBILE_CANVAS_HEIGHT_RATIO, displayWidth)))
-      : Math.floor((displayWidth * DESKTOP_CANVAS_HEIGHT) / DESKTOP_CANVAS_WIDTH);
-  const displayHeight = panelBounds.height > 0 ? panelBounds.height : fallbackHeight;
+  const { displayWidth, displayHeight } = resolveCanvasDisplaySize(
+    viewportWidth,
+    viewportHeight,
+    panelBounds.width,
+    layoutMode
+  );
   const responsiveCanvasView = createResponsiveCanvasView(displayWidth, displayHeight, window.devicePixelRatio || 1);
   const mobileLayoutState = createMobileLayoutState(
     viewportWidth,
