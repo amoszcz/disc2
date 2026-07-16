@@ -196,3 +196,17 @@ export function worldTileToCanvasPoint(
 ): ScreenPoint {
   return worldPointToScreenPoint(position, viewport, map, canvas.width, canvas.height);
 }
+
+export function createTileVisualBounds(
+  point: ScreenPoint,
+  tileSize: number,
+  insetRatio = 0
+): { x: number; y: number; width: number; height: number } {
+  const inset = tileSize * insetRatio;
+  return {
+    x: point.x + inset,
+    y: point.y + inset,
+    width: Math.max(1, tileSize - inset * 2),
+    height: Math.max(1, tileSize - inset * 2)
+  };
+}

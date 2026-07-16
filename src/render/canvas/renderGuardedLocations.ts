@@ -1,5 +1,9 @@
 import type { GuardedLocation, MapDefinition, MapViewport } from "../../engine/scenario/types";
-import { palette } from "../sprites/placeholders";
+import {
+  drawResolvedVisualTemplate,
+  recordVisualTemplateDiagnostic,
+  resolveGuardedLocationVisualTemplate
+} from "../sprites/visualTemplateResolver";
 import { worldTileToCanvasPoint } from "./viewportRender";
 
 export function renderGuardedLocations(
@@ -11,10 +15,16 @@ export function renderGuardedLocations(
 ): void {
   for (const location of locations) {
     const point = worldTileToCanvasPoint(location.mapPosition, viewport, context.canvas, map);
-    context.fillStyle = location.accessState === "blocked" ? palette.guardBlocked : palette.guardOpen;
-    context.fillRect(point.x + tileSize * 0.2, point.y + tileSize * 0.2, tileSize * 0.6, tileSize * 0.6);
-    context.fillStyle = "#fff";
-    context.font = "12px Georgia";
-    context.fillText(location.accessState === "blocked" ? "G" : "O", point.x + tileSize * 0.2, point.y + tileSize * 0.35);
+    const resolvedTemplate = resolveGuardedLocationVisualTemplate(location);
+    recordVisualTemplateDiagnostic(
+      { subjectKind: "guarded-location", subjectType: `${location.locationType}:${location.accessState}`, sceneContext: "map" },
+      resolvedTemplate
+    );
+    drawResolvedVisualTemplate(context, resolvedTemplate, {
+      x: point.x + tileSize * 0.15,
+      y: point.y + tileSize * 0.15,
+      width: tileSize * 0.7,
+      height: tileSize * 0.7
+    });
   }
 }
