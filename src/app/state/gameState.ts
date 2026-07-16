@@ -11,11 +11,14 @@ import {
   type MapViewState,
   type ScenarioDefinition,
   type SceneMode,
+  type StorybookPreviewSubject,
+  type StorybookState,
   type VisualStateTracker
 } from "../../engine/scenario/types";
 import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
 import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
+import { getStorybookPreviewSubjects } from "../../render/sprites/visualTemplateCatalog";
 
 export function createDefaultMapViewState(scenario: ScenarioDefinition): MapViewState {
   return {
@@ -57,6 +60,26 @@ function createInitialVisualStates(scenario: ScenarioDefinition): VisualStateTra
   };
 }
 
+function createStorybookState(subjects: StorybookPreviewSubject[] = getStorybookPreviewSubjects()): StorybookState {
+  const selectedSubjectId = subjects[0]?.subjectId ?? null;
+
+  return {
+    subjects,
+    selectedSubjectId,
+    subjectSelections: Object.fromEntries(
+      subjects.map((subject) => [
+        subject.subjectId,
+        {
+          stateName: subject.defaultStateName,
+          direction: subject.defaultDirection
+        }
+      ])
+    ),
+    lastChangedSubjectId: null,
+    lastTransition: null
+  };
+}
+
 function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameState {
   const scenario = loadScenario(scenarioId);
   const activePlayerId = scenario.players.find((player) => player.kind === "player")?.id ?? scenario.players[0].id;
@@ -74,6 +97,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     winnerPlayerId: null,
     routeFeedback: null,
     activeRoutePreview: null,
+    storybookState: null,
     mapViewState: createDefaultMapViewState(scenario),
     mapTravelState: createInitialMapTravelState(scenario),
     visualStates: createInitialVisualStates(scenario),
@@ -94,6 +118,13 @@ export function createMenuState(): GameState {
   menuState.selectedHeroId = null;
   menuState.messageLog = ["Choose a scenario to begin."];
   return menuState;
+}
+
+export function openStorybook(state: GameState): GameState {
+  state.sceneMode = "storybook";
+  state.storybookState = createStorybookState();
+  state.messageLog = ["Asset storybook opened."];
+  return state;
 }
 
 export function appendMessage(state: GameState, message: string): GameState {
@@ -166,6 +197,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.winnerPlayerId = nextState.winnerPlayerId;
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
+  state.storybookState = nextState.storybookState;
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
@@ -190,12 +222,51 @@ export function returnToMainMenu(state: GameState): GameState {
   state.winnerPlayerId = nextState.winnerPlayerId;
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
+  state.storybookState = nextState.storybookState;
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
+  return state;
+}
+
+export function selectStorybookSubject(state: GameState, subjectId: string): GameState {
+  if (!state.storybookState) {
+    return state;
+  }
+
+  state.storybookState.selectedSubjectId = subjectId;
+  return state;
+}
+
+export function updateStorybookSubjectSelection(state: GameState, subjectId: string, optionId: string): GameState {
+  const storybookState = state.storybookState;
+  if (!storybookState) {
+    return state;
+  }
+
+  const subject = storybookState.subjects.find((entry) => entry.subjectId === subjectId);
+  const option = subject?.stateOptions.find((entry) => entry.optionId === optionId);
+  if (!subject || !option) {
+    return state;
+  }
+
+  const previousSelection = storybookState.subjectSelections[subjectId];
+  storybookState.subjectSelections[subjectId] = {
+    stateName: option.stateName,
+    direction: option.direction
+  };
+  storybookState.selectedSubjectId = subjectId;
+  storybookState.lastChangedSubjectId = subjectId;
+  storybookState.lastTransition = {
+    subjectId,
+    previousStateLabel: previousSelection
+      ? `${previousSelection.stateName}${previousSelection.direction ? ` (${previousSelection.direction})` : ""}`
+      : `${subject.defaultStateName}${subject.defaultDirection ? ` (${subject.defaultDirection})` : ""}`,
+    nextStateLabel: `${option.stateName}${option.direction ? ` (${option.direction})` : ""}`
+  };
   return state;
 }
 

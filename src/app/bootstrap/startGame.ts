@@ -1,9 +1,10 @@
-import { GameStore, createInitialState, createMenuState, returnToMainMenu, startScenarioSession } from "../state/gameState";
+import { GameStore, createInitialState, createMenuState, openStorybook, returnToMainMenu, startScenarioSession } from "../state/gameState";
 import { createSceneController } from "../scene-controller/sceneController";
 import { bindMapInput } from "../scene-controller/mapInputController";
 import { bindBattleCanvasInput } from "../scene-controller/battleInputController";
 import { drawBattleScene, renderBattleSidebar } from "../scene-controller/battleScene";
 import { drawMapScene, renderMapSidebar } from "../scene-controller/mapScene";
+import { drawStorybookScene, renderStorybookSidebar } from "../scene-controller/storybookScene";
 import { isScenarioId, type ScenarioId } from "../../engine/scenario/loadScenario";
 import { createViewport } from "../../engine/map/viewportMath";
 import { measureGameShellLayout, normalizeViewportForState } from "../../render/canvas/viewportRender";
@@ -27,10 +28,10 @@ function drawMenuScene(context: CanvasRenderingContext2D, canvas: HTMLCanvasElem
   context.font = `700 ${Math.max(34, Math.floor(canvas.width / 14))}px Georgia`;
   context.fillText("disc2", canvas.width / 2, Math.max(120, Math.floor(canvas.height * 0.28)));
   context.font = `${Math.max(18, Math.floor(canvas.width / 34))}px Georgia`;
-  context.fillText("Select a scenario to begin", canvas.width / 2, Math.max(176, Math.floor(canvas.height * 0.38)));
+  context.fillText("Choose a scenario or storybook", canvas.width / 2, Math.max(176, Math.floor(canvas.height * 0.38)));
   context.font = `${Math.max(14, Math.floor(canvas.width / 52))}px Georgia`;
   context.fillText(
-    "Use the action panel to launch a fresh session.",
+    "Use the action panel to launch a run or inspect current asset states.",
     canvas.width / 2,
     Math.max(218, Math.floor(canvas.height * 0.47))
   );
@@ -158,12 +159,26 @@ export function startGame(root: HTMLElement | null): void {
           });
         };
       }
+      const storybookButton = sidebar.querySelector<HTMLButtonElement>('[data-menu-action="open-storybook"]');
+      if (storybookButton) {
+        storybookButton.onclick = () => {
+          store.update((currentState) => {
+            openStorybook(currentState);
+          });
+        };
+      }
       return;
     }
 
     if (sceneController.getMode() === "battle") {
       drawBattleScene(store, context);
       renderBattleSidebar(store, sidebar);
+      return;
+    }
+
+    if (sceneController.getMode() === "storybook") {
+      drawStorybookScene(store, context);
+      renderStorybookSidebar(store, sidebar);
       return;
     }
 

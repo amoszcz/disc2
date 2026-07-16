@@ -2,7 +2,7 @@ export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
 export type MovementObjectType = "bridge" | "milestone" | "rubble" | "cave" | "teleport" | "exit";
 
-export type SceneMode = "menu" | "map" | "battle" | "victory";
+export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook";
 export type SideKind = "player" | "enemy" | "neutral";
 export type LocationType = "resource-site";
 export type AccessState = "blocked" | "open";
@@ -48,6 +48,7 @@ export type ObjectAnimationStateName =
   | "highlighted"
   | "selected";
 export type VisualStateName = HeroAnimationStateName | BattleUnitAnimationStateName | ObjectAnimationStateName;
+export type StorybookPreviewSubjectKind = "hero" | "unit" | "movement-object" | "guarded-location";
 
 export interface Position {
   x: number;
@@ -148,6 +149,51 @@ export interface VisualStateTracker {
   heroStates: Record<string, HeroVisualStateRuntime>;
   unitStates: Record<string, BattleUnitVisualStateRuntime>;
   objectStates: Record<string, ObjectVisualStateRuntime>;
+}
+
+export interface StorybookStateOption {
+  optionId: string;
+  label: string;
+  stateName: HeroAnimationStateName | BattleUnitAnimationStateName | ObjectAnimationStateName;
+  direction: FacingDirection | null;
+  isFallbackReviewable: boolean;
+}
+
+export interface StorybookPreviewTileStyle {
+  tileWidth: number;
+  tileHeight: number;
+}
+
+export interface StorybookPreviewSubject {
+  subjectId: string;
+  subjectKind: StorybookPreviewSubjectKind;
+  subjectType: string;
+  displayName: string;
+  categoryLabel: string;
+  sceneContext: VisualSceneContext;
+  defaultStateName: HeroAnimationStateName | BattleUnitAnimationStateName | ObjectAnimationStateName;
+  defaultDirection: FacingDirection | null;
+  previewTileStyle: StorybookPreviewTileStyle;
+  stateOptions: StorybookStateOption[];
+}
+
+export interface StorybookSubjectSelection {
+  stateName: HeroAnimationStateName | BattleUnitAnimationStateName | ObjectAnimationStateName;
+  direction: FacingDirection | null;
+}
+
+export interface StorybookTransitionRecord {
+  subjectId: string;
+  previousStateLabel: string;
+  nextStateLabel: string;
+}
+
+export interface StorybookState {
+  subjects: StorybookPreviewSubject[];
+  selectedSubjectId: string | null;
+  subjectSelections: Record<string, StorybookSubjectSelection>;
+  lastChangedSubjectId: string | null;
+  lastTransition: StorybookTransitionRecord | null;
 }
 
 export type LayoutMode = "desktop" | "mobile";
@@ -526,6 +572,7 @@ export interface GameState {
   winnerPlayerId: string | null;
   routeFeedback: RouteFeedback | null;
   activeRoutePreview: RoutePreview | null;
+  storybookState: StorybookState | null;
   mapViewState: MapViewState;
   mapTravelState: MapTravelState;
   visualStates: VisualStateTracker;

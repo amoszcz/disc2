@@ -21,8 +21,16 @@ export function renderMainMenu(state: GameState): string {
     <div class="overlay-box menu-panel" data-testid="main-menu-panel">
       <strong>${isMobile ? "Start Menu" : "Start Menu"}</strong>
       <p data-testid="main-menu-message">
-        ${isMobile ? "Choose a scenario and tap to begin a new run." : "Choose a scenario to begin a new run."}
+        ${isMobile ? "Choose a scenario and tap to begin a new run, or open the asset storybook." : "Choose a scenario to begin a new run, or open the asset storybook."}
       </p>
+      <button
+        type="button"
+        class="menu-option"
+        data-testid="storybook-open-button"
+        data-menu-action="open-storybook">
+        <strong>Asset Storybook</strong>
+        <span>Preview current heroes, battle units, and map objects across their supported states.</span>
+      </button>
       <div data-testid="scenario-option-list">${options}</div>
     </div>
   `;

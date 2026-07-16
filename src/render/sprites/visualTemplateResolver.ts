@@ -9,6 +9,8 @@ import type {
   ResourceType,
   ScenarioHero,
   ScenarioUnit,
+  StorybookPreviewSubject,
+  StorybookSubjectSelection,
   TerrainTypeName,
   VisualFallbackStyle,
   VisualSceneContext,
@@ -252,6 +254,46 @@ export function resolveResourcePickupVisualTemplate(
   catalog: VisualTemplateCatalog = visualTemplateCatalog
 ): VisualTemplateResolverResult {
   return resolveVisualTemplate({ subjectKind: "resource-pickup", subjectType: pickup.resourceType, sceneContext: "map" }, catalog);
+}
+
+export function resolveStorybookPreviewTemplate(
+  subject: StorybookPreviewSubject,
+  selection: StorybookSubjectSelection,
+  catalog: VisualTemplateCatalog = visualTemplateCatalog
+): VisualTemplateResolverResult {
+  switch (subject.subjectKind) {
+    case "hero":
+      return resolveHeroVisualTemplate(
+        { name: subject.subjectType },
+        {
+          stateName: selection.stateName as HeroAnimationStateName,
+          direction: selection.direction ?? subject.defaultDirection ?? "down"
+        },
+        catalog
+      );
+    case "unit":
+      return resolveUnitVisualTemplate(
+        { name: subject.subjectType },
+        subject.sceneContext,
+        selection.stateName as BattleUnitAnimationStateName,
+        catalog
+      );
+    case "movement-object":
+      return resolveMovementObjectVisualTemplate(subject.subjectType, selection.stateName as ObjectAnimationStateName, catalog);
+    case "guarded-location": {
+      const [locationType, accessState] = subject.subjectType.split(":");
+      return resolveGuardedLocationVisualTemplate(
+        {
+          locationType: locationType as GuardedLocation["locationType"],
+          accessState: accessState as GuardedLocation["accessState"]
+        },
+        selection.stateName as ObjectAnimationStateName,
+        catalog
+      );
+    }
+    default:
+      return getFallbackTemplate(catalog, "movement-object", "map");
+  }
 }
 
 function syncDiagnosticsToWindow(): void {
