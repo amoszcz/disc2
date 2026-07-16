@@ -45,9 +45,27 @@ export function startGame(root: HTMLElement | null): void {
   const requestedScenarioId = resolveScenarioId();
   const store = new GameStore(requestedScenarioId ? createInitialState(requestedScenarioId) : createMenuState());
   const sceneController = createSceneController(store.getState().sceneMode);
-  (window as Window & { __gameStore?: GameStore; __visualTemplateCatalog?: typeof visualTemplateCatalog }).__gameStore = store;
-  (window as Window & { __gameStore?: GameStore; __visualTemplateCatalog?: typeof visualTemplateCatalog }).__visualTemplateCatalog =
-    visualTemplateCatalog;
+  (
+    window as Window & {
+      __gameStore?: GameStore;
+      __visualTemplateCatalog?: typeof visualTemplateCatalog;
+      __visualStateTracker?: GameStore["getState"] extends () => infer T ? T extends { visualStates: infer V } ? V : never : never;
+    }
+  ).__gameStore = store;
+  (
+    window as Window & {
+      __gameStore?: GameStore;
+      __visualTemplateCatalog?: typeof visualTemplateCatalog;
+      __visualStateTracker?: GameStore["getState"] extends () => infer T ? T extends { visualStates: infer V } ? V : never : never;
+    }
+  ).__visualTemplateCatalog = visualTemplateCatalog;
+  (
+    window as Window & {
+      __gameStore?: GameStore;
+      __visualTemplateCatalog?: typeof visualTemplateCatalog;
+      __visualStateTracker?: GameStore["getState"] extends () => infer T ? T extends { visualStates: infer V } ? V : never : never;
+    }
+  ).__visualStateTracker = store.getState().visualStates;
 
   root.innerHTML = `
     <section class="panel game-surface-panel" id="game-surface-panel">
@@ -115,6 +133,11 @@ export function startGame(root: HTMLElement | null): void {
   }
 
   store.subscribe((state) => {
+    (
+      window as Window & {
+        __visualStateTracker?: GameStore["getState"] extends () => infer T ? T extends { visualStates: infer V } ? V : never : never;
+      }
+    ).__visualStateTracker = state.visualStates;
     sceneController.setMode(state.sceneMode);
     sidebar.dataset.scene = sceneController.getMode();
     root.dataset.layoutMode = state.mobileLayoutState.layoutMode;

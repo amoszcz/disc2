@@ -36,6 +36,7 @@ export function createBattle(state: GameState, heroId: string, guardForceId: str
 
   for (const unit of [...attackerUnits, ...defenderUnits]) {
     unit.actionState = "ready";
+    state.visualStates.unitStates[unit.id] = { stateName: "idle" };
   }
 
   const battle: Battle = {
@@ -56,5 +57,8 @@ export function createBattle(state: GameState, heroId: string, guardForceId: str
   };
 
   battle.targetingState = createBattleTargetingState(state, battle, battle.activeUnitId);
+  if (battle.activeUnitId) {
+    state.visualStates.unitStates[battle.activeUnitId] = { stateName: "ready" };
+  }
   return battle;
 }

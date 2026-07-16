@@ -15,7 +15,7 @@ export function renderGuardedLocations(
 ): void {
   for (const location of locations) {
     const point = worldTileToCanvasPoint(location.mapPosition, viewport, context.canvas, map);
-    const resolvedTemplate = resolveGuardedLocationVisualTemplate(location);
+    const resolvedTemplate = resolveGuardedLocationVisualTemplate(location, location.accessState === "blocked" ? "blocked" : "open");
     recordVisualTemplateDiagnostic(
       { subjectKind: "guarded-location", subjectType: `${location.locationType}:${location.accessState}`, sceneContext: "map" },
       resolvedTemplate

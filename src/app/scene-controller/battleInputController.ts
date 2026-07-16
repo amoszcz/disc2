@@ -69,6 +69,18 @@ function resolvePlayerBattleAction(state: GameState, message: string): void {
   continueBattleUntilPlayerTurn(state);
 }
 
+function schedulePlayerBattleContinuation(store: GameStore, message: string): void {
+  window.setTimeout(() => {
+    store.update((state) => {
+      if (state.sceneMode !== "battle" || !state.battle) {
+        return;
+      }
+
+      resolvePlayerBattleAction(state, message);
+    });
+  }, 0);
+}
+
 function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string | null {
   const battle = state.battle;
   if (!battle) {
@@ -109,6 +121,7 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
 
   if (strikeButton) {
     strikeButton.onclick = () => {
+      let battleMessage: string | null = null;
       store.update((state) => {
         if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
           return;
@@ -119,22 +132,29 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
           return;
         }
 
-        const message = performStrikeAction(state, state.battle);
-        resolvePlayerBattleAction(state, message);
+        battleMessage = performStrikeAction(state, state.battle);
       });
+
+      if (battleMessage) {
+        schedulePlayerBattleContinuation(store, battleMessage);
+      }
     };
   }
 
   if (defendButton) {
     defendButton.onclick = () => {
+      let battleMessage: string | null = null;
       store.update((state) => {
         if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
           return;
         }
 
-        const message = performDefendAction(state, state.battle);
-        resolvePlayerBattleAction(state, message);
+        battleMessage = performDefendAction(state, state.battle);
       });
+
+      if (battleMessage) {
+        schedulePlayerBattleContinuation(store, battleMessage);
+      }
     };
   }
 }

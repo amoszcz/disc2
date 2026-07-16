@@ -20,6 +20,34 @@ export type VisualCategory = "unit" | "hero" | "movement-object" | "guarded-loca
 export type VisualSceneContext = "map" | "battle";
 export type VisualSubjectKind = VisualCategory;
 export type VisualFallbackShape = "rect" | "circle" | "diamond" | "tile" | "slot";
+export type FacingDirection = "up" | "down" | "left" | "right";
+export type HeroDirectionalStateName = "idle" | "start-move" | "walk" | "stop-move";
+export type HeroEventStateName = "interact" | "victory" | "hurt" | "perish";
+export type HeroAnimationStateName = HeroDirectionalStateName | HeroEventStateName;
+export type BattleUnitAnimationStateName =
+  | "idle"
+  | "ready"
+  | "attack"
+  | "cast"
+  | "shoot"
+  | "hit"
+  | "defend"
+  | "wait"
+  | "victory"
+  | "perish";
+export type ObjectAnimationStateName =
+  | "idle"
+  | "active"
+  | "inactive"
+  | "blocked"
+  | "open"
+  | "claimed"
+  | "depleted"
+  | "damaged"
+  | "destroyed"
+  | "highlighted"
+  | "selected";
+export type VisualStateName = HeroAnimationStateName | BattleUnitAnimationStateName | ObjectAnimationStateName;
 
 export interface Position {
   x: number;
@@ -53,6 +81,7 @@ export interface VisualTemplateDefinition {
   assetKind: VisualAssetKind;
   assetSource: string | null;
   spriteFrame?: VisualSpriteFrame | null;
+  supportedStateNames?: string[] | null;
   fallbackStyle: VisualFallbackStyle;
   readabilityLabel: string;
   intendedContexts: VisualSceneContext[];
@@ -64,6 +93,9 @@ export interface VisualTemplateResolverResult {
   assetKind: VisualAssetKind;
   assetSource: string | null;
   spriteFrame?: VisualSpriteFrame | null;
+  requestedStateName?: string | null;
+  resolvedStateName?: string | null;
+  stateDirection?: FacingDirection | null;
   fallbackStyle: VisualFallbackStyle;
   readabilityLabel: string;
   intendedContexts: VisualSceneContext[];
@@ -74,6 +106,48 @@ export interface VisualSubjectDescriptor {
   subjectKind: VisualSubjectKind;
   subjectType: string;
   sceneContext: VisualSceneContext;
+}
+
+export interface HeroAnimationStateProfile {
+  directionalStateNames: HeroDirectionalStateName[];
+  eventStateNames: HeroEventStateName[];
+  fallbackStateName: HeroAnimationStateName;
+  defaultDirection: FacingDirection;
+  requiredStateNames: HeroAnimationStateName[];
+  mvpStateNames: HeroAnimationStateName[];
+}
+
+export interface BattleUnitAnimationStateProfile {
+  supportedStateNames: BattleUnitAnimationStateName[];
+  fallbackStateName: BattleUnitAnimationStateName;
+  requiredStateNames: BattleUnitAnimationStateName[];
+  mvpStateNames: BattleUnitAnimationStateName[];
+}
+
+export interface ObjectAnimationStateProfile {
+  supportedStateNames: ObjectAnimationStateName[];
+  fallbackStateName: ObjectAnimationStateName;
+  requiredStateNames: ObjectAnimationStateName[];
+  optionalStateNames: ObjectAnimationStateName[];
+}
+
+export interface HeroVisualStateRuntime {
+  stateName: HeroAnimationStateName;
+  direction: FacingDirection;
+}
+
+export interface BattleUnitVisualStateRuntime {
+  stateName: BattleUnitAnimationStateName;
+}
+
+export interface ObjectVisualStateRuntime {
+  stateName: ObjectAnimationStateName;
+}
+
+export interface VisualStateTracker {
+  heroStates: Record<string, HeroVisualStateRuntime>;
+  unitStates: Record<string, BattleUnitVisualStateRuntime>;
+  objectStates: Record<string, ObjectVisualStateRuntime>;
 }
 
 export type LayoutMode = "desktop" | "mobile";
@@ -454,6 +528,7 @@ export interface GameState {
   activeRoutePreview: RoutePreview | null;
   mapViewState: MapViewState;
   mapTravelState: MapTravelState;
+  visualStates: VisualStateTracker;
   mobileLayoutState: MobileLayoutState;
   responsiveCanvasView: ResponsiveCanvasView;
   lastTouchInteraction: TouchInteraction | null;

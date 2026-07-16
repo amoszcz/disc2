@@ -47,7 +47,7 @@ function drawUnitCard(
   const isLegalTarget = legalTargetUnitIds.includes(unit.id);
   const isSelectedTarget = selectedTargetUnitId === unit.id;
   const isDefending = state.battle?.defendStates.some((entry) => entry.unitId === unit.id && entry.isActive);
-  const resolvedTemplate = resolveUnitVisualTemplate(unit, "battle");
+  const resolvedTemplate = resolveUnitVisualTemplate(unit, "battle", state.visualStates.unitStates[unit.id]?.stateName);
 
   context.save();
   recordVisualTemplateDiagnostic({ subjectKind: "unit", subjectType: unit.name, sceneContext: "battle" }, resolvedTemplate);
