@@ -7,7 +7,9 @@ export function findGuardedLocationAtHero(state: GameState, heroId: string): Gua
     return undefined;
   }
 
-  return state.scenario.guardedLocations.find((location) => positionsEqual(location.mapPosition, hero.mapPosition));
+  return state.scenario.guardedLocations.find(
+    (location) => location.mapId === hero.mapId && positionsEqual(location.mapPosition, hero.mapPosition)
+  );
 }
 
 export function getGuardForce(state: GameState, location: GuardedLocation): GuardForce | undefined {

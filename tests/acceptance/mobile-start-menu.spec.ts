@@ -23,4 +23,9 @@ test("game opens on a mobile menu and can start each scenario without horizontal
   await tapElement(page.getByTestId("scenario-start-advanced-terrain-scenario"));
   await expect(page.getByTestId("map-hud")).toBeVisible();
   await expect(page.getByTestId("remaining-movement")).toContainText("8");
+
+  await page.goto("/");
+  await tapElement(page.getByTestId("scenario-start-submap-expedition-scenario"));
+  await expect(page.getByTestId("map-hud")).toBeVisible();
+  await expect(page.getByTestId("active-map-name")).toContainText("Surface Camp");
 });

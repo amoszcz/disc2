@@ -13,7 +13,10 @@ const MOVEMENT_OBJECT_EFFECTS: Record<
 > = {
   bridge: { movementDelta: 0, changesPassability: true },
   milestone: { movementDelta: -1, changesPassability: false },
-  rubble: { movementDelta: 1, changesPassability: false }
+  rubble: { movementDelta: 1, changesPassability: false },
+  cave: { movementDelta: 0, changesPassability: false },
+  teleport: { movementDelta: 0, changesPassability: false },
+  exit: { movementDelta: 0, changesPassability: false }
 };
 
 export function hasMovementObjectRegions(scenario: ScenarioDefinition): boolean {

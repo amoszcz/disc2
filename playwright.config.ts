@@ -1,8 +1,10 @@
 import { defineConfig } from "@playwright/test";
 
+const isCi = Boolean((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.CI);
+
 export default defineConfig({
   testDir: "./tests/acceptance",
-  retries: process.env.CI ? 1 : 0,
+  retries: isCi ? 1 : 0,
   expect: {
     timeout: 10000
   },

@@ -12,7 +12,8 @@ describe("foundation flow", () => {
     expect(state.activeScenarioId).toBeNull();
     expect(state.availableScenarioOptions.map((option) => option.id)).toEqual([
       "core-map-loop",
-      "advanced-terrain-scenario"
+      "advanced-terrain-scenario",
+      "submap-expedition-scenario"
     ]);
   });
 
@@ -49,5 +50,22 @@ describe("foundation flow", () => {
     expect(state.activeScenarioId).toBe("core-map-loop");
     expect(state.scenario.heroes[0].remainingMovement).toBe(2);
     expect(state.selectedHeroId).toBe("hero-1");
+  });
+
+  test("advanced terrain sessions start on the surface map and reset travel state on restart", () => {
+    const state = createMenuState();
+
+    startScenarioSession(state, "advanced-terrain-scenario");
+    state.mapTravelState.activeMapId = "cavern-depths";
+    state.mapTravelState.lastMapId = "surface";
+    state.mapTravelState.lastTravelLinkId = "cave-entry-link";
+    state.mapTravelState.travelHistory.push("cave-entry-link");
+    startScenarioSession(state, "advanced-terrain-scenario");
+
+    expect(state.mapTravelState.activeMapId).toBe("surface");
+    expect(state.mapTravelState.lastMapId).toBeNull();
+    expect(state.mapTravelState.lastTravelLinkId).toBeNull();
+    expect(state.mapTravelState.travelHistory).toEqual([]);
+    expect(state.scenario.map.width).toBe(64);
   });
 });

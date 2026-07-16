@@ -23,4 +23,16 @@ describe("menu scenario selection flow", () => {
     expect(state.scenario.map.width).toBe(64);
     expect(state.scenario.heroes[0].remainingMovement).toBe(8);
   });
+
+  test("starting the submap scenario loads its linked-map setup from the main menu", () => {
+    const state = createMenuState();
+
+    startScenarioSession(state, "submap-expedition-scenario");
+
+    expect(state.sceneMode).toBe("map");
+    expect(state.scenario.id).toBe("submap-expedition-scenario");
+    expect(state.scenario.worldMaps?.map((worldMap) => worldMap.id)).toEqual(["surface-camp", "echo-cavern"]);
+    expect(state.mapTravelState.activeMapId).toBe("surface-camp");
+    expect(state.scenario.heroes[0].remainingMovement).toBe(5);
+  });
 });

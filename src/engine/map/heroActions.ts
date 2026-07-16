@@ -1,13 +1,15 @@
-import type { GameState, Position, RouteProgressResult, RouteStep } from "../scenario/types";
+import type { GameState, LinkedMapTravelLink, Position, RouteProgressResult, RouteStep } from "../scenario/types";
+import { getWorldMapById, resolveTravelLinkAtPosition } from "../scenario/types";
 import { findGuardedLocationAtHero, isLocationBlocked } from "./guardRules";
 import { isValidMove, movementCost, positionsEqual } from "./mapRules";
 import { collectPickupIfPresent } from "./pickupResolution";
 import { clearRoutePreview, createRoutePreview, isRoutePreviewOwnedByHero, markRoutePreviewForContinuation } from "./routePreviewState";
 import { findShortestRoute } from "./routePathfinding";
 import { hasMovementObjectRegions } from "./movementObjectLookup";
-import { buildRouteAttempt } from "./routeRules";
+import { buildRouteAttempt, validateTravelLink } from "./routeRules";
 import { createRouteFeedback, createRoutePreviewFeedback } from "./terrainFeedback";
 import { hasTerrainRegions } from "./terrainLookup";
+import { setActiveWorldMap } from "../../app/state/gameState";
 
 export interface HeroActionResult {
   ok: boolean;
@@ -16,6 +18,49 @@ export interface HeroActionResult {
 }
 
 type RouteAdvanceTrigger = "manual" | "end-turn";
+
+function buildTravelMessage(state: GameState, heroName: string, link: LinkedMapTravelLink): string {
+  const destinationMap = getWorldMapById(state.scenario, link.destinationMapId);
+  const destinationName = destinationMap?.name ?? "the linked map";
+
+  if (link.triggerKind === "exit") {
+    return `${heroName} returned to ${destinationName}.`;
+  }
+
+  if (link.triggerKind === "teleport") {
+    return `${heroName} used a teleport to reach ${destinationName}.`;
+  }
+
+  return `${heroName} entered ${destinationName} through a cave.`;
+}
+
+function resolveTravelAtHeroPosition(state: GameState, heroId: string): HeroActionResult {
+  const hero = state.scenario.heroes.find((entry) => entry.id === heroId);
+  if (!hero) {
+    return { ok: false, reason: "Hero not found." };
+  }
+
+  const link = resolveTravelLinkAtPosition(state.scenario, hero.mapId, hero.mapPosition);
+  if (!link) {
+    state.mapTravelState.transitionMessage = null;
+    return { ok: true };
+  }
+
+  const travelValidation = validateTravelLink(state.scenario, link);
+  if (!travelValidation.ok) {
+    const reason = travelValidation.reason ?? "That linked passage is unavailable.";
+    state.mapTravelState.transitionMessage = reason;
+    state.messageLog.push(reason);
+    return { ok: true, reason };
+  }
+
+  hero.mapId = link.destinationMapId;
+  hero.mapPosition = { ...link.destinationPosition };
+  const transitionMessage = buildTravelMessage(state, hero.name, link);
+  setActiveWorldMap(state, link.destinationMapId, transitionMessage, link.id);
+  state.messageLog.push(transitionMessage);
+  return { ok: true };
+}
 
 export function selectHero(state: GameState, heroId: string): HeroActionResult {
   const hero = state.scenario.heroes.find((entry) => entry.id === heroId);
@@ -27,6 +72,9 @@ export function selectHero(state: GameState, heroId: string): HeroActionResult {
   }
   if (hero.availabilityState === "defeated") {
     return { ok: false, reason: "That hero has been defeated." };
+  }
+  if (hero.mapId !== state.mapTravelState.activeMapId) {
+    return { ok: false, reason: "That hero is not on the active map." };
   }
   state.selectedHeroId = heroId;
   state.routeFeedback = null;
@@ -47,6 +95,9 @@ export function plotRoutePreview(state: GameState, destination: Position): HeroA
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
   if (!hero) {
     return { ok: false, reason: "Select a hero first." };
+  }
+  if (hero.mapId !== state.mapTravelState.activeMapId) {
+    return { ok: false, reason: "Select a hero on the active map first." };
   }
 
   const routeResult = findShortestRoute(state.scenario, hero.id, hero.mapPosition, destination);
@@ -187,6 +238,9 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
   if (!hero) {
     return { ok: false, reason: "Select a hero first." };
   }
+  if (hero.mapId !== state.mapTravelState.activeMapId) {
+    return { ok: false, reason: "That hero is not on the active map." };
+  }
 
   if (hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario)) {
     const routeAttempt = buildRouteAttempt(state.scenario, hero.id, hero.mapPosition, position, hero.remainingMovement);
@@ -204,7 +258,7 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
       `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()}${movementObjectSummary} at (${position.x + 1}, ${position.y + 1}).`
     );
     collectPickupIfPresent(state, hero.id);
-    return { ok: true };
+    return resolveTravelAtHeroPosition(state, hero.id);
   }
 
   if (!isValidMove(state.scenario.map, hero.mapPosition, position, hero.remainingMovement)) {
@@ -217,5 +271,5 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
   state.routeFeedback = null;
   state.messageLog.push(`${hero.name} moved to (${position.x + 1}, ${position.y + 1}).`);
   collectPickupIfPresent(state, hero.id);
-  return { ok: true };
+  return resolveTravelAtHeroPosition(state, hero.id);
 }

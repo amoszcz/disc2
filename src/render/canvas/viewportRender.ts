@@ -144,9 +144,10 @@ export function measureGameShellLayout(
 }
 
 export function normalizeViewportForState(state: GameState): MapViewport {
+  const activeMap = state.scenario.map;
   return normalizeViewport(
     state.mapViewState.viewport,
-    state.scenario.map,
+    activeMap,
     state.responsiveCanvasView.pixelWidth,
     state.responsiveCanvasView.pixelHeight
   );
@@ -168,10 +169,11 @@ export function getViewportRenderMetrics(
   state: GameState,
   canvas: HTMLCanvasElement | { width: number; height: number }
 ): ViewportRenderMetrics {
-  const baseTileSize = getBaseTileSize(state.scenario.map, canvas.width, canvas.height);
+  const activeMap = state.scenario.map;
+  const baseTileSize = getBaseTileSize(activeMap, canvas.width, canvas.height);
   const viewport = normalizeViewportForState(state);
-  const scaledTileSize = getScaledTileSize(viewport, state.scenario.map, canvas.width, canvas.height);
-  const visibleWorldSize = getVisibleWorldSize(viewport, state.scenario.map, canvas.width, canvas.height);
+  const scaledTileSize = getScaledTileSize(viewport, activeMap, canvas.width, canvas.height);
+  const visibleWorldSize = getVisibleWorldSize(viewport, activeMap, canvas.width, canvas.height);
 
   return {
     viewport,
@@ -181,8 +183,8 @@ export function getViewportRenderMetrics(
     visibleWorldHeight: visibleWorldSize.height,
     startTileX: Math.max(0, Math.floor(viewport.panOffsetX)),
     startTileY: Math.max(0, Math.floor(viewport.panOffsetY)),
-    endTileX: Math.min(state.scenario.map.width, Math.ceil(viewport.panOffsetX + visibleWorldSize.width)),
-    endTileY: Math.min(state.scenario.map.height, Math.ceil(viewport.panOffsetY + visibleWorldSize.height))
+    endTileX: Math.min(activeMap.width, Math.ceil(viewport.panOffsetX + visibleWorldSize.width)),
+    endTileY: Math.min(activeMap.height, Math.ceil(viewport.panOffsetY + visibleWorldSize.height))
   };
 }
 

@@ -14,7 +14,7 @@ export function collectPickupIfPresent(state: GameState, heroId: string): boolea
   }
 
   const pickup = state.scenario.resourcePickups.find(
-    (entry) => !entry.collectedState && positionsEqual(entry.mapPosition, hero.mapPosition)
+    (entry) => !entry.collectedState && entry.mapId === hero.mapId && positionsEqual(entry.mapPosition, hero.mapPosition)
   );
 
   if (!pickup) {

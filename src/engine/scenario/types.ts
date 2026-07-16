@@ -1,6 +1,6 @@
 export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
-export type MovementObjectType = "bridge" | "milestone" | "rubble";
+export type MovementObjectType = "bridge" | "milestone" | "rubble" | "cave" | "teleport" | "exit";
 
 export type SceneMode = "menu" | "map" | "battle" | "victory";
 export type SideKind = "player" | "enemy" | "neutral";
@@ -13,6 +13,8 @@ export type BattleOutcomeWinner = "attacker" | "defender";
 export type VictoryType = "eliminate-all-enemies";
 export type BattleSide = "attacker" | "defender";
 export type AttackCategory = "melee" | "ranged" | "area";
+export type WorldMapKind = "main" | "submap";
+export type MapTravelTriggerKind = "cave" | "teleport" | "exit";
 
 export interface Position {
   x: number;
@@ -225,6 +227,7 @@ export interface ScenarioHero {
   id: string;
   name: string;
   ownerPlayerId: string;
+  mapId: string;
   mapPosition: Position;
   movementPerTurn: number;
   remainingMovement: number;
@@ -248,6 +251,7 @@ export interface ScenarioUnit {
 
 export interface ResourcePickup {
   id: string;
+  mapId: string;
   mapPosition: Position;
   resourceType: ResourceType;
   amount: number;
@@ -264,6 +268,7 @@ export interface GuardForce {
 export interface GuardedLocation {
   id: string;
   name: string;
+  mapId: string;
   mapPosition: Position;
   guardForceId: string;
   locationType: LocationType;
@@ -277,6 +282,24 @@ export interface VictoryCondition {
   evaluationMoments: Array<"after-battle" | "end-turn">;
 }
 
+export interface ScenarioWorldMap {
+  id: string;
+  name: string;
+  kind: WorldMapKind;
+  map: MapDefinition;
+  terrainRegions?: TerrainRegion[];
+  movementObjectRegions?: MovementObjectRegion[];
+}
+
+export interface LinkedMapTravelLink {
+  id: string;
+  sourceMapId: string;
+  sourcePosition: Position;
+  triggerKind: MapTravelTriggerKind;
+  destinationMapId: string;
+  destinationPosition: Position;
+}
+
 export interface ScenarioDefinition {
   id: string;
   name: string;
@@ -284,6 +307,8 @@ export interface ScenarioDefinition {
   map: MapDefinition;
   terrainRegions?: TerrainRegion[];
   movementObjectRegions?: MovementObjectRegion[];
+  worldMaps?: ScenarioWorldMap[];
+  mapLinks?: LinkedMapTravelLink[];
   players: ScenarioPlayer[];
   heroes: ScenarioHero[];
   units: ScenarioUnit[];
@@ -297,6 +322,14 @@ export interface ScenarioOption {
   id: string;
   label: string;
   description: string;
+}
+
+export interface MapTravelState {
+  activeMapId: string;
+  lastMapId: string | null;
+  lastTravelLinkId: string | null;
+  transitionMessage: string | null;
+  travelHistory: string[];
 }
 
 export interface BattleParticipant {
@@ -370,6 +403,7 @@ export interface GameState {
   routeFeedback: RouteFeedback | null;
   activeRoutePreview: RoutePreview | null;
   mapViewState: MapViewState;
+  mapTravelState: MapTravelState;
   mobileLayoutState: MobileLayoutState;
   responsiveCanvasView: ResponsiveCanvasView;
   lastTouchInteraction: TouchInteraction | null;
@@ -385,4 +419,52 @@ export interface GameSnapshot {
 
 export function cloneScenario<T>(value: T): T {
   return structuredClone(value);
+}
+
+const DEFAULT_MAIN_MAP_ID = "main-map";
+
+export function getScenarioWorldMaps(scenario: ScenarioDefinition): ScenarioWorldMap[] {
+  if (scenario.worldMaps && scenario.worldMaps.length > 0) {
+    return scenario.worldMaps;
+  }
+
+  return [
+    {
+      id: DEFAULT_MAIN_MAP_ID,
+      name: scenario.name,
+      kind: "main",
+      map: scenario.map,
+      terrainRegions: scenario.terrainRegions,
+      movementObjectRegions: scenario.movementObjectRegions
+    }
+  ];
+}
+
+export function getMainWorldMapId(scenario: ScenarioDefinition): string {
+  return getScenarioWorldMaps(scenario).find((worldMap) => worldMap.kind === "main")?.id ?? DEFAULT_MAIN_MAP_ID;
+}
+
+export function getWorldMapById(scenario: ScenarioDefinition, mapId: string): ScenarioWorldMap | undefined {
+  return getScenarioWorldMaps(scenario).find((worldMap) => worldMap.id === mapId);
+}
+
+export function applyScenarioWorldMap(scenario: ScenarioDefinition, mapId: string): void {
+  const worldMap = getWorldMapById(scenario, mapId);
+  if (!worldMap) {
+    throw new Error(`Unknown world map: ${mapId}`);
+  }
+
+  scenario.map = worldMap.map;
+  scenario.terrainRegions = worldMap.terrainRegions;
+  scenario.movementObjectRegions = worldMap.movementObjectRegions;
+}
+
+export function resolveTravelLinkAtPosition(
+  scenario: ScenarioDefinition,
+  mapId: string,
+  position: Position
+): LinkedMapTravelLink | undefined {
+  return scenario.mapLinks?.find(
+    (link) => link.sourceMapId === mapId && link.sourcePosition.x === position.x && link.sourcePosition.y === position.y
+  );
 }

@@ -50,7 +50,11 @@ function handleMapTap(store: GameStore, point: ScreenPoint): void {
     };
 
     const heroAtTile = state.scenario.heroes.find(
-      (hero) => hero.mapPosition.x === x && hero.mapPosition.y === y && hero.availabilityState !== "defeated"
+      (hero) =>
+        hero.mapId === state.mapTravelState.activeMapId &&
+        hero.mapPosition.x === x &&
+        hero.mapPosition.y === y &&
+        hero.availabilityState !== "defeated"
     );
 
     if (heroAtTile) {
@@ -88,7 +92,9 @@ function handleMapTap(store: GameStore, point: ScreenPoint): void {
     }
 
     if (result.routeProgress?.completionState === "completed") {
-      state.messageLog.push(`Route completed at (${x + 1}, ${y + 1}).`);
+      state.messageLog.push(
+        `Route completed at (${result.routeProgress.finalPosition.x + 1}, ${result.routeProgress.finalPosition.y + 1}).`
+      );
     } else if (result.routeProgress) {
       state.messageLog.push(
         `Route advanced to (${result.routeProgress.finalPosition.x + 1}, ${result.routeProgress.finalPosition.y + 1}) and awaits continuation.`
