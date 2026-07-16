@@ -9,6 +9,12 @@ function movementObjectLabel(objectType: RouteFeedback["objectLabels"][number]):
       return "Milestone";
     case "rubble":
       return "Rubble";
+    case "cave":
+      return "Cave";
+    case "teleport":
+      return "Teleport";
+    case "exit":
+      return "Exit";
   }
 
   return objectType;

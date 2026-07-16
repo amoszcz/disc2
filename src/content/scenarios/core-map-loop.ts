@@ -4,6 +4,17 @@ export const coreMapLoopScenario: ScenarioDefinition = {
   id: "core-map-loop",
   name: "Border Watch",
   description: "A compact frontier skirmish with a guarded mine close to the starting hero.",
+  worldMaps: [
+    {
+      id: "main-map",
+      name: "Border Watch",
+      kind: "main",
+      map: {
+        width: 5,
+        height: 5
+      }
+    }
+  ],
   map: {
     width: 5,
     height: 5
@@ -33,6 +44,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       id: "hero-1",
       name: "Aren",
       ownerPlayerId: "player-1",
+      mapId: "main-map",
       mapPosition: { x: 0, y: 2 },
       movementPerTurn: 2,
       remainingMovement: 2,
@@ -106,6 +118,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
   resourcePickups: [
     {
       id: "pickup-1",
+      mapId: "main-map",
       mapPosition: { x: 1, y: 2 },
       resourceType: "gold",
       amount: 10,
@@ -116,6 +129,7 @@ export const coreMapLoopScenario: ScenarioDefinition = {
     {
       id: "guarded-location-1",
       name: "Ancient Mine",
+      mapId: "main-map",
       mapPosition: { x: 3, y: 2 },
       guardForceId: "guard-force-1",
       locationType: "resource-site",

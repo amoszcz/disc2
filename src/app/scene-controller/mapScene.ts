@@ -15,6 +15,8 @@ import { hasTerrainRegions } from "../../engine/map/terrainLookup";
 export function renderMapSidebar(store: GameStore, container: HTMLElement): void {
   const state = store.getState();
   const logMessage = state.messageLog[state.messageLog.length - 1] ?? "Explore the map.";
+  const travelMessage = state.mapTravelState.transitionMessage;
+  const overlayTitle = travelMessage ? "Travel" : state.routeFeedback?.blockedReason ? "Route" : "Message";
   const terrainMode = hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario);
   const isMobile = state.mobileLayoutState.layoutMode === "mobile";
   const navigationMessage = state.mapViewState.panGesture?.isActive
@@ -50,7 +52,7 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
             (state.routeFeedback?.objectLabels.length ? `Objects here: ${state.routeFeedback.objectLabels.join(", ")}.` : null)
         : null
     )}
-    ${renderErrorOverlay(logMessage, state.routeFeedback?.blockedReason ?? navigationMessage)}
+    ${renderErrorOverlay(logMessage, travelMessage ?? state.routeFeedback?.blockedReason ?? navigationMessage, overlayTitle)}
   `;
 
   const button = container.querySelector<HTMLButtonElement>("#end-turn-button");

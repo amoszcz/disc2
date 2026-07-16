@@ -63,6 +63,30 @@ export async function touchCanvasPoint(page: Page, point: { x: number; y: number
   );
 }
 
+export async function clickTile(page: Page, tileX: number, tileY: number): Promise<void> {
+  const point = await getTileClientPoint(page, tileX, tileY);
+  await page.mouse.click(point.x, point.y);
+}
+
+export async function mutateTravelLink(
+  page: Page,
+  linkId: string,
+  destinationMapId: string
+): Promise<void> {
+  await page.evaluate(
+    ({ nextDestinationMapId, nextLinkId }) => {
+      const store = (window as Window & { __gameStore?: { getState: () => any } }).__gameStore;
+      const link = store?.getState().scenario.mapLinks?.find((entry: { id: string }) => entry.id === nextLinkId);
+      if (!link) {
+        throw new Error(`Travel link ${nextLinkId} was not available.`);
+      }
+
+      link.destinationMapId = nextDestinationMapId;
+    },
+    { nextDestinationMapId: destinationMapId, nextLinkId: linkId }
+  );
+}
+
 export async function dragCanvas(page: Page, from: { x: number; y: number }, to: { x: number; y: number }): Promise<void> {
   await page.evaluate(
     ({ fromPoint, toPoint }) => {

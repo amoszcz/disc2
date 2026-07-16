@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { clickTile } from "./mobileTestUtils";
 
 test("player can still select and move after zooming or panning, and the view is restored after scene changes", async ({ page }) => {
   await page.goto("/?scenario=advanced-terrain-scenario");
@@ -58,4 +59,16 @@ test("player can still select and move after zooming or panning, and the view is
   expect(preserved.after.zoomLevel).toBe(preserved.before.zoomLevel);
   expect(preserved.after.panOffsetX).toBe(preserved.before.panOffsetX);
   expect(preserved.after.panOffsetY).toBe(preserved.before.panOffsetY);
+});
+
+test("cave travel enters the linked submap and updates the active map hud", async ({ page }) => {
+  await page.goto("/?scenario=advanced-terrain-scenario");
+
+  await clickTile(page, 5, 10);
+  await clickTile(page, 8, 10);
+  await clickTile(page, 8, 10);
+
+  await expect(page.getByTestId("active-map-name")).toHaveText("Cavern Depths");
+  await expect(page.getByTestId("travel-message")).toContainText("entered Cavern Depths");
+  await expect(page.getByTestId("error-detail")).toContainText("entered Cavern Depths");
 });

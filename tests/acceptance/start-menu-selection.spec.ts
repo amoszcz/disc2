@@ -6,6 +6,7 @@ test("game opens on the main menu and each scenario can be started", async ({ pa
   await expect(page.getByTestId("main-menu-panel")).toBeVisible();
   await expect(page.getByTestId("scenario-start-core-map-loop")).toBeVisible();
   await expect(page.getByTestId("scenario-start-advanced-terrain-scenario")).toBeVisible();
+  await expect(page.getByTestId("scenario-start-submap-expedition-scenario")).toBeVisible();
 
   await page.getByTestId("scenario-start-core-map-loop").click();
   await expect(page.getByTestId("map-hud")).toBeVisible();
@@ -15,4 +16,9 @@ test("game opens on the main menu and each scenario can be started", async ({ pa
   await page.getByTestId("scenario-start-advanced-terrain-scenario").click();
   await expect(page.getByTestId("map-hud")).toBeVisible();
   await expect(page.getByTestId("remaining-movement")).toContainText("8");
+
+  await page.goto("/");
+  await page.getByTestId("scenario-start-submap-expedition-scenario").click();
+  await expect(page.getByTestId("map-hud")).toBeVisible();
+  await expect(page.getByTestId("active-map-name")).toContainText("Surface Camp");
 });

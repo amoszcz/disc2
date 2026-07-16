@@ -1,5 +1,14 @@
 import { getDefaultScenarioId, getScenarioOptions, loadScenario, type ScenarioId } from "../../engine/scenario/loadScenario";
-import type { Battle, GameState, MapViewState, ScenarioDefinition, SceneMode } from "../../engine/scenario/types";
+import {
+  applyScenarioWorldMap,
+  getMainWorldMapId,
+  type Battle,
+  type GameState,
+  type MapTravelState,
+  type MapViewState,
+  type ScenarioDefinition,
+  type SceneMode
+} from "../../engine/scenario/types";
 import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
 import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
@@ -15,6 +24,16 @@ export function createDefaultMapViewState(scenario: ScenarioDefinition): MapView
     zoomGesture: null,
     lastSceneMode: "map",
     isDefaultView: true
+  };
+}
+
+function createInitialMapTravelState(scenario: ScenarioDefinition): MapTravelState {
+  return {
+    activeMapId: getMainWorldMapId(scenario),
+    lastMapId: null,
+    lastTravelLinkId: null,
+    transitionMessage: null,
+    travelHistory: []
   };
 }
 
@@ -36,6 +55,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     routeFeedback: null,
     activeRoutePreview: null,
     mapViewState: createDefaultMapViewState(scenario),
+    mapTravelState: createInitialMapTravelState(scenario),
     mobileLayoutState: getDefaultMobileLayoutState(),
     responsiveCanvasView: getDefaultResponsiveCanvasView(),
     lastTouchInteraction: null
@@ -79,6 +99,37 @@ export function setScenario(state: GameState, scenario: ScenarioDefinition): Gam
   return state;
 }
 
+export function setActiveWorldMap(
+  state: GameState,
+  nextMapId: string,
+  transitionMessage: string | null,
+  travelLinkId: string | null
+): GameState {
+  const previousMapId = state.mapTravelState.activeMapId;
+  applyScenarioWorldMap(state.scenario, nextMapId);
+  state.mapTravelState.activeMapId = nextMapId;
+  state.mapTravelState.lastMapId = previousMapId;
+  state.mapTravelState.lastTravelLinkId = travelLinkId;
+  state.mapTravelState.transitionMessage = transitionMessage;
+  if (travelLinkId) {
+    state.mapTravelState.travelHistory.push(travelLinkId);
+  }
+  state.activeRoutePreview = null;
+  state.routeFeedback = null;
+  state.mapViewState = {
+    ...state.mapViewState,
+    viewport: createViewport(
+      state.scenario.map,
+      state.responsiveCanvasView.pixelWidth,
+      state.responsiveCanvasView.pixelHeight
+    ),
+    panGesture: null,
+    zoomGesture: null,
+    isDefaultView: true
+  };
+  return state;
+}
+
 export function startScenarioSession(state: GameState, scenarioId: ScenarioId): GameState {
   const preservedLayoutState = state.mobileLayoutState;
   const preservedCanvasView = state.responsiveCanvasView;
@@ -95,6 +146,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
+  state.mapTravelState = nextState.mapTravelState;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
@@ -117,6 +169,7 @@ export function returnToMainMenu(state: GameState): GameState {
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
+  state.mapTravelState = nextState.mapTravelState;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;

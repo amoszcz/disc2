@@ -2,12 +2,14 @@ import { describe, expect, test } from "vitest";
 import { loadScenario, validateScenario } from "../../src/engine/scenario/loadScenario";
 
 describe("movement object format contract", () => {
-  test("advanced terrain scenarios can author bridge, milestone, and rubble regions", () => {
+  test("advanced terrain scenarios can author visible travel markers alongside bridge and rubble regions", () => {
     const scenario = loadScenario("advanced-terrain-scenario");
 
     expect(scenario.movementObjectRegions?.map((region) => region.objectType)).toEqual([
       "bridge",
       "milestone",
+      "cave",
+      "teleport",
       "rubble",
       "rubble"
     ]);
@@ -15,7 +17,12 @@ describe("movement object format contract", () => {
 
   test("bridge regions on non-river terrain fail validation", () => {
     const scenario = loadScenario("advanced-terrain-scenario");
-    scenario.movementObjectRegions = [
+    const surfaceMap = scenario.worldMaps?.find((worldMap) => worldMap.id === "surface");
+    if (!surfaceMap) {
+      throw new Error("Surface map was not available.");
+    }
+
+    surfaceMap.movementObjectRegions = [
       {
         id: "bad-bridge",
         objectType: "bridge",
@@ -23,6 +30,7 @@ describe("movement object format contract", () => {
         coverage: { kind: "rect", x: 5, y: 10, width: 1, height: 1 }
       }
     ];
+    scenario.movementObjectRegions = surfaceMap.movementObjectRegions;
 
     expect(() => validateScenario(scenario)).toThrow("Bridge region bad-bridge can only cover river tiles.");
   });

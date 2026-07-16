@@ -11,7 +11,9 @@ describe("main menu contract", () => {
     expect(html).toContain('data-testid="scenario-option-list"');
     expect(html).toContain("Border Watch");
     expect(html).toContain("Broken Causeway");
+    expect(html).toContain("Cavern Circuit");
     expect(html).toContain('data-testid="scenario-start-core-map-loop"');
     expect(html).toContain('data-testid="scenario-start-advanced-terrain-scenario"');
+    expect(html).toContain('data-testid="scenario-start-submap-expedition-scenario"');
   });
 });

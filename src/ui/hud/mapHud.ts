@@ -4,6 +4,7 @@ import { renderTerrainLegend } from "../../render/canvas/renderTerrainLegend";
 export function renderMapHud(state: GameState): string {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
   const player = state.scenario.players.find((entry) => entry.id === state.activePlayerId);
+  const activeMap = state.scenario.worldMaps?.find((worldMap) => worldMap.id === state.mapTravelState.activeMapId);
   const routeFeedback = state.routeFeedback;
   const routePreview = state.activeRoutePreview;
   const isMobile = state.mobileLayoutState.layoutMode === "mobile";
@@ -14,12 +15,18 @@ export function renderMapHud(state: GameState): string {
   return `
     <div class="overlay-box" data-testid="map-hud">
       <div class="hud-row"><strong>Scene</strong><span>Adventure Map</span></div>
+      <div class="hud-row"><strong>Map</strong><span data-testid="active-map-name">${activeMap?.name ?? state.scenario.name}</span></div>
       <div class="hud-row"><strong>Active Side</strong><span>${player?.name ?? "Unknown"}</span></div>
       <div class="hud-row"><strong>Hero</strong><span>${hero?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Layout</strong><span data-testid="layout-mode">${state.mobileLayoutState.layoutMode}</span></div>
       <div class="hud-row"><strong>Zoom</strong><span data-testid="map-zoom">${state.mapViewState.viewport.zoomLevel.toFixed(2)}x</span></div>
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
+      ${
+        state.mapTravelState.transitionMessage
+          ? `<div class="hud-row"><strong>Travel</strong><span data-testid="travel-message">${state.mapTravelState.transitionMessage}</span></div>`
+          : ""
+      }
       <p class="control-tip" data-testid="map-control-tip">${controlsMessage}</p>
       <div class="hud-row action-row">
         <button type="button" class="secondary-button" id="map-zoom-out-button" data-testid="map-zoom-out-button">Zoom Out</button>

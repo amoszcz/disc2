@@ -17,6 +17,7 @@ export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): num
 
 export function renderMapScene(context: CanvasRenderingContext2D, state: GameState): void {
   const { map } = state.scenario;
+  const activeMapId = state.mapTravelState.activeMapId;
   const metrics = getViewportRenderMetrics(state, context.canvas);
   const tileSize = metrics.scaledTileSize;
 
@@ -71,7 +72,7 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
 
   const routePreview = state.activeRoutePreview;
   const routeOwner = routePreview ? state.scenario.heroes.find((hero) => hero.id === routePreview.heroId) : null;
-  if (routePreview && routeOwner && routePreview.steps.length > 0) {
+  if (routePreview && routeOwner && routeOwner.mapId === activeMapId && routePreview.steps.length > 0) {
     const pathPoints = [routeOwner.mapPosition, ...routePreview.steps.map((step) => step.position)].map((position) =>
       worldTileToCanvasPoint(position, metrics.viewport, context.canvas, map)
     );
@@ -110,7 +111,9 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     context.lineWidth = 1;
   }
 
-  for (const pickup of state.scenario.resourcePickups.filter((entry) => !entry.collectedState)) {
+  for (const pickup of state.scenario.resourcePickups.filter(
+    (entry) => !entry.collectedState && entry.mapId === activeMapId
+  )) {
     const point = worldTileToCanvasPoint(pickup.mapPosition, metrics.viewport, context.canvas, map);
     context.fillStyle = palette.pickup;
     context.beginPath();
@@ -124,9 +127,17 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     context.fill();
   }
 
-  renderGuardedLocations(context, tileSize, state.scenario.guardedLocations, metrics.viewport, map);
+  renderGuardedLocations(
+    context,
+    tileSize,
+    state.scenario.guardedLocations.filter((location) => location.mapId === activeMapId),
+    metrics.viewport,
+    map
+  );
 
-  for (const hero of state.scenario.heroes.filter((entry) => entry.availabilityState !== "defeated")) {
+  for (const hero of state.scenario.heroes.filter(
+    (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId
+  )) {
     const point = worldTileToCanvasPoint(hero.mapPosition, metrics.viewport, context.canvas, map);
     context.fillStyle = palette.hero;
     context.beginPath();

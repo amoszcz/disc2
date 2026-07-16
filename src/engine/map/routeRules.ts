@@ -1,5 +1,6 @@
-import type { Position, RouteAttempt, ScenarioDefinition } from "../scenario/types";
+import type { LinkedMapTravelLink, Position, RouteAttempt, ScenarioDefinition } from "../scenario/types";
 import { movementCost as legacyMovementCost, isWithinBounds } from "./mapRules";
+import { getWorldMapById } from "../scenario/types";
 import { hasMovementObjectRegions } from "./movementObjectLookup";
 import { resolveMovementTile } from "./movementObjectRules";
 import { hasTerrainRegions } from "./terrainLookup";
@@ -112,4 +113,18 @@ export function legacyMoveWithinAllowance(
 ): boolean {
   const cost = legacyMovementCost(fromPosition, toPosition);
   return isWithinBounds(scenario.map, toPosition) && cost > 0 && cost <= remainingMovement;
+}
+
+export function validateTravelLink(scenario: ScenarioDefinition, link: LinkedMapTravelLink): { ok: boolean; reason?: string } {
+  const sourceMap = getWorldMapById(scenario, link.sourceMapId);
+  const destinationMap = getWorldMapById(scenario, link.destinationMapId);
+  if (!sourceMap || !destinationMap) {
+    return { ok: false, reason: "That linked passage is unavailable." };
+  }
+
+  if (!isWithinBounds(sourceMap.map, link.sourcePosition) || !isWithinBounds(destinationMap.map, link.destinationPosition)) {
+    return { ok: false, reason: "That linked passage leads nowhere safe." };
+  }
+
+  return { ok: true };
 }

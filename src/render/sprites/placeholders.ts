@@ -32,13 +32,19 @@ export const terrainPalette = {
 export const movementObjectPalette = {
   bridge: "#f5f1dd",
   milestone: "#fff4bf",
-  rubble: "#6a4f3b"
+  rubble: "#6a4f3b",
+  cave: "#70543b",
+  teleport: "#7ec8e3",
+  exit: "#d6f0c0"
 } as const;
 
 export const movementObjectGlyph = {
   bridge: "=",
   milestone: "+",
-  rubble: "x"
+  rubble: "x",
+  cave: "C",
+  teleport: "T",
+  exit: "E"
 } as const;
 
 export const routePreviewPalette = {
