@@ -9,6 +9,8 @@ import { createViewport } from "../../engine/map/viewportMath";
 import { measureGameShellLayout, normalizeViewportForState } from "../../render/canvas/viewportRender";
 import { renderMainMenu } from "../../ui/overlays/mainMenu";
 import { renderVictoryMenu } from "../../ui/overlays/victoryMenu";
+import { visualTemplateCatalog } from "../../render/sprites/visualTemplateCatalog";
+import { VISUAL_TEMPLATE_INVALIDATE_EVENT } from "../../render/sprites/visualTemplateResolver";
 
 function resolveScenarioId(): ScenarioId | null {
   const params = new URLSearchParams(window.location.search);
@@ -43,7 +45,9 @@ export function startGame(root: HTMLElement | null): void {
   const requestedScenarioId = resolveScenarioId();
   const store = new GameStore(requestedScenarioId ? createInitialState(requestedScenarioId) : createMenuState());
   const sceneController = createSceneController(store.getState().sceneMode);
-  (window as Window & { __gameStore?: GameStore }).__gameStore = store;
+  (window as Window & { __gameStore?: GameStore; __visualTemplateCatalog?: typeof visualTemplateCatalog }).__gameStore = store;
+  (window as Window & { __gameStore?: GameStore; __visualTemplateCatalog?: typeof visualTemplateCatalog }).__visualTemplateCatalog =
+    visualTemplateCatalog;
 
   root.innerHTML = `
     <section class="panel game-surface-panel" id="game-surface-panel">
@@ -97,6 +101,11 @@ export function startGame(root: HTMLElement | null): void {
   };
 
   window.addEventListener("resize", syncResponsiveLayout);
+  window.addEventListener(VISUAL_TEMPLATE_INVALIDATE_EVENT, () => {
+    store.update(() => {
+      // Re-render when an asynchronously loaded dedicated visual becomes available.
+    });
+  });
   if ("ResizeObserver" in window) {
     const observer = new ResizeObserver(() => {
       syncResponsiveLayout();

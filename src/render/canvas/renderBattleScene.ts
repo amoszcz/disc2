@@ -2,6 +2,12 @@ import type { BattleFormationSlot, GameState } from "../../engine/scenario/types
 import { getBattleCanvasSlotCenter, BATTLE_SLOT_HEIGHT, BATTLE_SLOT_WIDTH } from "../../engine/battle/battleFormation";
 import { getBattleParticipant, getBattleUnit, getUnitAttackCategory, isPlayerControlledBattleUnit } from "../../engine/battle/battleTargeting";
 import { palette } from "../sprites/placeholders";
+import {
+  drawResolvedVisualTemplate,
+  recordVisualTemplateDiagnostic,
+  resetVisualTemplateDiagnostics,
+  resolveUnitVisualTemplate
+} from "../sprites/visualTemplateResolver";
 
 function drawFormationSlot(context: CanvasRenderingContext2D, slot: BattleFormationSlot): void {
   const center = getBattleCanvasSlotCenter(slot, context.canvas.width, context.canvas.height);
@@ -41,10 +47,17 @@ function drawUnitCard(
   const isLegalTarget = legalTargetUnitIds.includes(unit.id);
   const isSelectedTarget = selectedTargetUnitId === unit.id;
   const isDefending = state.battle?.defendStates.some((entry) => entry.unitId === unit.id && entry.isActive);
+  const resolvedTemplate = resolveUnitVisualTemplate(unit, "battle");
 
   context.save();
-  context.fillStyle = !isAlive ? "#9f9487" : slot.side === "attacker" ? palette.attacker : palette.defender;
+  recordVisualTemplateDiagnostic({ subjectKind: "unit", subjectType: unit.name, sceneContext: "battle" }, resolvedTemplate);
+  context.fillStyle = !isAlive ? "#9f9487" : "#eadbc7";
   context.fillRect(left, top, width, height);
+  drawResolvedVisualTemplate(context, resolvedTemplate, { x: left, y: top, width, height });
+  if (!isAlive) {
+    context.fillStyle = "rgba(35, 23, 13, 0.35)";
+    context.fillRect(left, top, width, height);
+  }
 
   context.lineWidth = isSelectedTarget ? 4 : isLegalTarget ? 3 : isActive ? 3 : 1;
   context.strokeStyle = isSelectedTarget ? palette.battleSelected : isLegalTarget ? palette.battleLegal : isActive ? palette.battleActive : "#ffffff";
@@ -59,13 +72,15 @@ function drawUnitCard(
   }
 
   context.fillStyle = "#ffffff";
+  context.fillRect(left, top + height * 0.6, width, height * 0.4);
+  context.fillStyle = "#23170d";
   context.font = `bold ${Math.max(11, Math.floor(slotHeight * 0.24))}px Georgia`;
   context.fillText(unit.name, left + 6, top + Math.max(18, Math.floor(slotHeight * 0.32)), width - 12);
   context.font = `${Math.max(10, Math.floor(slotHeight * 0.2))}px Georgia`;
   context.fillText(`${unit.currentHealth}/${unit.maxHealth} HP`, left + 6, top + Math.max(34, Math.floor(slotHeight * 0.62)));
 
   if (isAlive) {
-    context.fillStyle = "#f8e7b0";
+    context.fillStyle = slot.side === "attacker" ? palette.attacker : palette.defender;
     context.fillText(getUnitAttackCategory(state, unit.id).toUpperCase(), left + 6, top + Math.max(48, Math.floor(slotHeight * 0.88)));
   }
 
@@ -77,6 +92,7 @@ export function renderBattleScene(context: CanvasRenderingContext2D, state: Game
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.fillStyle = "#f3e6d3";
   context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+  resetVisualTemplateDiagnostics("battle");
 
   if (!battle) {
     return;

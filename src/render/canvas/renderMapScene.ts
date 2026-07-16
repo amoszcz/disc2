@@ -3,13 +3,19 @@ import type { MapDefinition } from "../../engine/scenario/types";
 import { resolveMovementObjectStack } from "../../engine/map/movementObjectLookup";
 import { resolveTerrainTile } from "../../engine/map/terrainLookup";
 import { getBaseTileSize } from "../../engine/map/viewportMath";
-import { movementObjectGlyph } from "../sprites/placeholders";
-import { movementObjectPalette } from "../sprites/placeholders";
 import { palette } from "../sprites/placeholders";
 import { routePreviewPalette } from "../sprites/placeholders";
-import { terrainPalette } from "../sprites/placeholders";
+import {
+  drawResolvedVisualTemplate,
+  recordVisualTemplateDiagnostic,
+  resetVisualTemplateDiagnostics,
+  resolveHeroVisualTemplate,
+  resolveMovementObjectVisualTemplate,
+  resolveResourcePickupVisualTemplate,
+  resolveTerrainVisualTemplate
+} from "../sprites/visualTemplateResolver";
 import { renderGuardedLocations } from "./renderGuardedLocations";
-import { getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
+import { createTileVisualBounds, getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
 
 export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): number {
   return getBaseTileSize(map, canvas?.width, canvas?.height);
@@ -24,47 +30,46 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.fillStyle = "#f6ecd0";
   context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+  resetVisualTemplateDiagnostics("map");
 
   for (let y = metrics.startTileY; y < metrics.endTileY; y += 1) {
     for (let x = metrics.startTileX; x < metrics.endTileX; x += 1) {
       const terrainTile = state.scenario.terrainRegions?.length ? resolveTerrainTile(state.scenario, { x, y }) : null;
       const point = worldTileToCanvasPoint({ x, y }, metrics.viewport, context.canvas, map);
-      context.fillStyle = terrainTile ? terrainPalette[terrainTile.terrainType] : palette.tile;
-      context.fillRect(point.x, point.y, tileSize - 1, tileSize - 1);
+      const terrainType = terrainTile?.terrainType ?? state.scenario.map.defaultTerrainType ?? "plains";
+      const terrainTemplate = resolveTerrainVisualTemplate(terrainType);
+      recordVisualTemplateDiagnostic({ subjectKind: "terrain", subjectType: terrainType, sceneContext: "map" }, terrainTemplate);
+      drawResolvedVisualTemplate(context, terrainTemplate, createTileVisualBounds(point, tileSize, 0));
       context.strokeStyle = palette.tileBorder;
       context.strokeRect(point.x, point.y, tileSize, tileSize);
 
       const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
       if (movementObjects.effects.length > 0) {
         const primaryObject = movementObjects.effects[0];
-        context.fillStyle = movementObjectPalette[primaryObject.objectType];
-        context.fillRect(
-          point.x + Math.max(2, Math.floor(tileSize / 8)),
-          point.y + Math.max(2, Math.floor(tileSize / 8)),
-          tileSize - Math.max(4, Math.floor(tileSize / 4)),
-          Math.max(8, Math.floor(tileSize / 4))
+        const primaryTemplate = resolveMovementObjectVisualTemplate(primaryObject.objectType);
+        recordVisualTemplateDiagnostic(
+          { subjectKind: "movement-object", subjectType: primaryObject.objectType, sceneContext: "map" },
+          primaryTemplate
         );
-        context.fillStyle = primaryObject.objectType === "bridge" ? palette.text : "#fff";
-        context.font = `${Math.max(8, Math.floor(tileSize / 3))}px sans-serif`;
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(
-          movementObjectGlyph[primaryObject.objectType],
-          point.x + tileSize / 2,
-          point.y + Math.max(6, Math.floor(tileSize / 4))
-        );
+        drawResolvedVisualTemplate(context, primaryTemplate, {
+          x: point.x + Math.max(2, Math.floor(tileSize / 8)),
+          y: point.y + Math.max(2, Math.floor(tileSize / 8)),
+          width: tileSize - Math.max(4, Math.floor(tileSize / 4)),
+          height: Math.max(8, Math.floor(tileSize / 3))
+        });
 
         if (movementObjects.effects.length > 1) {
-          context.fillStyle = movementObjectPalette[movementObjects.effects[1].objectType];
-          context.beginPath();
-          context.arc(
-            point.x + tileSize - Math.max(6, Math.floor(tileSize / 5)),
-            point.y + tileSize - Math.max(6, Math.floor(tileSize / 5)),
-            Math.max(4, Math.floor(tileSize / 8)),
-            0,
-            Math.PI * 2
+          const secondaryTemplate = resolveMovementObjectVisualTemplate(movementObjects.effects[1].objectType);
+          recordVisualTemplateDiagnostic(
+            { subjectKind: "movement-object", subjectType: movementObjects.effects[1].objectType, sceneContext: "map" },
+            secondaryTemplate
           );
-          context.fill();
+          drawResolvedVisualTemplate(context, secondaryTemplate, {
+            x: point.x + tileSize - Math.max(12, Math.floor(tileSize / 3)),
+            y: point.y + tileSize - Math.max(12, Math.floor(tileSize / 3)),
+            width: Math.max(8, Math.floor(tileSize / 4)),
+            height: Math.max(8, Math.floor(tileSize / 4))
+          });
         }
       }
     }
@@ -115,16 +120,17 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     (entry) => !entry.collectedState && entry.mapId === activeMapId
   )) {
     const point = worldTileToCanvasPoint(pickup.mapPosition, metrics.viewport, context.canvas, map);
-    context.fillStyle = palette.pickup;
-    context.beginPath();
-    context.arc(
-      point.x + tileSize / 2,
-      point.y + tileSize / 2,
-      Math.max(4, Math.floor(tileSize / 6)),
-      0,
-      Math.PI * 2
+    const pickupTemplate = resolveResourcePickupVisualTemplate(pickup);
+    recordVisualTemplateDiagnostic(
+      { subjectKind: "resource-pickup", subjectType: pickup.resourceType, sceneContext: "map" },
+      pickupTemplate
     );
-    context.fill();
+    drawResolvedVisualTemplate(context, pickupTemplate, {
+      x: point.x + tileSize * 0.2,
+      y: point.y + tileSize * 0.2,
+      width: tileSize * 0.6,
+      height: tileSize * 0.6
+    });
   }
 
   renderGuardedLocations(
@@ -139,16 +145,14 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId
   )) {
     const point = worldTileToCanvasPoint(hero.mapPosition, metrics.viewport, context.canvas, map);
-    context.fillStyle = palette.hero;
-    context.beginPath();
-    context.arc(
-      point.x + tileSize / 2,
-      point.y + tileSize / 2,
-      Math.max(4, Math.floor(tileSize / 4)),
-      0,
-      Math.PI * 2
-    );
-    context.fill();
+    const heroTemplate = resolveHeroVisualTemplate(hero);
+    recordVisualTemplateDiagnostic({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, heroTemplate);
+    drawResolvedVisualTemplate(context, heroTemplate, {
+      x: point.x + tileSize * 0.1,
+      y: point.y + tileSize * 0.1,
+      width: tileSize * 0.8,
+      height: tileSize * 0.8
+    });
 
     if (state.selectedHeroId === hero.id) {
       context.strokeStyle = "#fff";

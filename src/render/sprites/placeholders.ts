@@ -47,6 +47,48 @@ export const movementObjectGlyph = {
   exit: "E"
 } as const;
 
+export const visualFallbackGlyph = {
+  unit: "U",
+  hero: "H",
+  "movement-object": "O",
+  "guarded-location": "G",
+  terrain: "",
+  "resource-pickup": "$"
+} as const;
+
+export const visualFallbackPalette = {
+  unit: { fillColor: palette.attacker, accentColor: "#ffffff", borderColor: "#ffffff", textColor: "#ffffff", shape: "slot" as const },
+  hero: { fillColor: palette.hero, accentColor: "#ffffff", borderColor: "#ffffff", textColor: "#ffffff", shape: "circle" as const },
+  "movement-object": {
+    fillColor: palette.tileBorder,
+    accentColor: "#fff4bf",
+    borderColor: palette.text,
+    textColor: "#ffffff",
+    shape: "rect" as const
+  },
+  "guarded-location": {
+    fillColor: palette.guardBlocked,
+    accentColor: "#ffffff",
+    borderColor: palette.text,
+    textColor: "#ffffff",
+    shape: "rect" as const
+  },
+  terrain: {
+    fillColor: palette.tile,
+    accentColor: "#f6ecd0",
+    borderColor: palette.tileBorder,
+    textColor: palette.text,
+    shape: "tile" as const
+  },
+  "resource-pickup": {
+    fillColor: palette.pickup,
+    accentColor: "#fff4bf",
+    borderColor: palette.tileBorder,
+    textColor: palette.text,
+    shape: "circle" as const
+  }
+} as const;
+
 export const routePreviewPalette = {
   line: "#f3f0d1",
   dot: "#d46a3d",

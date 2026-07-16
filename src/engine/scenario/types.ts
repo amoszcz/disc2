@@ -15,6 +15,11 @@ export type BattleSide = "attacker" | "defender";
 export type AttackCategory = "melee" | "ranged" | "area";
 export type WorldMapKind = "main" | "submap";
 export type MapTravelTriggerKind = "cave" | "teleport" | "exit";
+export type VisualAssetKind = "dedicated" | "fallback";
+export type VisualCategory = "unit" | "hero" | "movement-object" | "guarded-location" | "terrain" | "resource-pickup";
+export type VisualSceneContext = "map" | "battle";
+export type VisualSubjectKind = VisualCategory;
+export type VisualFallbackShape = "rect" | "circle" | "diamond" | "tile" | "slot";
 
 export interface Position {
   x: number;
@@ -24,6 +29,42 @@ export interface Position {
 export interface ScreenPoint {
   x: number;
   y: number;
+}
+
+export interface VisualFallbackStyle {
+  fillColor: string;
+  accentColor?: string;
+  borderColor?: string;
+  textColor?: string;
+  glyph?: string;
+  shape: VisualFallbackShape;
+}
+
+export interface VisualTemplateDefinition {
+  templateId: string;
+  visualCategory: VisualCategory;
+  assetKind: VisualAssetKind;
+  assetSource: string | null;
+  fallbackStyle: VisualFallbackStyle;
+  readabilityLabel: string;
+  intendedContexts: VisualSceneContext[];
+}
+
+export interface VisualTemplateResolverResult {
+  templateId: string;
+  resolvedFrom: string;
+  assetKind: VisualAssetKind;
+  assetSource: string | null;
+  fallbackStyle: VisualFallbackStyle;
+  readabilityLabel: string;
+  intendedContexts: VisualSceneContext[];
+  isFallback: boolean;
+}
+
+export interface VisualSubjectDescriptor {
+  subjectKind: VisualSubjectKind;
+  subjectType: string;
+  sceneContext: VisualSceneContext;
 }
 
 export type LayoutMode = "desktop" | "mobile";
