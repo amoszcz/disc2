@@ -1,0 +1,33 @@
+# Contract: Touch Session Controls
+
+## Purpose
+
+Define the touch-capable interaction contract for mobile gameplay sessions.
+
+## Touch Input Contract
+
+- Every action required to start, play, complete, and replay a scenario must be possible through touch-capable controls.
+- Required interactions must not depend on hover-only feedback, mouse wheel input, or middle mouse button input.
+- Tap interactions must resolve cleanly to one gameplay action at a time, while drag interactions must pan the map without accidentally confirming a move.
+- Touch input must map cleanly to the existing gameplay flow rather than introducing a separate ruleset.
+
+## Map Interaction Contract
+
+- A player must be able to tap heroes, tap map tiles, and progress route selection from a mobile browser.
+- A player must be able to navigate the map view on mobile when the default visible area is insufficient.
+- Mobile map navigation may combine drag-to-pan with explicit zoom buttons, but route selection and pan gestures must remain distinguishable.
+- Touch navigation must not corrupt selection, route, or turn state while the player is interacting with the map.
+
+## Battle Interaction Contract
+
+- A player must be able to select battle targets and trigger battle actions through touch-capable controls.
+- Touch targeting must continue to work after the battle canvas is resized for a different mobile viewport.
+- Battle action availability and target-selection feedback must remain understandable on a small screen.
+- Completing a battle on mobile must return the player to the normal post-battle scene flow.
+
+## Session Continuity Contract
+
+- Viewport changes during a mobile session must preserve current scenario progress.
+- Returning to the main menu after completion on mobile must dispose of the finished session and allow a fresh replay.
+- Starting a new scenario from the menu must retain the current mobile layout state instead of reverting to a desktop-only shell.
+- Starting a scenario again after a mobile return-to-menu flow must create a clean new session state.

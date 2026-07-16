@@ -17,7 +17,7 @@ import { applyBattleOutcome } from "../state/applyBattleOutcome";
 import { checkScenarioEnd } from "./checkScenarioEnd";
 import type { GameState, ScreenPoint } from "../../engine/scenario/types";
 
-function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent): ScreenPoint {
+function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | PointerEvent): ScreenPoint {
   const bounds = canvas.getBoundingClientRect();
   const scaleX = canvas.width / bounds.width;
   const scaleY = canvas.height / bounds.height;
@@ -75,6 +75,9 @@ function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string |
     return null;
   }
 
+  const slotWidth = (BATTLE_SLOT_WIDTH * state.responsiveCanvasView.pixelWidth) / 896;
+  const slotHeight = (BATTLE_SLOT_HEIGHT * state.responsiveCanvasView.pixelHeight) / 640;
+
   for (const participant of battle.participants) {
     const slot = findBattleFormationSlotByUnitId(battle.formation, participant.unitId);
     if (!slot) {
@@ -86,11 +89,11 @@ function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string |
       continue;
     }
 
-    const center = getBattleCanvasSlotCenter(slot);
-    const minX = center.x - BATTLE_SLOT_WIDTH / 2;
-    const maxX = center.x + BATTLE_SLOT_WIDTH / 2;
-    const minY = center.y - BATTLE_SLOT_HEIGHT / 2;
-    const maxY = center.y + BATTLE_SLOT_HEIGHT / 2;
+    const center = getBattleCanvasSlotCenter(slot, state.responsiveCanvasView.pixelWidth, state.responsiveCanvasView.pixelHeight);
+    const minX = center.x - slotWidth / 2;
+    const maxX = center.x + slotWidth / 2;
+    const minY = center.y - slotHeight / 2;
+    const maxY = center.y + slotHeight / 2;
 
     if (point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY) {
       return participant.unitId;
@@ -137,17 +140,19 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
 }
 
 export function bindBattleCanvasInput(canvas: HTMLCanvasElement, store: GameStore): void {
-  canvas.addEventListener("click", (event) => {
-    if (event.button !== 0) {
-      return;
-    }
-
-    const point = getCanvasPoint(canvas, event);
+  const selectBattleTarget = (point: ScreenPoint, pointerType: string): void => {
     store.update((state) => {
       if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
         return;
       }
 
+      state.lastTouchInteraction = {
+        interactionType: "tap",
+        screenPosition: point,
+        targetKind: "none",
+        targetId: null,
+        gesturePhase: "end"
+      };
       const targetUnitId = findClickedBattleUnitId(state, point);
       if (!targetUnitId) {
         return;
@@ -161,8 +166,26 @@ export function bindBattleCanvasInput(canvas: HTMLCanvasElement, store: GameStor
 
       if (trySelectBattleTarget(state, state.battle, targetUnitId)) {
         const target = getBattleUnit(state, targetUnitId);
+        state.lastTouchInteraction.targetId = targetUnitId;
+        state.lastTouchInteraction.targetKind = pointerType === "touch" ? "hero" : "tile";
         state.messageLog.push(`${target.name} is selected as the strike target.`);
       }
     });
+  };
+
+  canvas.addEventListener("click", (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    selectBattleTarget(getCanvasPoint(canvas, event), "mouse");
+  });
+
+  canvas.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    selectBattleTarget(getCanvasPoint(canvas, event), event.pointerType);
   });
 }

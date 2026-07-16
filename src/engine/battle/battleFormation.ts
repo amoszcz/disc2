@@ -4,6 +4,8 @@ export const BATTLE_FORMATION_ROWS = 3;
 export const BATTLE_FORMATION_COLUMNS = 4;
 export const BATTLE_SLOT_WIDTH = 76;
 export const BATTLE_SLOT_HEIGHT = 56;
+export const BATTLE_REFERENCE_WIDTH = 896;
+export const BATTLE_REFERENCE_HEIGHT = 640;
 
 function createEmptySlot(side: BattleSide, rowIndex: number, columnIndex: number): BattleFormationSlot {
   return {
@@ -70,18 +72,24 @@ export function getLivingUnitIdsInColumn(state: GameState, battle: Battle, side:
     });
 }
 
-export function getBattleCanvasSlotCenter(slot: BattleFormationSlot): Position {
+export function getBattleCanvasSlotCenter(
+  slot: BattleFormationSlot,
+  canvasWidth = BATTLE_REFERENCE_WIDTH,
+  canvasHeight = BATTLE_REFERENCE_HEIGHT
+): Position {
   const attackerOriginX = 56;
   const defenderOriginX = 508;
   const originY = 116;
   const columnSpacing = 92;
   const rowSpacing = 150;
+  const scaleX = canvasWidth / BATTLE_REFERENCE_WIDTH;
+  const scaleY = canvasHeight / BATTLE_REFERENCE_HEIGHT;
 
   return {
     x:
       slot.side === "attacker"
-        ? attackerOriginX + (BATTLE_FORMATION_COLUMNS - 1 - slot.columnIndex) * columnSpacing
-        : defenderOriginX + slot.columnIndex * columnSpacing,
-    y: originY + slot.rowIndex * rowSpacing
+        ? (attackerOriginX + (BATTLE_FORMATION_COLUMNS - 1 - slot.columnIndex) * columnSpacing) * scaleX
+        : (defenderOriginX + slot.columnIndex * columnSpacing) * scaleX,
+    y: (originY + slot.rowIndex * rowSpacing) * scaleY
   };
 }

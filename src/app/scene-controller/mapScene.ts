@@ -7,6 +7,7 @@ import { renderGuardStatusOverlay } from "../../ui/overlays/guardStatusOverlay";
 import { renderErrorOverlay } from "../../ui/overlays/errorOverlay";
 import { advanceTurn, autoAdvanceActiveRouteBeforeTurnEnd, carryRoutePreviewAcrossTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
+import { zoomViewportAtPoint } from "../../engine/map/viewportMath";
 import { checkScenarioEnd } from "./checkScenarioEnd";
 import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup";
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
@@ -15,10 +16,15 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
   const state = store.getState();
   const logMessage = state.messageLog[state.messageLog.length - 1] ?? "Explore the map.";
   const terrainMode = hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario);
+  const isMobile = state.mobileLayoutState.layoutMode === "mobile";
   const navigationMessage = state.mapViewState.panGesture?.isActive
-    ? "Panning map view..."
+    ? isMobile
+      ? "Dragging map view..."
+      : "Panning map view..."
     : state.mapViewState.isDefaultView
-      ? "Use mouse wheel to zoom and middle mouse button to pan."
+      ? isMobile
+        ? "Tap heroes or tiles. Drag the map to pan. Use the zoom buttons when needed."
+        : "Use mouse wheel to zoom and middle mouse button to pan."
       : `Map view preserved at ${state.mapViewState.viewport.zoomLevel.toFixed(2)}x.`;
   container.innerHTML = `
     ${renderMapHud(state)}
@@ -48,6 +54,47 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement): void
   `;
 
   const button = container.querySelector<HTMLButtonElement>("#end-turn-button");
+  const zoomInButton = container.querySelector<HTMLButtonElement>("#map-zoom-in-button");
+  const zoomOutButton = container.querySelector<HTMLButtonElement>("#map-zoom-out-button");
+  const applyZoom = (direction: "in" | "out"): void => {
+    store.update((currentState) => {
+      if (currentState.sceneMode !== "map") {
+        return;
+      }
+
+      currentState.mapViewState.viewport = zoomViewportAtPoint(
+        currentState.mapViewState.viewport,
+        direction === "in" ? -100 : 100,
+        {
+          x: currentState.responsiveCanvasView.pixelWidth / 2,
+          y: currentState.responsiveCanvasView.pixelHeight / 2
+        },
+        currentState.scenario.map,
+        currentState.responsiveCanvasView.pixelWidth,
+        currentState.responsiveCanvasView.pixelHeight
+      );
+      currentState.mapViewState.isDefaultView = false;
+      currentState.lastTouchInteraction = {
+        interactionType: direction === "in" ? "zoom-in" : "zoom-out",
+        screenPosition: {
+          x: currentState.responsiveCanvasView.pixelWidth / 2,
+          y: currentState.responsiveCanvasView.pixelHeight / 2
+        },
+        targetKind: "none",
+        targetId: null,
+        gesturePhase: "end"
+      };
+    });
+  };
+
+  if (zoomInButton) {
+    zoomInButton.onclick = () => applyZoom("in");
+  }
+
+  if (zoomOutButton) {
+    zoomOutButton.onclick = () => applyZoom("out");
+  }
+
   if (!button) {
     return;
   }

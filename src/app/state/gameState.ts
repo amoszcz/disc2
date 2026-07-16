@@ -2,10 +2,15 @@ import { getDefaultScenarioId, getScenarioOptions, loadScenario, type ScenarioId
 import type { Battle, GameState, MapViewState, ScenarioDefinition, SceneMode } from "../../engine/scenario/types";
 import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
+import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
 
 export function createDefaultMapViewState(scenario: ScenarioDefinition): MapViewState {
   return {
-    viewport: createViewport(scenario.map),
+    viewport: createViewport(
+      scenario.map,
+      getDefaultResponsiveCanvasView().pixelWidth,
+      getDefaultResponsiveCanvasView().pixelHeight
+    ),
     panGesture: null,
     lastSceneMode: "map",
     isDefaultView: true
@@ -29,7 +34,10 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     winnerPlayerId: null,
     routeFeedback: null,
     activeRoutePreview: null,
-    mapViewState: createDefaultMapViewState(scenario)
+    mapViewState: createDefaultMapViewState(scenario),
+    mobileLayoutState: getDefaultMobileLayoutState(),
+    responsiveCanvasView: getDefaultResponsiveCanvasView(),
+    lastTouchInteraction: null
   };
 }
 
@@ -71,6 +79,8 @@ export function setScenario(state: GameState, scenario: ScenarioDefinition): Gam
 }
 
 export function startScenarioSession(state: GameState, scenarioId: ScenarioId): GameState {
+  const preservedLayoutState = state.mobileLayoutState;
+  const preservedCanvasView = state.responsiveCanvasView;
   const nextState = createInitialState(scenarioId);
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
@@ -84,10 +94,15 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
+  state.mobileLayoutState = preservedLayoutState;
+  state.responsiveCanvasView = preservedCanvasView;
+  state.lastTouchInteraction = nextState.lastTouchInteraction;
   return state;
 }
 
 export function returnToMainMenu(state: GameState): GameState {
+  const preservedLayoutState = state.mobileLayoutState;
+  const preservedCanvasView = state.responsiveCanvasView;
   const nextState = createMenuState();
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
@@ -101,6 +116,9 @@ export function returnToMainMenu(state: GameState): GameState {
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
+  state.mobileLayoutState = preservedLayoutState;
+  state.responsiveCanvasView = preservedCanvasView;
+  state.lastTouchInteraction = nextState.lastTouchInteraction;
   return state;
 }
 

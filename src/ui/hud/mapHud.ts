@@ -6,15 +6,25 @@ export function renderMapHud(state: GameState): string {
   const player = state.scenario.players.find((entry) => entry.id === state.activePlayerId);
   const routeFeedback = state.routeFeedback;
   const routePreview = state.activeRoutePreview;
+  const isMobile = state.mobileLayoutState.layoutMode === "mobile";
+  const controlsMessage = isMobile
+    ? "Tap to select or confirm. Drag the map to pan. Use zoom buttons if the view is tight."
+    : "Click to select or confirm. Use the mouse wheel to zoom and middle mouse drag to pan.";
 
   return `
     <div class="overlay-box" data-testid="map-hud">
       <div class="hud-row"><strong>Scene</strong><span>Adventure Map</span></div>
       <div class="hud-row"><strong>Active Side</strong><span>${player?.name ?? "Unknown"}</span></div>
       <div class="hud-row"><strong>Hero</strong><span>${hero?.name ?? "None"}</span></div>
+      <div class="hud-row"><strong>Layout</strong><span data-testid="layout-mode">${state.mobileLayoutState.layoutMode}</span></div>
       <div class="hud-row"><strong>Zoom</strong><span data-testid="map-zoom">${state.mapViewState.viewport.zoomLevel.toFixed(2)}x</span></div>
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
+      <p class="control-tip" data-testid="map-control-tip">${controlsMessage}</p>
+      <div class="hud-row action-row">
+        <button type="button" class="secondary-button" id="map-zoom-out-button" data-testid="map-zoom-out-button">Zoom Out</button>
+        <button type="button" class="secondary-button" id="map-zoom-in-button" data-testid="map-zoom-in-button">Zoom In</button>
+      </div>
       ${
         routePreview
           ? `<div class="hud-row"><strong>Path</strong><span data-testid="route-preview-status">${routePreview.status}</span></div>
