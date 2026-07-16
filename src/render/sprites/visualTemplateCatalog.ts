@@ -6,6 +6,8 @@ import type {
   ObjectAnimationStateName,
   ObjectAnimationStateProfile,
   ResourceType,
+  StorybookPreviewSubject,
+  StorybookStateOption,
   TerrainTypeName,
   VisualSpriteFrame,
   VisualTemplateDefinition
@@ -166,6 +168,56 @@ function createObjectStateProfile(
     requiredStateNames,
     optionalStateNames
   };
+}
+
+const STORYBOOK_PREVIEW_TILE = {
+  tileWidth: 96,
+  tileHeight: 96
+} as const;
+
+function toStorybookSubjectId(kind: StorybookPreviewSubject["subjectKind"], subjectType: string): string {
+  const safeType = subjectType.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `${kind}-${safeType}`;
+}
+
+function createStateOption(
+  optionId: string,
+  label: string,
+  stateName: StorybookStateOption["stateName"],
+  direction: StorybookStateOption["direction"] = null,
+  isFallbackReviewable = false
+): StorybookStateOption {
+  return {
+    optionId,
+    label,
+    stateName,
+    direction,
+    isFallbackReviewable
+  };
+}
+
+function createHeroStorybookOptions(profile: HeroAnimationStateProfile): StorybookStateOption[] {
+  const directionalOptions = profile.directionalStateNames.flatMap((stateName) =>
+    (["up", "down", "left", "right"] as const).map((direction) =>
+      createStateOption(`${stateName}-${direction}`, `${stateName} (${direction})`, stateName, direction)
+    )
+  );
+
+  const eventOptions = profile.eventStateNames.map((stateName) =>
+    createStateOption(stateName, stateName, stateName, null, stateName === "hurt")
+  );
+
+  return [...directionalOptions, ...eventOptions];
+}
+
+function createBattleStorybookOptions(profile: BattleUnitAnimationStateProfile): StorybookStateOption[] {
+  return profile.supportedStateNames.map((stateName) => createStateOption(stateName, stateName, stateName));
+}
+
+function createObjectStorybookOptions(profile: ObjectAnimationStateProfile): StorybookStateOption[] {
+  return profile.supportedStateNames.map((stateName) =>
+    createStateOption(stateName, stateName, stateName, null, profile.optionalStateNames.includes(stateName))
+  );
 }
 
 export const visualTemplateCatalog: VisualTemplateCatalog = {
@@ -479,5 +531,68 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
     )
   }
 };
+
+export function getStorybookPreviewSubjects(catalog: VisualTemplateCatalog = visualTemplateCatalog): StorybookPreviewSubject[] {
+  const heroes: StorybookPreviewSubject[] = Object.entries(catalog.heroStateProfiles).map(([subjectType, profile]) => ({
+    subjectId: toStorybookSubjectId("hero", subjectType),
+    subjectKind: "hero",
+    subjectType,
+    displayName: subjectType,
+    categoryLabel: "Hero",
+    sceneContext: "map",
+    defaultStateName: profile.fallbackStateName,
+    defaultDirection: profile.defaultDirection,
+    previewTileStyle: STORYBOOK_PREVIEW_TILE,
+    stateOptions: createHeroStorybookOptions(profile)
+  }));
+
+  const units: StorybookPreviewSubject[] = Object.entries(catalog.unitStateProfiles).map(([subjectType, profile]) => ({
+    subjectId: toStorybookSubjectId("unit", subjectType),
+    subjectKind: "unit",
+    subjectType,
+    displayName: subjectType,
+    categoryLabel: "Battle Unit",
+    sceneContext: "battle",
+    defaultStateName: profile.fallbackStateName,
+    defaultDirection: null,
+    previewTileStyle: STORYBOOK_PREVIEW_TILE,
+    stateOptions: createBattleStorybookOptions(profile)
+  }));
+
+  const movementObjects: StorybookPreviewSubject[] = Object.entries(catalog.movementObjectStateProfiles).map(([subjectType, profile]) => ({
+    subjectId: toStorybookSubjectId("movement-object", subjectType),
+    subjectKind: "movement-object",
+    subjectType,
+    displayName: subjectType,
+    categoryLabel: "Map Object",
+    sceneContext: "map",
+    defaultStateName: profile.fallbackStateName,
+    defaultDirection: null,
+    previewTileStyle: STORYBOOK_PREVIEW_TILE,
+    stateOptions: createObjectStorybookOptions(profile)
+  }));
+
+  const guardedLocations: StorybookPreviewSubject[] = Object.entries(catalog.guardedLocationStateProfiles).map(([subjectType, profile]) => ({
+    subjectId: toStorybookSubjectId("guarded-location", subjectType),
+    subjectKind: "guarded-location",
+    subjectType,
+    displayName: subjectType,
+    categoryLabel: "Guarded Location",
+    sceneContext: "map",
+    defaultStateName: profile.fallbackStateName,
+    defaultDirection: null,
+    previewTileStyle: STORYBOOK_PREVIEW_TILE,
+    stateOptions: createObjectStorybookOptions(profile)
+  }));
+
+  return [...heroes, ...units, ...movementObjects, ...guardedLocations];
+}
+
+export function getStorybookPreviewSubjectById(
+  subjectId: string,
+  catalog: VisualTemplateCatalog = visualTemplateCatalog
+): StorybookPreviewSubject | undefined {
+  return getStorybookPreviewSubjects(catalog).find((subject) => subject.subjectId === subjectId);
+}
 
 export type { VisualTemplateCatalog };
