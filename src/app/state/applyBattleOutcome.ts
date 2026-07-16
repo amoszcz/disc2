@@ -22,6 +22,11 @@ export function applyBattleOutcome(state: GameState): void {
 
     unlockLocation(state, guardForce.guardedLocationId, hero.ownerPlayerId);
     hero.experience += battle.outcome.heroExperienceAwarded;
+    state.visualStates.heroStates[hero.id] = {
+      ...state.visualStates.heroStates[hero.id],
+      stateName: "victory",
+      direction: state.visualStates.heroStates[hero.id]?.direction ?? "down"
+    };
     state.messageLog.push(`${hero.name} won the battle and gained ${battle.outcome.heroExperienceAwarded} experience.`);
   } else {
     hero.availabilityState = "defeated";
@@ -29,6 +34,11 @@ export function applyBattleOutcome(state: GameState): void {
     if (player) {
       player.defeatState = true;
     }
+    state.visualStates.heroStates[hero.id] = {
+      ...state.visualStates.heroStates[hero.id],
+      stateName: "perish",
+      direction: state.visualStates.heroStates[hero.id]?.direction ?? "down"
+    };
     state.messageLog.push(`${hero.name} was driven back by the guards.`);
   }
 }

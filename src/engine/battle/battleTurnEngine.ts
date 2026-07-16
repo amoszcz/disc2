@@ -12,6 +12,21 @@ import {
 } from "./battleTargeting";
 import type { Battle, GameState, ScenarioUnit } from "../scenario/types";
 
+function setUnitVisualState(state: GameState, unitId: string, stateName: GameState["visualStates"]["unitStates"][string]["stateName"]): void {
+  state.visualStates.unitStates[unitId] = { stateName };
+}
+
+function getActionVisualState(state: GameState, actorId: string): "attack" | "shoot" | "cast" {
+  const attackCategory = getUnitAttackCategory(state, actorId);
+  if (attackCategory === "ranged") {
+    return "shoot";
+  }
+  if (attackCategory === "area") {
+    return "cast";
+  }
+  return "attack";
+}
+
 function applyDefendMitigation(battle: Battle, targetUnitId: string, baseDamage: number): number {
   const defendState = battle.defendStates.find((entry) => entry.unitId === targetUnitId && entry.isActive);
   if (!defendState) {
@@ -84,10 +99,12 @@ export function performStrikeAction(state: GameState, battle: Battle): string {
   const hitSummaries = targetUnitIds.map((targetUnitId) => {
     const target = getBattleUnit(state, targetUnitId);
     const dealtDamage = applyDamageToUnit(state, battle, targetUnitId, actor.attackValue);
+    setUnitVisualState(state, targetUnitId, target.currentHealth > 0 ? "hit" : "perish");
     return `${target.name} for ${dealtDamage}`;
   });
 
   actor.actionState = "spent";
+  setUnitVisualState(state, actor.id, getActionVisualState(state, actor.id));
   return `${actor.name} strikes ${hitSummaries.join(", ")}.`;
 }
 
@@ -112,6 +129,7 @@ export function performDefendAction(state: GameState, battle: Battle): string {
   }
 
   actor.actionState = "spent";
+  setUnitVisualState(state, actor.id, "defend");
   return `${actor.name} defends and braces for the next attack.`;
 }
 
@@ -130,12 +148,20 @@ export function advanceBattleQueue(state: GameState, battle: Battle): void {
   const rotated = [...rest, current];
 
   currentUnit.actionState = currentUnit.defeatState ? "defeated" : "ready";
+  if (!currentUnit.defeatState && currentUnit.currentHealth > 0) {
+    setUnitVisualState(state, currentUnit.id, "wait");
+  } else {
+    setUnitVisualState(state, currentUnit.id, "perish");
+  }
 
   battle.turnQueue = rotated;
   battle.activeUnitId = rotated[0] ?? current;
   expireDefendStateForUnit(battle, battle.activeUnitId);
   battle.targetingState = createBattleTargetingState(state, battle, battle.activeUnitId);
   clearInvalidSelectedTarget(state, battle);
+  if (battle.activeUnitId) {
+    setUnitVisualState(state, battle.activeUnitId, "ready");
+  }
 }
 
 export function performAutomaticBattleAction(state: GameState, battle: Battle): string {

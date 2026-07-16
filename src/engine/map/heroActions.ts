@@ -1,4 +1,4 @@
-import type { GameState, LinkedMapTravelLink, Position, RouteProgressResult, RouteStep } from "../scenario/types";
+import type { FacingDirection, GameState, HeroAnimationStateName, LinkedMapTravelLink, Position, RouteProgressResult, RouteStep } from "../scenario/types";
 import { getWorldMapById, resolveTravelLinkAtPosition } from "../scenario/types";
 import { findGuardedLocationAtHero, isLocationBlocked } from "./guardRules";
 import { isValidMove, movementCost, positionsEqual } from "./mapRules";
@@ -18,6 +18,36 @@ export interface HeroActionResult {
 }
 
 type RouteAdvanceTrigger = "manual" | "end-turn";
+
+function setHeroVisualState(
+  state: GameState,
+  heroId: string,
+  stateName: HeroAnimationStateName,
+  direction?: FacingDirection
+): void {
+  const current = state.visualStates.heroStates[heroId] ?? { stateName: "idle" as const, direction: "down" as const };
+  state.visualStates.heroStates[heroId] = {
+    stateName,
+    direction: direction ?? current.direction
+  };
+}
+
+function getFacingDirection(from: Position, to: Position): FacingDirection {
+  if (to.x > from.x) {
+    return "right";
+  }
+  if (to.x < from.x) {
+    return "left";
+  }
+  if (to.y > from.y) {
+    return "down";
+  }
+  return "up";
+}
+
+function getRouteDirection(from: Position, step: RouteStep | undefined): FacingDirection {
+  return step ? getFacingDirection(from, step.position) : "down";
+}
 
 function buildTravelMessage(state: GameState, heroName: string, link: LinkedMapTravelLink): string {
   const destinationMap = getWorldMapById(state.scenario, link.destinationMapId);
@@ -43,6 +73,9 @@ function resolveTravelAtHeroPosition(state: GameState, heroId: string): HeroActi
   const link = resolveTravelLinkAtPosition(state.scenario, hero.mapId, hero.mapPosition);
   if (!link) {
     state.mapTravelState.transitionMessage = null;
+    if (state.visualStates.heroStates[hero.id]?.stateName !== "interact") {
+      setHeroVisualState(state, hero.id, "stop-move");
+    }
     return { ok: true };
   }
 
@@ -51,6 +84,7 @@ function resolveTravelAtHeroPosition(state: GameState, heroId: string): HeroActi
     const reason = travelValidation.reason ?? "That linked passage is unavailable.";
     state.mapTravelState.transitionMessage = reason;
     state.messageLog.push(reason);
+    setHeroVisualState(state, hero.id, "interact");
     return { ok: true, reason };
   }
 
@@ -59,6 +93,7 @@ function resolveTravelAtHeroPosition(state: GameState, heroId: string): HeroActi
   const transitionMessage = buildTravelMessage(state, hero.name, link);
   setActiveWorldMap(state, link.destinationMapId, transitionMessage, link.id);
   state.messageLog.push(transitionMessage);
+  setHeroVisualState(state, hero.id, "interact");
   return { ok: true };
 }
 
@@ -78,6 +113,7 @@ export function selectHero(state: GameState, heroId: string): HeroActionResult {
   }
   state.selectedHeroId = heroId;
   state.routeFeedback = null;
+  setHeroVisualState(state, heroId, "idle");
   return { ok: true };
 }
 
@@ -88,6 +124,7 @@ export function clearOwnedRoutePreview(state: GameState, heroId: string): HeroAc
 
   state.activeRoutePreview = clearRoutePreview();
   state.routeFeedback = null;
+  setHeroVisualState(state, heroId, "idle");
   return { ok: true };
 }
 
@@ -120,6 +157,7 @@ export function plotRoutePreview(state: GameState, destination: Position): HeroA
 
   state.activeRoutePreview = createRoutePreview(hero.id, hero.mapPosition, destination, routeResult.steps);
   state.routeFeedback = createRoutePreviewFeedback(state.activeRoutePreview);
+  setHeroVisualState(state, hero.id, "start-move", getRouteDirection(hero.mapPosition, routeResult.steps[0]));
   return { ok: true };
 }
 
@@ -201,6 +239,7 @@ function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigge
       routeTotalMovement: previewToExecute.totalMovementCost,
       previewMessage: "Route retained for later continuation."
     };
+    setHeroVisualState(state, hero.id, "stop-move");
     return { ok: false, reason: "Not enough movement to advance along this route." };
   }
 
@@ -217,9 +256,11 @@ function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigge
 
   if (routeProgress.completionState === "completed") {
     state.activeRoutePreview = null;
+    setHeroVisualState(state, hero.id, encounteredBlockedLocation ? "interact" : "stop-move");
   } else {
     state.activeRoutePreview = markRoutePreviewForContinuation(previewToExecute, hero.mapPosition, remainingSteps);
     state.routeFeedback = createRoutePreviewFeedback(state.activeRoutePreview);
+    setHeroVisualState(state, hero.id, encounteredBlockedLocation ? "interact" : "walk");
   }
 
   return { ok: true, routeProgress };
@@ -243,6 +284,7 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
   }
 
   if (hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario)) {
+    const direction = getFacingDirection(hero.mapPosition, position);
     const routeAttempt = buildRouteAttempt(state.scenario, hero.id, hero.mapPosition, position, hero.remainingMovement);
     state.routeFeedback = createRouteFeedback(routeAttempt);
     if (!routeAttempt.isLegal) {
@@ -251,13 +293,17 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
 
     hero.mapPosition = { ...position };
     hero.remainingMovement -= routeAttempt.movementCost;
+    setHeroVisualState(state, hero.id, "walk", direction);
     const movementObjectSummary = state.routeFeedback.objectLabels.length
       ? ` using ${state.routeFeedback.objectLabels.join(" + ").toLowerCase()}`
       : "";
     state.messageLog.push(
       `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()}${movementObjectSummary} at (${position.x + 1}, ${position.y + 1}).`
     );
-    collectPickupIfPresent(state, hero.id);
+    const collectedPickup = collectPickupIfPresent(state, hero.id);
+    if (collectedPickup) {
+      setHeroVisualState(state, hero.id, "interact", direction);
+    }
     return resolveTravelAtHeroPosition(state, hero.id);
   }
 
@@ -266,10 +312,15 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
   }
 
   const cost = movementCost(hero.mapPosition, position);
+  const direction = getFacingDirection(hero.mapPosition, position);
   hero.mapPosition = { ...position };
   hero.remainingMovement -= cost;
   state.routeFeedback = null;
+  setHeroVisualState(state, hero.id, "walk", direction);
   state.messageLog.push(`${hero.name} moved to (${position.x + 1}, ${position.y + 1}).`);
-  collectPickupIfPresent(state, hero.id);
+  const collectedPickup = collectPickupIfPresent(state, hero.id);
+  if (collectedPickup) {
+    setHeroVisualState(state, hero.id, "interact", direction);
+  }
   return resolveTravelAtHeroPosition(state, hero.id);
 }

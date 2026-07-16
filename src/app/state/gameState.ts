@@ -1,13 +1,17 @@
 import { getDefaultScenarioId, getScenarioOptions, loadScenario, type ScenarioId } from "../../engine/scenario/loadScenario";
 import {
   applyScenarioWorldMap,
+  type BattleUnitVisualStateRuntime,
+  type FacingDirection,
   getMainWorldMapId,
   type Battle,
   type GameState,
+  type HeroVisualStateRuntime,
   type MapTravelState,
   type MapViewState,
   type ScenarioDefinition,
-  type SceneMode
+  type SceneMode,
+  type VisualStateTracker
 } from "../../engine/scenario/types";
 import { createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
@@ -37,6 +41,22 @@ function createInitialMapTravelState(scenario: ScenarioDefinition): MapTravelSta
   };
 }
 
+function createInitialHeroVisualState(direction: FacingDirection = "down"): HeroVisualStateRuntime {
+  return { stateName: "idle", direction };
+}
+
+function createInitialUnitVisualState(): BattleUnitVisualStateRuntime {
+  return { stateName: "idle" };
+}
+
+function createInitialVisualStates(scenario: ScenarioDefinition): VisualStateTracker {
+  return {
+    heroStates: Object.fromEntries(scenario.heroes.map((hero) => [hero.id, createInitialHeroVisualState()])),
+    unitStates: Object.fromEntries(scenario.units.map((unit) => [unit.id, createInitialUnitVisualState()])),
+    objectStates: {}
+  };
+}
+
 function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameState {
   const scenario = loadScenario(scenarioId);
   const activePlayerId = scenario.players.find((player) => player.kind === "player")?.id ?? scenario.players[0].id;
@@ -56,6 +76,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     activeRoutePreview: null,
     mapViewState: createDefaultMapViewState(scenario),
     mapTravelState: createInitialMapTravelState(scenario),
+    visualStates: createInitialVisualStates(scenario),
     mobileLayoutState: getDefaultMobileLayoutState(),
     responsiveCanvasView: getDefaultResponsiveCanvasView(),
     lastTouchInteraction: null
@@ -147,6 +168,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
+  state.visualStates = nextState.visualStates;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
@@ -170,6 +192,7 @@ export function returnToMainMenu(state: GameState): GameState {
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
+  state.visualStates = nextState.visualStates;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;

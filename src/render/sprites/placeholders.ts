@@ -89,6 +89,15 @@ export const visualFallbackPalette = {
   }
 } as const;
 
+export const visualFallbackStateNames = {
+  unit: "idle",
+  hero: "idle",
+  "movement-object": "idle",
+  "guarded-location": "blocked",
+  terrain: "",
+  "resource-pickup": "idle"
+} as const;
+
 export const routePreviewPalette = {
   line: "#f3f0d1",
   dot: "#d46a3d",

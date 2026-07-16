@@ -1,4 +1,10 @@
 import type {
+  BattleUnitAnimationStateName,
+  BattleUnitAnimationStateProfile,
+  HeroAnimationStateName,
+  HeroAnimationStateProfile,
+  ObjectAnimationStateName,
+  ObjectAnimationStateProfile,
   ResourceType,
   TerrainTypeName,
   VisualSpriteFrame,
@@ -16,8 +22,31 @@ interface VisualTemplateCatalog {
   guardedLocationTemplates: Record<string, VisualTemplateDefinition>;
   terrainTemplates: Record<TerrainTypeName, VisualTemplateDefinition>;
   resourcePickupTemplates: Record<ResourceType, VisualTemplateDefinition>;
+  unitStateProfiles: Record<string, BattleUnitAnimationStateProfile>;
+  heroStateProfiles: Record<string, HeroAnimationStateProfile>;
+  movementObjectStateProfiles: Record<string, ObjectAnimationStateProfile>;
+  guardedLocationStateProfiles: Record<string, ObjectAnimationStateProfile>;
   fallbackTemplates: Record<string, VisualTemplateDefinition>;
 }
+
+const HERO_REQUIRED_STATES: HeroAnimationStateName[] = [
+  "idle",
+  "start-move",
+  "walk",
+  "stop-move",
+  "interact",
+  "victory",
+  "hurt",
+  "perish"
+];
+
+const HERO_MVP_STATES: HeroAnimationStateName[] = ["idle", "walk", "perish"];
+
+const BATTLE_STATE_SETS = {
+  melee: ["idle", "ready", "attack", "hit", "defend", "wait", "victory", "perish"],
+  ranged: ["idle", "ready", "shoot", "hit", "defend", "wait", "victory", "perish"],
+  area: ["idle", "ready", "cast", "hit", "defend", "wait", "victory", "perish"]
+} satisfies Record<string, BattleUnitAnimationStateName[]>;
 
 function spriteFrame(sourceX: number, sourceY: number, sourceWidth: number, sourceHeight: number): VisualSpriteFrame {
   return {
@@ -66,7 +95,8 @@ function createTemplate(
   readabilityLabel: string,
   fallbackStyle: VisualTemplateDefinition["fallbackStyle"],
   intendedContexts: VisualTemplateDefinition["intendedContexts"],
-  frame?: VisualSpriteFrame
+  frame?: VisualSpriteFrame,
+  supportedStateNames?: string[]
 ): VisualTemplateDefinition {
   return {
     templateId,
@@ -74,6 +104,7 @@ function createTemplate(
     assetKind: "dedicated",
     assetSource,
     spriteFrame: frame ?? null,
+    supportedStateNames: supportedStateNames ?? null,
     fallbackStyle,
     readabilityLabel,
     intendedContexts
@@ -93,9 +124,47 @@ function createFallbackTemplate(
     assetKind: "fallback",
     assetSource: null,
     spriteFrame: null,
+    supportedStateNames: null,
     fallbackStyle,
     readabilityLabel,
     intendedContexts
+  };
+}
+
+function createHeroStateProfile(): HeroAnimationStateProfile {
+  return {
+    directionalStateNames: ["idle", "start-move", "walk", "stop-move"],
+    eventStateNames: ["interact", "victory", "hurt", "perish"],
+    fallbackStateName: "idle",
+    defaultDirection: "down",
+    requiredStateNames: HERO_REQUIRED_STATES,
+    mvpStateNames: HERO_MVP_STATES
+  };
+}
+
+function createBattleUnitStateProfile(
+  supportedStateNames: BattleUnitAnimationStateName[],
+  fallbackStateName: BattleUnitAnimationStateName = "idle"
+): BattleUnitAnimationStateProfile {
+  return {
+    supportedStateNames,
+    fallbackStateName,
+    requiredStateNames: ["idle", "ready", "hit", "perish"],
+    mvpStateNames: ["idle", supportedStateNames.includes("attack") ? "attack" : supportedStateNames.includes("shoot") ? "shoot" : "cast", "hit", "perish"]
+  };
+}
+
+function createObjectStateProfile(
+  requiredStateNames: ObjectAnimationStateName[],
+  optionalStateNames: ObjectAnimationStateName[] = [],
+  fallbackStateName: ObjectAnimationStateName = "idle"
+): ObjectAnimationStateProfile {
+  const deduped = Array.from(new Set([...requiredStateNames, ...optionalStateNames]));
+  return {
+    supportedStateNames: deduped,
+    fallbackStateName,
+    requiredStateNames,
+    optionalStateNames
   };
 }
 
@@ -108,7 +177,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Militia",
       { fillColor: "#3466af", accentColor: "#f1d48b", borderColor: "#ffffff", textColor: "#ffffff", glyph: "M", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.militia
+      UNIT_FRAMES.militia,
+      BATTLE_STATE_SETS.melee
     ),
     Archer: createTemplate(
       "unit-archer",
@@ -117,7 +187,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Archer",
       { fillColor: "#5376cc", accentColor: "#d8e7ff", borderColor: "#ffffff", textColor: "#ffffff", glyph: "A", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.archer
+      UNIT_FRAMES.archer,
+      BATTLE_STATE_SETS.ranged
     ),
     Mage: createTemplate(
       "unit-mage",
@@ -126,7 +197,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Mage",
       { fillColor: "#7d5bb6", accentColor: "#f3d2ff", borderColor: "#ffffff", textColor: "#ffffff", glyph: "Mg", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.mage
+      UNIT_FRAMES.mage,
+      BATTLE_STATE_SETS.area
     ),
     Skeleton: createTemplate(
       "unit-skeleton",
@@ -135,7 +207,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Skeleton",
       { fillColor: "#7f7a77", accentColor: "#ebe2d2", borderColor: "#ffffff", textColor: "#ffffff", glyph: "S", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.skeleton
+      UNIT_FRAMES.skeleton,
+      BATTLE_STATE_SETS.melee
     ),
     "Skeleton Archer": createTemplate(
       "unit-skeleton-archer",
@@ -144,7 +217,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Skeleton Archer",
       { fillColor: "#8b6d5a", accentColor: "#f2e5c6", borderColor: "#ffffff", textColor: "#ffffff", glyph: "SA", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.skeletonArcher
+      UNIT_FRAMES.skeletonArcher,
+      BATTLE_STATE_SETS.ranged
     ),
     "Stone Watcher": createTemplate(
       "unit-stone-watcher",
@@ -153,7 +227,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Stone Watcher",
       { fillColor: "#5e625e", accentColor: "#dbe7d6", borderColor: "#ffffff", textColor: "#ffffff", glyph: "SW", shape: "slot" },
       ["battle"],
-      UNIT_FRAMES.stoneWatcher
+      UNIT_FRAMES.stoneWatcher,
+      BATTLE_STATE_SETS.melee
     )
   },
   heroTemplates: {
@@ -164,7 +239,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Aren",
       { fillColor: "#3466af", accentColor: "#f7ecd6", borderColor: "#ffffff", textColor: "#ffffff", glyph: "A", shape: "circle" },
       ["map"],
-      UNIT_FRAMES.aren
+      UNIT_FRAMES.aren,
+      HERO_REQUIRED_STATES
     )
   },
   movementObjectTemplates: {
@@ -175,7 +251,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Bridge",
       { fillColor: "#f5f1dd", accentColor: "#8d6b48", borderColor: "#6f5e42", textColor: "#23170d", glyph: "=", shape: "rect" },
       ["map"],
-      OBJECT_FRAMES.bridge
+      OBJECT_FRAMES.bridge,
+      ["idle", "damaged"]
     ),
     milestone: createTemplate(
       "object-milestone",
@@ -184,7 +261,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Milestone",
       { fillColor: "#fff4bf", accentColor: "#8a6b3f", borderColor: "#6f5e42", textColor: "#23170d", glyph: "+", shape: "diamond" },
       ["map"],
-      OBJECT_FRAMES.milestone
+      OBJECT_FRAMES.milestone,
+      ["idle", "highlighted"]
     ),
     rubble: createTemplate(
       "object-rubble",
@@ -193,7 +271,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Rubble",
       { fillColor: "#6a4f3b", accentColor: "#d8b59a", borderColor: "#4c3628", textColor: "#ffffff", glyph: "x", shape: "rect" },
       ["map"],
-      OBJECT_FRAMES.rubble
+      OBJECT_FRAMES.rubble,
+      ["idle", "damaged"]
     ),
     cave: createTemplate(
       "object-cave",
@@ -202,7 +281,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Cave",
       { fillColor: "#70543b", accentColor: "#d0baa6", borderColor: "#4f3828", textColor: "#ffffff", glyph: "C", shape: "rect" },
       ["map"],
-      OBJECT_FRAMES.cave
+      OBJECT_FRAMES.cave,
+      ["idle", "active", "highlighted"]
     ),
     teleport: createTemplate(
       "object-teleport",
@@ -211,7 +291,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Teleport",
       { fillColor: "#7ec8e3", accentColor: "#eef8ff", borderColor: "#3b7e99", textColor: "#23170d", glyph: "T", shape: "diamond" },
       ["map"],
-      OBJECT_FRAMES.teleport
+      OBJECT_FRAMES.teleport,
+      ["idle", "active", "inactive"]
     ),
     exit: createTemplate(
       "object-exit",
@@ -220,7 +301,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Exit",
       { fillColor: "#d6f0c0", accentColor: "#4d7c37", borderColor: "#567b42", textColor: "#23170d", glyph: "E", shape: "diamond" },
       ["map"],
-      OBJECT_FRAMES.exit
+      OBJECT_FRAMES.exit,
+      ["idle", "active", "highlighted"]
     )
   },
   guardedLocationTemplates: {
@@ -231,7 +313,8 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       "Blocked guarded site",
       { fillColor: "#7a2d2d", accentColor: "#f3d0d0", borderColor: "#ffffff", textColor: "#ffffff", glyph: "G", shape: "rect" },
       ["map"],
-      OBJECT_FRAMES.guardedBlocked
+      OBJECT_FRAMES.guardedBlocked,
+      ["blocked", "selected"]
     ),
     "resource-site:open": createTemplate(
       "guarded-location-open",
@@ -239,7 +322,9 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       guardedOpenUrl,
       "Open guarded site",
       { fillColor: "#447748", accentColor: "#d7f1d9", borderColor: "#ffffff", textColor: "#ffffff", glyph: "O", shape: "rect" },
-      ["map"]
+      ["map"],
+      undefined,
+      ["open", "claimed", "selected"]
     )
   },
   terrainTemplates: {
@@ -325,6 +410,29 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
       { fillColor: "#d7a31d", accentColor: "#fff2b8", borderColor: "#8a6b3f", textColor: "#23170d", glyph: "$", shape: "circle" },
       ["map"]
     )
+  },
+  unitStateProfiles: {
+    Militia: createBattleUnitStateProfile(BATTLE_STATE_SETS.melee),
+    Archer: createBattleUnitStateProfile(BATTLE_STATE_SETS.ranged),
+    Mage: createBattleUnitStateProfile(BATTLE_STATE_SETS.area),
+    Skeleton: createBattleUnitStateProfile(BATTLE_STATE_SETS.melee),
+    "Skeleton Archer": createBattleUnitStateProfile(BATTLE_STATE_SETS.ranged),
+    "Stone Watcher": createBattleUnitStateProfile(BATTLE_STATE_SETS.melee)
+  },
+  heroStateProfiles: {
+    Aren: createHeroStateProfile()
+  },
+  movementObjectStateProfiles: {
+    bridge: createObjectStateProfile(["idle"], ["damaged"]),
+    milestone: createObjectStateProfile(["idle"], ["highlighted"]),
+    rubble: createObjectStateProfile(["idle"], ["damaged"]),
+    cave: createObjectStateProfile(["idle"], ["active", "highlighted"]),
+    teleport: createObjectStateProfile(["idle", "active"], ["inactive"]),
+    exit: createObjectStateProfile(["idle", "active"], ["highlighted"])
+  },
+  guardedLocationStateProfiles: {
+    "resource-site:blocked": createObjectStateProfile(["blocked"], ["selected"], "blocked"),
+    "resource-site:open": createObjectStateProfile(["open"], ["claimed", "selected"], "open")
   },
   fallbackTemplates: {
     unit: createFallbackTemplate(

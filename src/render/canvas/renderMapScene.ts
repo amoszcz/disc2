@@ -1,5 +1,6 @@
 import type { GameState } from "../../engine/scenario/types";
 import type { MapDefinition } from "../../engine/scenario/types";
+import type { FacingDirection, HeroVisualStateRuntime, ObjectAnimationStateName } from "../../engine/scenario/types";
 import { resolveMovementObjectStack } from "../../engine/map/movementObjectLookup";
 import { resolveTerrainTile } from "../../engine/map/terrainLookup";
 import { getBaseTileSize } from "../../engine/map/viewportMath";
@@ -19,6 +20,34 @@ import { createTileVisualBounds, getViewportRenderMetrics, worldTileToCanvasPoin
 
 export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): number {
   return getBaseTileSize(map, canvas?.width, canvas?.height);
+}
+
+function getMovementObjectVisualState(objectType: string): ObjectAnimationStateName {
+  switch (objectType) {
+    case "teleport":
+    case "cave":
+    case "exit":
+      return "active";
+    default:
+      return "idle";
+  }
+}
+
+function getRouteDirection(heroState: HeroVisualStateRuntime | undefined, heroPosition: { x: number; y: number }, nextPosition: { x: number; y: number } | undefined): FacingDirection {
+  if (!nextPosition) {
+    return heroState?.direction ?? "down";
+  }
+
+  if (nextPosition.x > heroPosition.x) {
+    return "right";
+  }
+  if (nextPosition.x < heroPosition.x) {
+    return "left";
+  }
+  if (nextPosition.y > heroPosition.y) {
+    return "down";
+  }
+  return "up";
 }
 
 export function renderMapScene(context: CanvasRenderingContext2D, state: GameState): void {
@@ -43,10 +72,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
       context.strokeStyle = palette.tileBorder;
       context.strokeRect(point.x, point.y, tileSize, tileSize);
 
-      const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
-      if (movementObjects.effects.length > 0) {
-        const primaryObject = movementObjects.effects[0];
-        const primaryTemplate = resolveMovementObjectVisualTemplate(primaryObject.objectType);
+        const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
+        if (movementObjects.effects.length > 0) {
+          const primaryObject = movementObjects.effects[0];
+        const primaryTemplate = resolveMovementObjectVisualTemplate(primaryObject.objectType, getMovementObjectVisualState(primaryObject.objectType));
         recordVisualTemplateDiagnostic(
           { subjectKind: "movement-object", subjectType: primaryObject.objectType, sceneContext: "map" },
           primaryTemplate
@@ -59,7 +88,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
         });
 
         if (movementObjects.effects.length > 1) {
-          const secondaryTemplate = resolveMovementObjectVisualTemplate(movementObjects.effects[1].objectType);
+          const secondaryTemplate = resolveMovementObjectVisualTemplate(
+            movementObjects.effects[1].objectType,
+            getMovementObjectVisualState(movementObjects.effects[1].objectType)
+          );
           recordVisualTemplateDiagnostic(
             { subjectKind: "movement-object", subjectType: movementObjects.effects[1].objectType, sceneContext: "map" },
             secondaryTemplate
@@ -145,7 +177,13 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId
   )) {
     const point = worldTileToCanvasPoint(hero.mapPosition, metrics.viewport, context.canvas, map);
-    const heroTemplate = resolveHeroVisualTemplate(hero);
+    const trackedHeroState = state.visualStates.heroStates[hero.id];
+    const routeOwnedByHero = state.activeRoutePreview?.heroId === hero.id ? state.activeRoutePreview : null;
+    const effectiveHeroState =
+      routeOwnedByHero && routeOwnedByHero.isAwaitingConfirmation
+        ? { stateName: "start-move" as const, direction: getRouteDirection(trackedHeroState, hero.mapPosition, routeOwnedByHero.steps[0]?.position) }
+        : trackedHeroState;
+    const heroTemplate = resolveHeroVisualTemplate(hero, effectiveHeroState);
     recordVisualTemplateDiagnostic({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, heroTemplate);
     drawResolvedVisualTemplate(context, heroTemplate, {
       x: point.x + tileSize * 0.08,

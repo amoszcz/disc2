@@ -1,5 +1,10 @@
 import type {
+  BattleUnitAnimationStateName,
+  FacingDirection,
   GuardedLocation,
+  HeroAnimationStateName,
+  HeroVisualStateRuntime,
+  ObjectAnimationStateName,
   ResourcePickup,
   ResourceType,
   ScenarioHero,
@@ -41,6 +46,9 @@ interface RenderDiagnosticEntry {
   subjectType: string;
   sceneContext: VisualSceneContext;
   templateId: string;
+  requestedStateName: string | null;
+  resolvedStateName: string | null;
+  stateDirection: FacingDirection | null;
   assetKind: VisualTemplateResolverResult["assetKind"];
   isFallback: boolean;
 }
@@ -64,6 +72,9 @@ function getFallbackTemplate(
     assetKind: "fallback",
     assetSource: null,
     spriteFrame: null,
+    requestedStateName: null,
+    resolvedStateName: null,
+    stateDirection: null,
     fallbackStyle: fallback.fallbackStyle,
     readabilityLabel: fallback.readabilityLabel,
     intendedContexts: fallback.intendedContexts.includes(sceneContext) ? fallback.intendedContexts : [sceneContext],
@@ -87,6 +98,9 @@ function toResolvedTemplate(
       assetKind: template.assetKind,
       assetSource: template.assetSource,
       spriteFrame: template.spriteFrame ?? null,
+      requestedStateName: null,
+      resolvedStateName: null,
+      stateDirection: null,
       fallbackStyle: template.fallbackStyle,
       readabilityLabel: template.readabilityLabel,
       intendedContexts: template.intendedContexts,
@@ -95,6 +109,61 @@ function toResolvedTemplate(
   }
 
   return getFallbackTemplate(catalog, subject.subjectKind, subject.sceneContext);
+}
+
+function withResolvedState(
+  resolvedTemplate: VisualTemplateResolverResult,
+  requestedStateName: string,
+  resolvedStateName: string,
+  stateDirection: FacingDirection | null = null
+): VisualTemplateResolverResult {
+  return {
+    ...resolvedTemplate,
+    requestedStateName,
+    resolvedStateName,
+    stateDirection
+  };
+}
+
+function resolveHeroState(
+  hero: Pick<ScenarioHero, "name">,
+  visualState: HeroVisualStateRuntime | undefined,
+  catalog: VisualTemplateCatalog
+): { requestedStateName: HeroAnimationStateName; resolvedStateName: HeroAnimationStateName; stateDirection: FacingDirection } {
+  const profile = catalog.heroStateProfiles[hero.name];
+  const defaultDirection = profile?.defaultDirection ?? "down";
+  const requestedStateName = visualState?.stateName ?? profile?.fallbackStateName ?? "idle";
+  const resolvedStateName = profile
+    ? [...profile.directionalStateNames, ...profile.eventStateNames].includes(requestedStateName)
+      ? requestedStateName
+      : profile.fallbackStateName
+    : requestedStateName;
+  return {
+    requestedStateName,
+    resolvedStateName,
+    stateDirection: visualState?.direction ?? defaultDirection
+  };
+}
+
+function resolveUnitState(
+  unit: Pick<ScenarioUnit, "name">,
+  stateName: BattleUnitAnimationStateName | undefined,
+  catalog: VisualTemplateCatalog
+): { requestedStateName: BattleUnitAnimationStateName; resolvedStateName: BattleUnitAnimationStateName } {
+  const profile = catalog.unitStateProfiles[unit.name];
+  const requestedStateName = stateName ?? profile?.fallbackStateName ?? "idle";
+  const resolvedStateName = profile?.supportedStateNames.includes(requestedStateName) ? requestedStateName : profile?.fallbackStateName ?? "idle";
+  return { requestedStateName, resolvedStateName };
+}
+
+function resolveObjectState(
+  stateName: ObjectAnimationStateName | undefined,
+  supportedStates: ObjectAnimationStateName[] | undefined,
+  fallbackStateName: ObjectAnimationStateName | undefined
+): { requestedStateName: ObjectAnimationStateName; resolvedStateName: ObjectAnimationStateName } {
+  const requestedStateName = stateName ?? fallbackStateName ?? "idle";
+  const resolvedStateName = supportedStates?.includes(requestedStateName) ? requestedStateName : fallbackStateName ?? "idle";
+  return { requestedStateName, resolvedStateName };
 }
 
 export function resolveVisualTemplate(
@@ -122,33 +191,53 @@ export function resolveVisualTemplate(
 export function resolveUnitVisualTemplate(
   unit: Pick<ScenarioUnit, "name">,
   sceneContext: VisualSceneContext,
+  stateName?: BattleUnitAnimationStateName,
   catalog: VisualTemplateCatalog = visualTemplateCatalog
 ): VisualTemplateResolverResult {
-  return resolveVisualTemplate({ subjectKind: "unit", subjectType: unit.name, sceneContext }, catalog);
+  const resolvedTemplate = resolveVisualTemplate({ subjectKind: "unit", subjectType: unit.name, sceneContext }, catalog);
+  const resolvedState = resolveUnitState(unit, stateName, catalog);
+  return withResolvedState(resolvedTemplate, resolvedState.requestedStateName, resolvedState.resolvedStateName);
 }
 
 export function resolveHeroVisualTemplate(
   hero: Pick<ScenarioHero, "name">,
+  visualState?: HeroVisualStateRuntime,
   catalog: VisualTemplateCatalog = visualTemplateCatalog
 ): VisualTemplateResolverResult {
-  return resolveVisualTemplate({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, catalog);
+  const resolvedTemplate = resolveVisualTemplate({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, catalog);
+  const resolvedState = resolveHeroState(hero, visualState, catalog);
+  return withResolvedState(
+    resolvedTemplate,
+    resolvedState.requestedStateName,
+    resolvedState.resolvedStateName,
+    resolvedState.stateDirection
+  );
 }
 
 export function resolveMovementObjectVisualTemplate(
   objectType: string,
+  stateName?: ObjectAnimationStateName,
   catalog: VisualTemplateCatalog = visualTemplateCatalog
 ): VisualTemplateResolverResult {
-  return resolveVisualTemplate({ subjectKind: "movement-object", subjectType: objectType, sceneContext: "map" }, catalog);
+  const resolvedTemplate = resolveVisualTemplate({ subjectKind: "movement-object", subjectType: objectType, sceneContext: "map" }, catalog);
+  const profile = catalog.movementObjectStateProfiles[objectType];
+  const resolvedState = resolveObjectState(stateName, profile?.supportedStateNames, profile?.fallbackStateName);
+  return withResolvedState(resolvedTemplate, resolvedState.requestedStateName, resolvedState.resolvedStateName);
 }
 
 export function resolveGuardedLocationVisualTemplate(
   location: Pick<GuardedLocation, "locationType" | "accessState">,
+  stateName?: ObjectAnimationStateName,
   catalog: VisualTemplateCatalog = visualTemplateCatalog
 ): VisualTemplateResolverResult {
-  return resolveVisualTemplate(
+  const subjectType = `${location.locationType}:${location.accessState}`;
+  const resolvedTemplate = resolveVisualTemplate(
     { subjectKind: "guarded-location", subjectType: `${location.locationType}:${location.accessState}`, sceneContext: "map" },
     catalog
   );
+  const profile = catalog.guardedLocationStateProfiles[subjectType];
+  const resolvedState = resolveObjectState(stateName ?? (location.accessState === "blocked" ? "blocked" : "open"), profile?.supportedStateNames, profile?.fallbackStateName);
+  return withResolvedState(resolvedTemplate, resolvedState.requestedStateName, resolvedState.resolvedStateName);
 }
 
 export function resolveTerrainVisualTemplate(
@@ -190,6 +279,9 @@ export function recordVisualTemplateDiagnostic(
     subjectType: subject.subjectType,
     sceneContext: subject.sceneContext,
     templateId: resolvedTemplate.templateId,
+    requestedStateName: resolvedTemplate.requestedStateName ?? null,
+    resolvedStateName: resolvedTemplate.resolvedStateName ?? null,
+    stateDirection: resolvedTemplate.stateDirection ?? null,
     assetKind: resolvedTemplate.assetKind,
     isFallback: resolvedTemplate.isFallback
   });

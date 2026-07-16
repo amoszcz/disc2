@@ -43,6 +43,10 @@ function getLivingEnemyUnitIds(state: GameState, battle: Battle, actingSide: Bat
     .filter((unitId) => unitIsAlive(state, unitId));
 }
 
+function attackCategorySupportsImmediateStrike(attackCategory: AttackCategory): boolean {
+  return attackCategory === "area";
+}
+
 function getMeleeTargetUnitIds(state: GameState, battle: Battle, actingSide: BattleSide): string[] {
   const opposingSide = getOpposingSide(actingSide);
   const adjacentTargets = getLivingUnitIdsInColumn(state, battle, opposingSide, 0);
@@ -73,7 +77,7 @@ export function createBattleTargetingState(state: GameState, battle: Battle, act
     activeUnitId,
     selectedTargetUnitId: null,
     legalTargetUnitIds,
-    canStrike: attackCategory === "area" ? legalTargetUnitIds.length > 0 : false,
+    canStrike: attackCategorySupportsImmediateStrike(attackCategory) ? legalTargetUnitIds.length > 0 : false,
     canDefend: true
   };
 }
@@ -100,8 +104,9 @@ export function clearInvalidSelectedTarget(state: GameState, battle: Battle): vo
   }
 
   if (!targetingState.selectedTargetUnitId) {
-    targetingState.canStrike =
-      getUnitAttackCategory(state, targetingState.activeUnitId) === "area" ? targetingState.legalTargetUnitIds.length > 0 : false;
+    targetingState.canStrike = attackCategorySupportsImmediateStrike(getUnitAttackCategory(state, targetingState.activeUnitId))
+      ? targetingState.legalTargetUnitIds.length > 0
+      : false;
     return;
   }
 
