@@ -15,8 +15,10 @@ Define the touch-capable interaction contract for mobile gameplay sessions.
 
 - A player must be able to tap heroes, tap map tiles, and progress route selection from a mobile browser.
 - A player must be able to navigate the map view on mobile when the default visible area is insufficient.
-- Mobile map navigation may combine drag-to-pan with explicit zoom buttons, but route selection and pan gestures must remain distinguishable.
+- Mobile map navigation must allow a two-finger gesture on the play surface to zoom the map in and out during active play.
+- Mobile map navigation may combine drag-to-pan with explicit zoom buttons, but route selection, pan gestures, and two-finger zoom gestures must remain distinguishable.
 - Touch navigation must not corrupt selection, route, or turn state while the player is interacting with the map.
+- A two-finger zoom gesture performed on the play surface must update the in-game map zoom instead of the browser page zoom.
 
 ## Battle Interaction Contract
 

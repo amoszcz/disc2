@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation completed in one pass; no unresolved clarification markers remained.
+- Revalidated after adding two-finger mobile zoom requirements; no unresolved clarification markers remain.

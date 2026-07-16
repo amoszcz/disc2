@@ -3,7 +3,14 @@ import { clearOwnedRoutePreview, confirmRoutePreview, plotRoutePreview, selectHe
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
 import { isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../engine/map/routePreviewState";
-import { createInteractionTarget, createPanGesture, panViewport, zoomViewportAtPoint } from "../../engine/map/viewportMath";
+import {
+  createInteractionTarget,
+  createPanGesture,
+  createZoomGesture,
+  panViewport,
+  zoomViewportAtPoint,
+  zoomViewportWithTouchGesture
+} from "../../engine/map/viewportMath";
 import type { ScreenPoint } from "../../engine/scenario/types";
 
 const TOUCH_PAN_THRESHOLD = 12;
@@ -99,6 +106,24 @@ function handleMapTap(store: GameStore, point: ScreenPoint): void {
 }
 
 export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void {
+  const activeTouchPoints = new Map<number, ScreenPoint>();
+  const capturePointer = (pointerId: number): void => {
+    try {
+      canvas.setPointerCapture(pointerId);
+    } catch {
+      // Synthetic touch events used in tests may not support pointer capture.
+    }
+  };
+  const releasePointer = (pointerId: number): void => {
+    try {
+      if (canvas.hasPointerCapture(pointerId)) {
+        canvas.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // Ignore pointer-capture cleanup failures from synthetic events.
+    }
+  };
+
   canvas.addEventListener("click", (event) => {
     if (event.button !== 0) {
       return;
@@ -192,9 +217,25 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
     }
 
     const point = getCanvasPoint(canvas, event);
-    canvas.setPointerCapture(event.pointerId);
+    activeTouchPoints.set(event.pointerId, point);
+    capturePointer(event.pointerId);
     store.update((state) => {
       if (state.sceneMode !== "map") {
+        return;
+      }
+
+      const activePointers = [...activeTouchPoints.entries()];
+      if (activePointers.length >= 2) {
+        const [[firstPointerId, firstPoint], [secondPointerId, secondPoint]] = activePointers;
+        state.mapViewState.panGesture = null;
+        state.mapViewState.zoomGesture = createZoomGesture(firstPointerId, secondPointerId, firstPoint, secondPoint);
+        state.lastTouchInteraction = {
+          interactionType: "tap",
+          screenPosition: state.mapViewState.zoomGesture.anchorScreenPoint,
+          targetKind: "none",
+          targetId: null,
+          gesturePhase: "start"
+        };
         return;
       }
 
@@ -206,6 +247,7 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
         gesturePhase: "start"
       };
       state.mapViewState.panGesture = createPanGesture(point, state.mapViewState.viewport);
+      state.mapViewState.zoomGesture = null;
       state.mapViewState.panGesture.pointerId = event.pointerId;
       state.mapViewState.panGesture.pointerType = event.pointerType;
       state.mapViewState.panGesture.hasMoved = false;
@@ -218,8 +260,48 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
     }
 
     const point = getCanvasPoint(canvas, event);
+    activeTouchPoints.set(event.pointerId, point);
     store.update((state) => {
-      if (state.sceneMode !== "map" || !state.mapViewState.panGesture?.isActive) {
+      if (state.sceneMode !== "map") {
+        return;
+      }
+
+      const zoomGesture = state.mapViewState.zoomGesture;
+      if (zoomGesture?.isActive && zoomGesture.pointerIds.includes(event.pointerId)) {
+        const [firstPointerId, secondPointerId] = zoomGesture.pointerIds;
+        const firstPoint = activeTouchPoints.get(firstPointerId);
+        const secondPoint = activeTouchPoints.get(secondPointerId);
+        if (!firstPoint || !secondPoint) {
+          return;
+        }
+
+        const zoomResult = zoomViewportWithTouchGesture(
+          state.mapViewState.viewport,
+          zoomGesture,
+          firstPoint,
+          secondPoint,
+          state.scenario.map,
+          state.responsiveCanvasView.pixelWidth,
+          state.responsiveCanvasView.pixelHeight
+        );
+        state.mapViewState.zoomGesture = zoomResult.zoomGesture;
+        if (!zoomResult.interactionType) {
+          return;
+        }
+
+        state.mapViewState.viewport = zoomResult.viewport;
+        state.mapViewState.isDefaultView = false;
+        state.lastTouchInteraction = {
+          interactionType: zoomResult.interactionType,
+          screenPosition: zoomResult.zoomGesture.anchorScreenPoint,
+          targetKind: "none",
+          targetId: null,
+          gesturePhase: "move"
+        };
+        return;
+      }
+
+      if (!state.mapViewState.panGesture?.isActive) {
         return;
       }
       if (state.mapViewState.panGesture.pointerId !== event.pointerId) {
@@ -258,12 +340,26 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
     }
 
     const point = getCanvasPoint(canvas, event);
-    if (canvas.hasPointerCapture(event.pointerId)) {
-      canvas.releasePointerCapture(event.pointerId);
-    }
+    activeTouchPoints.delete(event.pointerId);
+    releasePointer(event.pointerId);
 
     let shouldTap = false;
     store.update((state) => {
+      const zoomGesture = state.mapViewState.zoomGesture;
+      if (zoomGesture?.pointerIds.includes(event.pointerId)) {
+        state.mapViewState.zoomGesture = null;
+        state.mapViewState.panGesture = null;
+        state.lastTouchInteraction = {
+          interactionType:
+            state.lastTouchInteraction?.interactionType === "zoom-out" ? "zoom-out" : "zoom-in",
+          screenPosition: point,
+          targetKind: "none",
+          targetId: null,
+          gesturePhase: "end"
+        };
+        return;
+      }
+
       const gesture = state.mapViewState.panGesture;
       if (!gesture || gesture.pointerId !== event.pointerId) {
         return;

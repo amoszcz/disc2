@@ -16,10 +16,18 @@
   - Add separate mobile-only action buttons for every map interaction: rejected because it would duplicate too much of the existing input model.
   - Depend on a third-party gesture library: rejected because browser-native input events are sufficient and avoid unnecessary dependencies.
 
+## Decision 2a: Support mobile map zoom through a two-finger in-canvas gesture
+
+- **Decision**: Interpret two-finger touch movement on the main play surface as a map zoom gesture that updates the existing viewport zoom state without invoking browser page zoom.
+- **Rationale**: The mobile spec now requires players to zoom the map directly with touch. Reusing the existing viewport zoom model keeps zoom behavior consistent across desktop and mobile while preserving one navigation system.
+- **Alternatives considered**:
+  - Rely only on explicit zoom buttons for mobile: rejected because it does not satisfy the direct two-finger gesture requirement.
+  - Allow browser pinch zoom and treat it as sufficient navigation: rejected because page zoom breaks canvas hit testing, layout stability, and session usability.
+
 ## Decision 3: Make canvas dimensions responsive and normalize viewport state against the rendered canvas size
 
 - **Decision**: Size the game canvas from the live container dimensions and re-normalize map viewport math whenever the available viewport changes.
-- **Rationale**: Current viewport calculations assume a fixed `896x640` canvas, which is not robust on narrow screens or after orientation changes. Responsive canvas metrics are required to keep map visibility, hit testing, and zoom behavior consistent on mobile.
+- **Rationale**: Current viewport calculations assume a fixed `896x640` canvas, which is not robust on narrow screens or after orientation changes. Responsive canvas metrics are required to keep map visibility, hit testing, and zoom behavior consistent on mobile, including while a two-finger gesture is actively changing zoom level.
 - **Alternatives considered**:
   - Keep a fixed internal canvas and only scale it with CSS: rejected because hit testing and readable tile sizing would drift on small screens.
   - Force landscape-only play: rejected because the feature requires mobile-browser playability, not a restricted orientation workaround.

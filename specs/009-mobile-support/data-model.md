@@ -63,9 +63,28 @@
 - **Relationships**:
   - Can select menu options, heroes, map tiles, battle targets, or action buttons.
   - May update map viewport state when used for navigation gestures.
+  - May contribute one touch point within a multi-touch mobile zoom gesture.
 - **Validation Rules**:
   - Required gameplay actions must not depend on hover, wheel, or middle mouse input.
   - Tap and drag behavior must resolve to one clear interaction outcome at a time.
+
+## Mobile Zoom Gesture
+
+- **Purpose**: Represents a two-finger gesture on the main play surface that changes map zoom during active mobile play.
+- **Fields**:
+  - `firstTouchPosition`
+  - `secondTouchPosition`
+  - `initialDistance`
+  - `currentDistance`
+  - `zoomDirection`
+  - `anchorScreenPosition`
+- **Relationships**:
+  - Uses two touch interactions as inputs.
+  - Updates map view state through the same viewport zoom model used by other navigation inputs.
+- **Validation Rules**:
+  - The gesture must only affect the map when both touches are on the play surface.
+  - The gesture must remain bounded by the existing map zoom limits.
+  - The gesture must not trigger browser page zoom while interacting with the play surface.
 
 ## Map View State
 
@@ -73,11 +92,12 @@
 - **Fields**:
   - `viewport`
   - `panGesture`
+  - `zoomGesture`
   - `isDefaultView`
   - `lastSceneMode`
 - **Relationships**:
   - Depends on responsive canvas view metrics for normalization and hit testing.
-  - Is updated by map touch interactions and viewport change events.
+  - Is updated by map touch interactions, mobile zoom gestures, and viewport change events.
 - **Validation Rules**:
   - Hit testing must stay correct after resize and orientation change.
   - Map pan and zoom behavior must remain bounded by scenario map dimensions.
@@ -117,6 +137,12 @@
 1. The player taps or drags within the canvas or action controls.
 2. The input layer resolves the interaction into an existing menu, map, battle, or viewport action.
 3. The active scene updates without requiring desktop-only controls.
+
+### Two-Finger Zoom Interaction
+
+1. The player places two touches on the map canvas during an active mobile scenario.
+2. The input layer identifies the gesture as zoom input and measures the change in finger spacing around the active anchor point.
+3. The map viewport zoom level updates without invoking browser page zoom or discarding current session state.
 
 ### Viewport Change During Play
 
