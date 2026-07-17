@@ -24,26 +24,51 @@
   - Rely only on explicit zoom buttons for mobile: rejected because it does not satisfy the direct two-finger gesture requirement.
   - Allow browser pinch zoom and treat it as sufficient navigation: rejected because page zoom breaks canvas hit testing, layout stability, and session usability.
 
+## Decision 2b: Normalize zoom bounds to a scenario-independent Border Watch baseline
+
+- **Decision**: Define the allowed minimum and maximum in-game zoom levels from the tile sizes already used by Border Watch, then apply those same tile-size endpoints to every scenario instead of deriving zoom limits from each map's total dimensions.
+- **Rationale**: The current behavior makes small maps top out with oversized tiles and large maps top out with undersized tiles at the same nominal zoom limit. A shared baseline preserves a predictable visual scale and makes mobile zoom behavior consistent across scenario changes.
+- **Alternatives considered**:
+  - Keep per-scenario zoom bounds derived from map size: rejected because it preserves the inconsistency the feature is intended to remove.
+  - Choose a brand-new arbitrary zoom range unrelated to existing scenarios: rejected because Border Watch already provides an accepted visual reference and reduces re-tuning risk.
+
 ## Decision 3: Make canvas dimensions responsive and normalize viewport state against the rendered canvas size
 
 - **Decision**: Size the game canvas from the live container dimensions and re-normalize map viewport math whenever the available viewport changes.
-- **Rationale**: Current viewport calculations assume a fixed `896x640` canvas, which is not robust on narrow screens or after orientation changes. Responsive canvas metrics are required to keep map visibility, hit testing, and zoom behavior consistent on mobile, including while a two-finger gesture is actively changing zoom level.
+- **Rationale**: Current viewport calculations assume a fixed `896x640` canvas, which is not robust on narrow screens or after orientation changes. Responsive canvas metrics are required to keep map visibility, hit testing, and zoom behavior consistent on mobile, including while a two-finger gesture is actively changing zoom level and while normalized zoom bounds are applied to different map sizes.
 - **Alternatives considered**:
   - Keep a fixed internal canvas and only scale it with CSS: rejected because hit testing and readable tile sizing would drift on small screens.
   - Force landscape-only play: rejected because the feature requires mobile-browser playability, not a restricted orientation workaround.
 
-## Decision 4: Preserve the existing map, battle, and victory rules while adapting only control affordances and layout
+## Decision 3a: Center the initial scenario viewport on the starting hero
 
-- **Decision**: Keep the current scenario rules, turn flow, battle resolution, and completion logic unchanged while adding mobile-friendly labels, control sizes, and action placement where needed.
-- **Rationale**: The spec is about accessibility and operability on mobile, not about redesigning gameplay. Preserving current rules minimizes regression risk and keeps the mobile work sharply scoped.
+- **Decision**: When a scenario session begins, initialize the map viewport so the selected starting hero appears at the center of the visible map area whenever bounds allow, and clamp that framing near edges or corners.
+- **Rationale**: The spec now requires the player to begin with their controllable unit in focus instead of relying on a generic origin view. Applying hero-centered framing during scenario startup improves orientation immediately and fits naturally within the existing viewport normalization path.
+- **Alternatives considered**:
+  - Keep the current default top-left or map-derived framing: rejected because it can start the player away from their controllable unit.
+  - Delay centering until the first user interaction: rejected because the requirement is for the initial scenario view itself.
+
+## Decision 3b: Price diagonal route steps longer than orthogonal route steps
+
+- **Decision**: Update route-distance calculation so a diagonal step contributes more distance than a horizontal or vertical step across otherwise equivalent terrain.
+- **Rationale**: The current equal-step treatment understates diagonal travel compared with the actual map geometry. Applying a longer diagonal distance keeps route previews and movement cost aligned with player expectations without changing which neighboring tiles are reachable.
+- **Alternatives considered**:
+  - Keep diagonal and orthogonal steps at equal distance: rejected because it preserves the inaccuracy called out in the spec.
+  - Remove diagonal movement entirely: rejected because the requirement is to account for longer diagonal travel, not to reduce movement options.
+  - Approximate all routes with Manhattan-only distance: rejected because it would distort existing route shapes and path selection behavior.
+
+## Decision 4: Preserve the existing map, battle, and victory rules while adapting only control affordances, layout, and route-distance weighting
+
+- **Decision**: Keep the current scenario rules, turn flow, battle resolution, and completion logic unchanged aside from the newly required diagonal-aware route-distance weighting, while adding mobile-friendly labels, control sizes, and action placement where needed.
+- **Rationale**: The spec is primarily about accessibility and operability on mobile, with one explicit adjustment to route-cost calculation. Limiting rule changes to that single distance-weighting requirement minimizes regression risk and keeps the work sharply scoped.
 - **Alternatives considered**:
   - Simplify gameplay rules for mobile: rejected because it would expand scope beyond browser support.
   - Add separate mobile scenarios or battle modes: rejected because the current feature only needs current scenarios to be playable.
 
 ## Decision 5: Prove mobile support with mobile-sized acceptance coverage plus targeted integration tests
 
-- **Decision**: Use Playwright mobile-sized browser contexts for end-to-end evidence and add Vitest coverage for layout state, input translation, and resize handling through public seams.
-- **Rationale**: Mobile support is primarily a user-visible behavior change spanning layout, input, and scene flow. Acceptance coverage is needed to prove real mobile-browser usability, while integration tests provide faster feedback for viewport and input state transitions.
+- **Decision**: Use Playwright mobile-sized browser contexts for end-to-end evidence and add Vitest coverage for layout state, initial hero-centered framing, input translation, resize handling, and cross-scenario zoom-bound normalization through public seams.
+- **Rationale**: Mobile support is primarily a user-visible behavior change spanning layout, input, and scene flow. Acceptance coverage is needed to prove real mobile-browser usability, while integration tests provide faster feedback for viewport, initial framing, input, and normalized zoom state transitions.
 - **Alternatives considered**:
   - Rely only on unit-level input tests: rejected because that would miss DOM wiring and real viewport behavior.
   - Rely only on manual device testing: rejected because the constitution requires automated feature-proof where practical.

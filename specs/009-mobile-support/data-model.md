@@ -83,8 +83,23 @@
   - Updates map view state through the same viewport zoom model used by other navigation inputs.
 - **Validation Rules**:
   - The gesture must only affect the map when both touches are on the play surface.
-  - The gesture must remain bounded by the existing map zoom limits.
+  - The gesture must remain bounded by the normalized map zoom limits.
   - The gesture must not trigger browser page zoom while interacting with the play surface.
+
+## Zoom Scale Baseline
+
+- **Purpose**: Represents the shared visual-scale endpoints used to normalize map zoom across scenarios.
+- **Fields**:
+  - `referenceScenarioId`
+  - `minimumTileRenderSize`
+  - `maximumTileRenderSize`
+  - `appliesToScenarioIds`
+- **Relationships**:
+  - Supplies the allowed zoom endpoints for map view state.
+  - Uses Border Watch as the source scenario for baseline tile sizes.
+- **Validation Rules**:
+  - The baseline must remain scenario-independent once derived from the reference scenario.
+  - Every supported scenario must use the same minimum and maximum tile render sizes at the zoom bounds.
 
 ## Map View State
 
@@ -93,14 +108,40 @@
   - `viewport`
   - `panGesture`
   - `zoomGesture`
+  - `zoomScaleBaseline`
+  - `minimumZoomLevel`
+  - `maximumZoomLevel`
+  - `initialFocusHeroId`
+  - `isInitialHeroCentered`
   - `isDefaultView`
   - `lastSceneMode`
 - **Relationships**:
   - Depends on responsive canvas view metrics for normalization and hit testing.
+  - Depends on zoom scale baseline for scenario-independent zoom bounds.
+  - Uses the starting hero as the initial framing reference when a scenario session begins.
   - Is updated by map touch interactions, mobile zoom gestures, and viewport change events.
 - **Validation Rules**:
   - Hit testing must stay correct after resize and orientation change.
-  - Map pan and zoom behavior must remain bounded by scenario map dimensions.
+  - Map pan behavior must remain bounded by scenario map dimensions.
+  - Map zoom behavior must use the shared minimum and maximum tile-size endpoints across scenarios.
+  - Initial scenario framing must center the starting hero or the closest map-bounded position to that center.
+
+## Route Distance Rule
+
+- **Purpose**: Represents the distance-weighting policy applied while previewing or confirming map movement routes.
+- **Fields**:
+  - `orthogonalStepDistance`
+  - `diagonalStepDistance`
+  - `terrainModifierSource`
+  - `appliesToPreview`
+  - `appliesToCommittedMove`
+- **Relationships**:
+  - Constrains route preview and movement validation for map navigation.
+  - Shares the same weighting policy between touch-capable and desktop-capable route selection.
+- **Validation Rules**:
+  - `diagonalStepDistance` must be greater than `orthogonalStepDistance` when terrain conditions are otherwise equal.
+  - Route previews and committed movement must use the same distance-weighting policy.
+  - Touch-capable route selection must not bypass diagonal-aware distance validation.
 
 ## Viewport Change Event
 
@@ -131,18 +172,20 @@
 1. The player taps a scenario option in the main menu.
 2. A fresh scenario session starts.
 3. Responsive canvas metrics and map viewport state are initialized for the current mobile viewport.
+4. The starting hero becomes the initial viewport focus and the map is centered on that hero as closely as bounds allow.
 
 ### Touch Gameplay Interaction
 
 1. The player taps or drags within the canvas or action controls.
 2. The input layer resolves the interaction into an existing menu, map, battle, or viewport action.
-3. The active scene updates without requiring desktop-only controls.
+3. Route previews and committed movement apply the diagonal-aware distance rule when the player selects a path.
+4. The active scene updates without requiring desktop-only controls.
 
 ### Two-Finger Zoom Interaction
 
 1. The player places two touches on the map canvas during an active mobile scenario.
 2. The input layer identifies the gesture as zoom input and measures the change in finger spacing around the active anchor point.
-3. The map viewport zoom level updates without invoking browser page zoom or discarding current session state.
+3. The map viewport zoom level updates within the shared zoom-scale baseline without invoking browser page zoom or discarding current session state.
 
 ### Viewport Change During Play
 

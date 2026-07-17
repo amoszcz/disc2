@@ -15,18 +15,26 @@ import {
   type StorybookState,
   type VisualStateTracker
 } from "../../engine/scenario/types";
-import { createViewport } from "../../engine/map/viewportMath";
+import { createCenteredViewport, createViewport } from "../../engine/map/viewportMath";
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
 import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
 import { getStorybookPreviewSubjects } from "../../render/sprites/visualTemplateCatalog";
 
-export function createDefaultMapViewState(scenario: ScenarioDefinition): MapViewState {
+export function createDefaultMapViewState(
+  scenario: ScenarioDefinition,
+  selectedHeroId: string | null = null,
+  canvasWidth = getDefaultResponsiveCanvasView().pixelWidth,
+  canvasHeight = getDefaultResponsiveCanvasView().pixelHeight
+): MapViewState {
+  const focusHero =
+    selectedHeroId === null
+      ? null
+      : scenario.heroes.find((hero) => hero.id === selectedHeroId && hero.mapId === getMainWorldMapId(scenario)) ?? null;
+
   return {
-    viewport: createViewport(
-      scenario.map,
-      getDefaultResponsiveCanvasView().pixelWidth,
-      getDefaultResponsiveCanvasView().pixelHeight
-    ),
+    viewport: focusHero
+      ? createCenteredViewport(scenario.map, focusHero.mapPosition, canvasWidth, canvasHeight)
+      : createViewport(scenario.map, canvasWidth, canvasHeight),
     panGesture: null,
     zoomGesture: null,
     lastSceneMode: "map",
@@ -98,7 +106,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     routeFeedback: null,
     activeRoutePreview: null,
     storybookState: null,
-    mapViewState: createDefaultMapViewState(scenario),
+    mapViewState: createDefaultMapViewState(scenario, selectedHeroId),
     mapTravelState: createInitialMapTravelState(scenario),
     visualStates: createInitialVisualStates(scenario),
     mobileLayoutState: getDefaultMobileLayoutState(),
@@ -198,7 +206,12 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.routeFeedback = nextState.routeFeedback;
   state.activeRoutePreview = nextState.activeRoutePreview;
   state.storybookState = nextState.storybookState;
-  state.mapViewState = nextState.mapViewState;
+  state.mapViewState = createDefaultMapViewState(
+    nextState.scenario,
+    nextState.selectedHeroId,
+    preservedCanvasView.pixelWidth,
+    preservedCanvasView.pixelHeight
+  );
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
   state.mobileLayoutState = preservedLayoutState;

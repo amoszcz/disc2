@@ -15,6 +15,10 @@ export function routeDirection(from: Position, to: Position): "orthogonal" | "di
   return from.x !== to.x && from.y !== to.y ? "diagonal" : "orthogonal";
 }
 
+function routeMovementCost(baseMovementCost: number, direction: "orthogonal" | "diagonal"): number {
+  return direction === "diagonal" ? baseMovementCost + 1 : baseMovementCost;
+}
+
 export function buildRouteAttempt(
   scenario: ScenarioDefinition,
   heroId: string,
@@ -52,7 +56,7 @@ export function buildRouteAttempt(
   }
 
   const resolvedTerrain = resolveMovementTile(scenario, toPosition);
-  const movementCost = resolvedTerrain.movementCost;
+  const movementCost = routeMovementCost(resolvedTerrain.movementCost, direction);
 
   if ((hasTerrainRegions(scenario) || hasMovementObjectRegions(scenario)) && !isAdjacent8(fromPosition, toPosition)) {
     return {

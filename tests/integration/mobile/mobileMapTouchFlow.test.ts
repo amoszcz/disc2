@@ -1,7 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { createInitialState } from "../../../src/app/state/gameState";
 import { plotRoutePreview, selectHero } from "../../../src/engine/map/heroActions";
-import { createPanGesture, createZoomGesture, panViewport, zoomViewportWithTouchGesture } from "../../../src/engine/map/viewportMath";
+import {
+  createPanGesture,
+  createZoomGesture,
+  getScaledTileSize,
+  getZoomScaleBaseline,
+  panViewport,
+  zoomViewportWithTouchGesture
+} from "../../../src/engine/map/viewportMath";
 import { createMobileLayoutState, createResponsiveCanvasView } from "../../../src/render/canvas/viewportRender";
 
 describe("mobile map touch flow", () => {
@@ -51,5 +58,35 @@ describe("mobile map touch flow", () => {
     expect(zoomResult.interactionType).toBe("zoom-in");
     expect(state.mapViewState.zoomGesture).not.toBeNull();
     expect(state.mapViewState.viewport.zoomLevel).toBeGreaterThan(startingZoom);
+  });
+
+  test("keeps mobile zoom endpoints aligned with Border Watch across scenarios", () => {
+    const baseline = getZoomScaleBaseline();
+    const borderWatchState = createInitialState("core-map-loop");
+    const largeScenarioState = createInitialState("advanced-terrain-scenario");
+
+    borderWatchState.mobileLayoutState = createMobileLayoutState(390, 844, 358, 420);
+    borderWatchState.responsiveCanvasView = createResponsiveCanvasView(358, 420, 2);
+    largeScenarioState.mobileLayoutState = createMobileLayoutState(390, 844, 358, 420);
+    largeScenarioState.responsiveCanvasView = createResponsiveCanvasView(358, 420, 2);
+
+    expect(getScaledTileSize(borderWatchState.mapViewState.viewport, borderWatchState.scenario.map)).toBe(
+      baseline.minTileRenderSize
+    );
+    expect(getScaledTileSize(largeScenarioState.mapViewState.viewport, largeScenarioState.scenario.map)).toBe(
+      baseline.minTileRenderSize
+    );
+    expect(
+      getScaledTileSize(
+        { ...borderWatchState.mapViewState.viewport, zoomLevel: borderWatchState.mapViewState.viewport.maxZoom },
+        borderWatchState.scenario.map
+      )
+    ).toBe(baseline.maxTileRenderSize);
+    expect(
+      getScaledTileSize(
+        { ...largeScenarioState.mapViewState.viewport, zoomLevel: largeScenarioState.mapViewState.viewport.maxZoom },
+        largeScenarioState.scenario.map
+      )
+    ).toBe(baseline.maxTileRenderSize);
   });
 });

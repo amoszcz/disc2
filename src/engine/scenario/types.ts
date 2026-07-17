@@ -316,6 +316,10 @@ export interface MapViewport {
   minZoom: number;
   maxZoom: number;
   zoomStep: number;
+  minTileRenderSize: number;
+  maxTileRenderSize: number;
+  zoomStepTileSize: number;
+  zoomReferenceScenarioId: string;
   panOffsetX: number;
   panOffsetY: number;
 }

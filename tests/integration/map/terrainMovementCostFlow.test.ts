@@ -10,11 +10,11 @@ describe("terrain movement costs", () => {
     expect(state.scenario.heroes[0].remainingMovement).toBe(7);
   });
 
-  test("spends 2 movement on standard terrain including diagonal steps", () => {
+  test("spends more movement on diagonal standard-terrain steps than orthogonal ones", () => {
     const state = createInitialState("advanced-terrain-scenario");
 
     expect(moveSelectedHero(state, { x: 6, y: 11 }).ok).toBe(true);
-    expect(state.scenario.heroes[0].remainingMovement).toBe(6);
+    expect(state.scenario.heroes[0].remainingMovement).toBe(5);
     expect(state.routeFeedback?.terrainLabel).toBe("Plains");
   });
 

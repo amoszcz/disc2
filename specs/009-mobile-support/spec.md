@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "add mobile support for the game. it should be possible to play it in mobile browser" and follow-up update: "in mobile, allow two-finger gestures to zoom in and out"
+**Input**: User description: "add mobile support for the game. it should be possible to play it in mobile browser" and follow-up updates: "in mobile, allow two-finger gestures to zoom in and out", "normalize map zoom so min and max zoom render the same tile sizes across scenario map sizes, matching Border Watch", "when scenario starts the view should be centered on initial hero", and "when calculating the distance the diagonal move is longer than horizontal or vertical it should be taken into account"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -23,6 +23,7 @@ As a mobile player, I can open the game in a phone browser, reach the main menu,
 1. **Given** the player opens the game in a supported mobile browser, **When** the application finishes loading, **Then** the main menu is visible and usable without horizontal page scrolling.
 2. **Given** the main menu is visible on mobile, **When** the player selects a scenario, **Then** the selected scenario starts successfully using touch-capable controls only.
 3. **Given** the player is viewing the active scenario on mobile, **When** the initial game view is shown, **Then** the main play surface and required action areas fit within a mobile-friendly layout that remains readable and operable.
+4. **Given** a scenario has just started on mobile, **When** the initial map view appears, **Then** the viewport is centered on the starting hero as closely as map boundaries allow so the player begins with their controllable unit in focus.
 
 ---
 
@@ -39,7 +40,9 @@ As a mobile player, I can perform the existing core gameplay actions through tou
 1. **Given** a scenario is active on mobile, **When** the player selects units, tiles, or action controls, **Then** the game accepts those inputs without relying on hover, right-click, or keyboard shortcuts.
 2. **Given** a scenario is active on mobile, **When** the player performs the inputs needed to inspect and navigate the map view, **Then** the map remains navigable within the mobile viewport.
 3. **Given** a scenario is active on mobile, **When** the player uses a two-finger zoom gesture on the map, **Then** the view zooms in or out predictably without triggering unintended page zoom or breaking the active session.
-4. **Given** a battle scene is active on mobile, **When** the player chooses battle actions and targets, **Then** the full battle flow can be completed using touch-capable controls.
+4. **Given** the player compares mobile zoom behavior between Border Watch and another scenario with a different map size, **When** they zoom to the minimum or maximum allowed level in each scenario, **Then** the tile size at those zoom limits remains consistent with the Border Watch reference instead of changing because one map is smaller or larger.
+5. **Given** a battle scene is active on mobile, **When** the player chooses battle actions and targets, **Then** the full battle flow can be completed using touch-capable controls.
+6. **Given** a player plots a route that includes diagonal movement, **When** the game calculates route distance or movement cost, **Then** each diagonal step counts as longer than a horizontal or vertical step so path cost reflects the extra distance traveled.
 
 ---
 
@@ -65,6 +68,9 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - What happens when the player uses the game on a narrow phone viewport rather than a tablet-sized screen? The core menu, map, battle, and end-of-scenario actions should still be reachable.
 - What happens when the browser applies default touch behaviors such as page zooming or scrolling? Core gameplay interactions should not be blocked by unintended browser gestures.
 - What happens when the player begins a two-finger zoom gesture near the edge of the play surface or changes finger spacing quickly? The map zoom should remain bounded, stable, and should not cause runaway browser or canvas scaling.
+- What happens when one scenario uses a small map and another uses a large map? The zoom minimum and maximum should preserve the same tile-size endpoints instead of making small maps top out with larger tiles or large maps top out with smaller tiles.
+- What happens when the starting hero is near a map edge or corner? The initial scenario view should center on that hero as much as possible without exposing space outside the map bounds.
+- What happens when a candidate route can be drawn with either mostly diagonal steps or mostly orthogonal steps? The route calculation should reflect the longer diagonal distance instead of treating both step types as equal.
 
 ## Requirements *(mandatory)*
 
@@ -74,9 +80,13 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - **FR-002**: The system MUST present the main menu in a mobile-friendly layout that is readable and actionable on narrow touch-screen viewports.
 - **FR-003**: The system MUST allow players to start any available scenario from the main menu on mobile without requiring mouse or keyboard input.
 - **FR-004**: The system MUST preserve the existing scenario-selection and scenario-start flow when accessed from mobile.
+- **FR-004a**: The system MUST position the initial scenario viewport so the starting hero is centered when a scenario begins, except where map boundaries require the hero to appear offset from exact center.
 - **FR-005**: The system MUST provide touch-capable interactions for the existing core gameplay actions required to complete a scenario.
 - **FR-006**: The system MUST allow players on mobile to select units, select map destinations, and confirm turn-progressing actions through touch-capable controls.
 - **FR-006a**: The system MUST allow players on mobile to zoom the map in and out through a two-finger gesture on the main play surface during active scenario play.
+- **FR-006b**: The system MUST keep the minimum and maximum in-game map zoom levels consistent across scenarios so that zoom bounds are not determined by the overall map dimensions.
+- **FR-006c**: The system MUST use the Border Watch scenario as the reference zoom baseline so that the tile size rendered at the minimum and maximum allowed zoom matches that same visual scale in other scenarios.
+- **FR-006d**: The system MUST calculate route distance and movement cost so that a diagonal move counts as longer than a horizontal or vertical move.
 - **FR-007**: The system MUST allow players on mobile to access and complete battle actions, including choosing actions and targets, through touch-capable controls.
 - **FR-008**: The system MUST keep required gameplay controls visible or reachable within a mobile-friendly layout during active play.
 - **FR-009**: The system MUST avoid relying on hover-only affordances for any action required to start, play, complete, or exit a scenario on mobile.
@@ -93,6 +103,7 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - **Mobile Session**: A gameplay session accessed through a mobile web browser, including menu navigation, active scenario play, and completion return flow.
 - **Touch Interaction**: A direct player input on a touch-screen device used to activate controls, select map targets, navigate the viewport, or progress battle and menu actions.
 - **Mobile Zoom Gesture**: A two-finger interaction on the main play surface that changes map zoom level during active mobile play.
+- **Zoom Scale Baseline**: The reference minimum and maximum tile sizes established by the Border Watch scenario and applied consistently across scenarios regardless of map dimensions.
 - **Mobile Layout State**: The visible arrangement of the main play surface and supporting controls for a given mobile viewport size or orientation.
 - **Viewport Change Event**: A change in available screen space during mobile play, such as device rotation or browser chrome expansion/collapse, that requires the interface to remain usable.
 
@@ -101,8 +112,11 @@ As a mobile player, I can continue playing when my device viewport changes so th
 ### Measurable Outcomes
 
 - **SC-001**: In mobile-browser acceptance testing, 100% of fresh launches reach a readable main menu and can start a scenario without mouse or keyboard input.
+- **SC-001a**: In mobile scenario-start validation, 100% of tested scenario launches place the starting hero at the center of the initial view or the closest map-bounded position to that center.
 - **SC-002**: In mobile gameplay acceptance testing, 100% of required core actions for at least one full scenario completion can be performed using touch-capable controls only.
 - **SC-002a**: In mobile map-navigation acceptance testing, 100% of tested two-finger zoom-in and zoom-out gestures change the map view as intended without invoking browser page zoom.
+- **SC-002b**: In cross-scenario mobile zoom testing, the tile size shown at minimum zoom and maximum zoom matches the Border Watch reference in 100% of tested scenarios, regardless of map size.
+- **SC-002c**: In route-calculation validation, 100% of tested diagonal movement steps are priced as longer than horizontal or vertical steps for equivalent terrain conditions.
 - **SC-003**: In mobile layout testing across supported narrow and rotated viewports, 100% of required menu, gameplay, battle, and completion actions remain reachable without horizontal page scrolling.
 - **SC-004**: In viewport-change testing, 100% of tested orientation and mobile viewport size changes preserve the active session without forcing a reload.
 - **SC-005**: In usability testing, at least 90% of players can start a scenario, take a turn, complete a battle interaction, and return to the menu on mobile without external instructions.
@@ -114,6 +128,8 @@ As a mobile player, I can continue playing when my device viewport changes so th
 - Mobile support covers browser play only and does not require installation as a native application.
 - Players are expected to use touch input as the primary control method on mobile.
 - Desktop support must continue to work alongside the new mobile-friendly behavior.
+- Border Watch is the accepted reference scenario for defining the normalized minimum and maximum tile sizes used by mobile map zoom.
+- The revised diagonal-distance rule applies to route calculation and movement costing without changing the broader turn structure or victory rules.
 
 ## Out of Scope
 

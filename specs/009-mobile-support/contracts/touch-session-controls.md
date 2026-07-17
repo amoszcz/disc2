@@ -14,11 +14,14 @@ Define the touch-capable interaction contract for mobile gameplay sessions.
 ## Map Interaction Contract
 
 - A player must be able to tap heroes, tap map tiles, and progress route selection from a mobile browser.
+- A fresh scenario start must frame the selected starting hero in the initial map view before the player performs any map interaction.
 - A player must be able to navigate the map view on mobile when the default visible area is insufficient.
 - Mobile map navigation must allow a two-finger gesture on the play surface to zoom the map in and out during active play.
 - Mobile map navigation may combine drag-to-pan with explicit zoom buttons, but route selection, pan gestures, and two-finger zoom gestures must remain distinguishable.
 - Touch navigation must not corrupt selection, route, or turn state while the player is interacting with the map.
+- When two routes differ only by diagonal versus orthogonal steps across equivalent terrain, the diagonal-heavy route must report a longer distance or movement cost.
 - A two-finger zoom gesture performed on the play surface must update the in-game map zoom instead of the browser page zoom.
+- Reaching the minimum or maximum allowed zoom in one scenario must produce the same tile-size endpoints as reaching those bounds in Border Watch.
 
 ## Battle Interaction Contract
 
@@ -33,3 +36,4 @@ Define the touch-capable interaction contract for mobile gameplay sessions.
 - Returning to the main menu after completion on mobile must dispose of the finished session and allow a fresh replay.
 - Starting a new scenario from the menu must retain the current mobile layout state instead of reverting to a desktop-only shell.
 - Starting a scenario again after a mobile return-to-menu flow must create a clean new session state.
+- Entering a different scenario after using map zoom in Border Watch must preserve the shared zoom-bound rules rather than recalculating larger or smaller endpoint tile sizes from map dimensions alone.

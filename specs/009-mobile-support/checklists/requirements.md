@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Revalidated after adding two-finger mobile zoom requirements; no unresolved clarification markers remain.
+- Revalidated after adding cross-scenario zoom normalization, initial hero-centered scenario-start framing, and diagonal-distance route-cost requirements; no unresolved clarification markers remain.

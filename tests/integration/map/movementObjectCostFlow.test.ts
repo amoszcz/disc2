@@ -11,7 +11,7 @@ describe("movement object cost flow", () => {
     hero.remainingMovement = 8;
 
     expect(moveSelectedHero(state, { x: 7, y: 11 }).ok).toBe(true);
-    expect(hero.remainingMovement).toBe(7);
+    expect(hero.remainingMovement).toBe(6);
     expect(state.routeFeedback?.objectLabels).toEqual(["Milestone"]);
   });
 

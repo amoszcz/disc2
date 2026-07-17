@@ -14,9 +14,12 @@ Define the player-visible layout contract for using the game on a narrow mobile 
 ## Active Gameplay Layout Contract
 
 - During map and battle scenes, the main play surface and required controls must remain visible or reachable within the mobile layout.
+- When a scenario first opens, the initial map view must place the starting hero at the visual center of the play surface or the closest map-bounded position to that center.
 - The active mobile layout may move the sidebar below the canvas, provided the canvas, battle controls, end-turn action, and return-to-menu action stay reachable in the same page state.
 - If the live viewport becomes too tight for comfortable map readability, explicit zoom controls must remain available without relying on wheel input.
 - When a player uses a two-finger zoom gesture on the play surface, the layout must remain stable and the canvas must continue to fit within the mobile shell without runaway growth or page zoom.
+- The tile size shown at the minimum and maximum allowed map zoom must match the Border Watch reference scale even when another scenario uses a smaller or larger map.
+- Route information shown during mobile map selection must continue to communicate that diagonal movement costs more than straight movement when the route preview changes.
 - Primary actions such as ending the turn, choosing battle actions, and returning to the menu after completion must remain easy to access on a small screen.
 - Text labels that convey required actions or state must stay readable on supported mobile viewports.
 

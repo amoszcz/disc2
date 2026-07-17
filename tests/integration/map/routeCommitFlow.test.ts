@@ -11,7 +11,7 @@ describe("route commit flow", () => {
 
     expect(result.ok).toBe(true);
     expect(state.scenario.heroes[0].mapPosition).toEqual({ x: 7, y: 11 });
-    expect(state.scenario.heroes[0].remainingMovement).toBe(6);
+    expect(state.scenario.heroes[0].remainingMovement).toBe(5);
     expect(result.routeProgress?.traversedSteps).toHaveLength(2);
   });
 
@@ -34,6 +34,7 @@ describe("route commit flow", () => {
     moveSelectedHero(state, { x: 6, y: 10 });
     moveSelectedHero(state, { x: 7, y: 10 });
     moveSelectedHero(state, { x: 8, y: 10 });
+    state.scenario.heroes[0].remainingMovement = 12;
     plotRoutePreview(state, { x: 4, y: 1 });
     const result = confirmRoutePreview(state);
 

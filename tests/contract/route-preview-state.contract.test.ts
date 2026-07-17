@@ -34,4 +34,18 @@ describe("route preview state contract", () => {
     expect(state.scenario.heroes[0].mapPosition).toEqual(startingPosition);
     expect(state.scenario.heroes[0].remainingMovement).toBe(8);
   });
+
+  test("diagonal previews cost more than orthogonal previews across equivalent terrain", () => {
+    const state = createInitialState("advanced-terrain-scenario");
+
+    expect(plotRoutePreview(state, { x: 5, y: 11 }).ok).toBe(true);
+    const orthogonalCost = state.activeRoutePreview?.totalMovementCost;
+
+    expect(plotRoutePreview(state, { x: 6, y: 11 }).ok).toBe(true);
+    const diagonalCost = state.activeRoutePreview?.totalMovementCost;
+
+    expect(orthogonalCost).toBe(2);
+    expect(diagonalCost).toBe(3);
+    expect(diagonalCost).toBeGreaterThan(orthogonalCost ?? 0);
+  });
 });

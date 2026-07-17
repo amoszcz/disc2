@@ -1,4 +1,12 @@
-import { GameStore, createInitialState, createMenuState, openStorybook, returnToMainMenu, startScenarioSession } from "../state/gameState";
+import {
+  GameStore,
+  createDefaultMapViewState,
+  createInitialState,
+  createMenuState,
+  openStorybook,
+  returnToMainMenu,
+  startScenarioSession
+} from "../state/gameState";
 import { createSceneController } from "../scene-controller/sceneController";
 import { bindMapInput } from "../scene-controller/mapInputController";
 import { bindBattleCanvasInput } from "../scene-controller/battleInputController";
@@ -114,7 +122,14 @@ export function startGame(root: HTMLElement | null): void {
         );
         state.mapViewState.isDefaultView = true;
       } else {
-        state.mapViewState.viewport = normalizeViewportForState(state);
+        state.mapViewState.viewport = state.mapViewState.isDefaultView
+          ? createDefaultMapViewState(
+              state.scenario,
+              state.selectedHeroId,
+              nextLayout.responsiveCanvasView.pixelWidth,
+              nextLayout.responsiveCanvasView.pixelHeight
+            ).viewport
+          : normalizeViewportForState(state);
       }
     });
   };

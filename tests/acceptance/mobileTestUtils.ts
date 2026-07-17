@@ -225,3 +225,17 @@ export async function getViewportState(page: Page): Promise<{ x: number; y: numb
     };
   });
 }
+
+export async function getRenderedTileSize(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const store = (window as Window & { __gameStore?: { getState: () => any } }).__gameStore;
+    const state = store?.getState();
+    if (!state) {
+      throw new Error("Game store was not available.");
+    }
+
+    const viewport = state.mapViewState.viewport;
+    const baseTileSize = viewport.minTileRenderSize / viewport.minZoom;
+    return baseTileSize * viewport.zoomLevel;
+  });
+}

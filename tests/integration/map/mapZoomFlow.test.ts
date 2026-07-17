@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { createViewport, screenPointToWorldPoint, zoomViewportAtPoint } from "../../../src/engine/map/viewportMath";
+import {
+  createViewport,
+  getScaledTileSize,
+  getZoomScaleBaseline,
+  screenPointToWorldPoint,
+  zoomViewportAtPoint
+} from "../../../src/engine/map/viewportMath";
 
 describe("map zoom flow", () => {
   test("zooms in toward the cursor while preserving the hovered world point", () => {
@@ -10,9 +16,22 @@ describe("map zoom flow", () => {
     const zoomed = zoomViewportAtPoint(viewport, -120, anchor, map);
     const after = screenPointToWorldPoint(anchor, zoomed, map);
 
-    expect(zoomed.zoomLevel).toBe(2.25);
+    expect(zoomed.zoomLevel).toBeGreaterThan(viewport.zoomLevel);
     expect(Math.abs(after.x - before.x)).toBeLessThan(0.001);
     expect(Math.abs(after.y - before.y)).toBeLessThan(0.001);
+  });
+
+  test("uses Border Watch tile-size endpoints for zoom bounds across map sizes", () => {
+    const baseline = getZoomScaleBaseline();
+    const smallMap = { width: 5, height: 5 };
+    const largeMap = { width: 64, height: 64 };
+    const smallViewport = createViewport(smallMap);
+    const largeViewport = createViewport(largeMap);
+
+    expect(getScaledTileSize(smallViewport, smallMap)).toBe(baseline.minTileRenderSize);
+    expect(getScaledTileSize(largeViewport, largeMap)).toBe(baseline.minTileRenderSize);
+    expect(getScaledTileSize({ ...smallViewport, zoomLevel: smallViewport.maxZoom }, smallMap)).toBe(baseline.maxTileRenderSize);
+    expect(getScaledTileSize({ ...largeViewport, zoomLevel: largeViewport.maxZoom }, largeMap)).toBe(baseline.maxTileRenderSize);
   });
 
   test("clamps zoom within the supported range", () => {

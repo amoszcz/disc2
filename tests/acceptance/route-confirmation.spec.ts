@@ -19,10 +19,10 @@ test("second click confirms a plotted route and moves the hero along it", async 
   await canvas.click({ position: destinationClick });
   await canvas.click({ position: destinationClick });
 
-  await expect(page.getByTestId("remaining-movement")).toHaveText("6");
+  await expect(page.getByTestId("remaining-movement")).toHaveText("5");
   await expect(page.getByTestId("route-terrain")).toHaveText("Plains");
   await expect(page.getByTestId("route-objects")).toHaveText("Milestone");
-  await expect(page.getByTestId("route-impact")).toHaveText("1 movement");
+  await expect(page.getByTestId("route-impact")).toHaveText("2 movement");
 });
 
 test("submap exit travel returns play to the configured surface destination", async ({ page }) => {
@@ -31,6 +31,13 @@ test("submap exit travel returns play to the configured surface destination", as
   await clickTile(page, 5, 10);
   await clickTile(page, 8, 10);
   await clickTile(page, 8, 10);
+  await page.evaluate(() => {
+    const store = (window as Window & { __gameStore?: { getState: () => any } }).__gameStore;
+    const state = store?.getState();
+    if (state?.scenario?.heroes?.[0]) {
+      state.scenario.heroes[0].remainingMovement = 12;
+    }
+  });
   await clickTile(page, 4, 1);
   await clickTile(page, 4, 1);
 

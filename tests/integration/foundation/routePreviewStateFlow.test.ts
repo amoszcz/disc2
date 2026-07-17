@@ -14,7 +14,19 @@ describe("route preview foundation flow", () => {
       { x: 6, y: 10 },
       { x: 7, y: 11 }
     ]);
-    expect(route.totalMovementCost).toBe(2);
+    expect(route.totalMovementCost).toBe(3);
+  });
+
+  test("prices diagonal routes higher than orthogonal routes on equivalent terrain", () => {
+    const state = createInitialState("advanced-terrain-scenario");
+    const orthogonalRoute = findShortestRoute(state.scenario, "hero-1", { x: 5, y: 10 }, { x: 5, y: 11 });
+    const diagonalRoute = findShortestRoute(state.scenario, "hero-1", { x: 5, y: 10 }, { x: 6, y: 11 });
+
+    expect(orthogonalRoute.ok).toBe(true);
+    expect(diagonalRoute.ok).toBe(true);
+    expect(orthogonalRoute.totalMovementCost).toBe(2);
+    expect(diagonalRoute.totalMovementCost).toBe(3);
+    expect(diagonalRoute.totalMovementCost).toBeGreaterThan(orthogonalRoute.totalMovementCost);
   });
 
   test("creates preview state with ownership and destination checks", () => {

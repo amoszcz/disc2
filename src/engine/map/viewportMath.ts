@@ -11,8 +11,11 @@ import type {
 const SMALL_MAP_THRESHOLD = 8;
 const DEFAULT_TILE_SIZE = 96;
 const MIN_BASE_TILE_SIZE = 10;
-const LARGE_MAP_DEFAULT_ZOOM = 2;
 const TOUCH_ZOOM_DISTANCE_THRESHOLD = 12;
+const BORDER_WATCH_REFERENCE_SCENARIO_ID = "core-map-loop";
+const BORDER_WATCH_MIN_TILE_RENDER_SIZE = DEFAULT_TILE_SIZE;
+const BORDER_WATCH_MAX_TILE_RENDER_SIZE = DEFAULT_TILE_SIZE * 4;
+const BORDER_WATCH_ZOOM_STEP_TILE_SIZE = DEFAULT_TILE_SIZE * 0.25;
 
 export function getBaseTileSize(map: MapDefinition, canvasWidth = 896, canvasHeight = 640): number {
   if (map.width <= SMALL_MAP_THRESHOLD && map.height <= SMALL_MAP_THRESHOLD) {
@@ -23,16 +26,55 @@ export function getBaseTileSize(map: MapDefinition, canvasWidth = 896, canvasHei
 }
 
 export function createViewport(map: MapDefinition, canvasWidth = 896, canvasHeight = 640): MapViewport {
+  const baseTileSize = getBaseTileSize(map, canvasWidth, canvasHeight);
+  const minZoom = BORDER_WATCH_MIN_TILE_RENDER_SIZE / baseTileSize;
+  const maxZoom = BORDER_WATCH_MAX_TILE_RENDER_SIZE / baseTileSize;
+  const zoomStep = BORDER_WATCH_ZOOM_STEP_TILE_SIZE / baseTileSize;
   const viewport: MapViewport = {
-    zoomLevel: map.width > 16 || map.height > 16 ? LARGE_MAP_DEFAULT_ZOOM : 1,
-    minZoom: 1,
-    maxZoom: 4,
-    zoomStep: 0.25,
+    zoomLevel: minZoom,
+    minZoom,
+    maxZoom,
+    zoomStep,
+    minTileRenderSize: BORDER_WATCH_MIN_TILE_RENDER_SIZE,
+    maxTileRenderSize: BORDER_WATCH_MAX_TILE_RENDER_SIZE,
+    zoomStepTileSize: BORDER_WATCH_ZOOM_STEP_TILE_SIZE,
+    zoomReferenceScenarioId: BORDER_WATCH_REFERENCE_SCENARIO_ID,
     panOffsetX: 0,
     panOffsetY: 0
   };
 
   return normalizeViewport(viewport, map, canvasWidth, canvasHeight);
+}
+
+export function centerViewportOnPosition(
+  viewport: MapViewport,
+  focusPosition: Position,
+  map: MapDefinition,
+  canvasWidth = 896,
+  canvasHeight = 640
+): MapViewport {
+  const normalizedViewport = normalizeViewport(viewport, map, canvasWidth, canvasHeight);
+  const visibleWorldSize = getVisibleWorldSize(normalizedViewport, map, canvasWidth, canvasHeight);
+
+  return normalizeViewport(
+    {
+      ...normalizedViewport,
+      panOffsetX: focusPosition.x + 0.5 - visibleWorldSize.width / 2,
+      panOffsetY: focusPosition.y + 0.5 - visibleWorldSize.height / 2
+    },
+    map,
+    canvasWidth,
+    canvasHeight
+  );
+}
+
+export function createCenteredViewport(
+  map: MapDefinition,
+  focusPosition: Position,
+  canvasWidth = 896,
+  canvasHeight = 640
+): MapViewport {
+  return centerViewportOnPosition(createViewport(map, canvasWidth, canvasHeight), focusPosition, map, canvasWidth, canvasHeight);
 }
 
 export function createPanGesture(origin: ScreenPoint, viewport: MapViewport): PanGestureState {
@@ -62,6 +104,20 @@ export function createZoomGesture(
 
 export function getScaledTileSize(viewport: MapViewport, map: MapDefinition, canvasWidth = 896, canvasHeight = 640): number {
   return getBaseTileSize(map, canvasWidth, canvasHeight) * viewport.zoomLevel;
+}
+
+export function getZoomScaleBaseline(): {
+  referenceScenarioId: string;
+  minTileRenderSize: number;
+  maxTileRenderSize: number;
+  zoomStepTileSize: number;
+} {
+  return {
+    referenceScenarioId: BORDER_WATCH_REFERENCE_SCENARIO_ID,
+    minTileRenderSize: BORDER_WATCH_MIN_TILE_RENDER_SIZE,
+    maxTileRenderSize: BORDER_WATCH_MAX_TILE_RENDER_SIZE,
+    zoomStepTileSize: BORDER_WATCH_ZOOM_STEP_TILE_SIZE
+  };
 }
 
 export function getVisibleWorldSize(
