@@ -1,0 +1,154 @@
+Generate a complete set of 2D game sprite images for a fantasy turn-based strategy game as one single combined image file. Output one packed image containing every required sprite variant on a transparent background.
+
+Global art direction:
+- top-down / tactical fantasy game art
+- clean readable silhouettes
+- slightly stylized, not photorealistic
+- production-quality game asset look
+- consistent visual style across all outputs
+- readable at small in-game size
+- transparent background
+- no text labels
+- no decorative borders
+- no fake UI framing
+- keep scale and framing consistent within each category
+
+Important output rules:
+- Generate one single combined image file containing all sprite variants
+- Preserve clear visual separation between each sprite so coordinates can be determined later
+- Do not add any text naming inside the image
+- Do not omit any listed sprite
+- Treat every line in the required sprite list as a separate mandatory sprite
+- Do not merge states together
+- Do not rename any sprite ids
+- Directional hero states must each appear as separate visuals
+- Battle units should look framed for battle readability
+- Map objects and hero sprites should look framed for map readability
+- Terrain should be presented as isolated tile-like assets
+- Resource pickup should be compact and clear
+- Leave enough spacing/padding between sprites to allow later atlas extraction
+- Do not output metadata, coordinates, manifest text, labels, or UI
+
+State-change guidance:
+- `hurt` / `hit`: visibly damaged, staggered, impacted
+- `perish`: defeated, collapsed, destroyed, or dying
+- `defend`: braced, guarded posture
+- `ready`: alert and combat-ready
+- `victory`: triumphant
+- `active`: energized, glowing, or clearly interactive
+- `inactive`: dormant, dimmed, unpowered
+- `highlighted`: emphasized, selected, or subtly glowing
+- `damaged`: cracked, broken, worn
+- `blocked`: closed, guarded, inaccessible
+- `open`: accessible, calm, available
+- `claimed`: visibly occupied or owned
+- `selected`: clearly highlighted as selected
+
+Required sprite list:
+- `hero-aren-idle-up`
+- `hero-aren-idle-down`
+- `hero-aren-idle-left`
+- `hero-aren-idle-right`
+- `hero-aren-start-move-up`
+- `hero-aren-start-move-down`
+- `hero-aren-start-move-left`
+- `hero-aren-start-move-right`
+- `hero-aren-walk-up`
+- `hero-aren-walk-down`
+- `hero-aren-walk-left`
+- `hero-aren-walk-right`
+- `hero-aren-stop-move-up`
+- `hero-aren-stop-move-down`
+- `hero-aren-stop-move-left`
+- `hero-aren-stop-move-right`
+- `hero-aren-interact`
+- `hero-aren-victory`
+- `hero-aren-hurt`
+- `hero-aren-perish`
+- `unit-militia-idle`
+- `unit-militia-ready`
+- `unit-militia-attack`
+- `unit-militia-hit`
+- `unit-militia-defend`
+- `unit-militia-wait`
+- `unit-militia-victory`
+- `unit-militia-perish`
+- `unit-archer-idle`
+- `unit-archer-ready`
+- `unit-archer-shoot`
+- `unit-archer-hit`
+- `unit-archer-defend`
+- `unit-archer-wait`
+- `unit-archer-victory`
+- `unit-archer-perish`
+- `unit-mage-idle`
+- `unit-mage-ready`
+- `unit-mage-cast`
+- `unit-mage-hit`
+- `unit-mage-defend`
+- `unit-mage-wait`
+- `unit-mage-victory`
+- `unit-mage-perish`
+- `unit-skeleton-idle`
+- `unit-skeleton-ready`
+- `unit-skeleton-attack`
+- `unit-skeleton-hit`
+- `unit-skeleton-defend`
+- `unit-skeleton-wait`
+- `unit-skeleton-victory`
+- `unit-skeleton-perish`
+- `unit-skeleton-archer-idle`
+- `unit-skeleton-archer-ready`
+- `unit-skeleton-archer-shoot`
+- `unit-skeleton-archer-hit`
+- `unit-skeleton-archer-defend`
+- `unit-skeleton-archer-wait`
+- `unit-skeleton-archer-victory`
+- `unit-skeleton-archer-perish`
+- `unit-stone-watcher-idle`
+- `unit-stone-watcher-ready`
+- `unit-stone-watcher-attack`
+- `unit-stone-watcher-hit`
+- `unit-stone-watcher-defend`
+- `unit-stone-watcher-wait`
+- `unit-stone-watcher-victory`
+- `unit-stone-watcher-perish`
+- `object-bridge-idle`
+- `object-bridge-damaged`
+- `object-milestone-idle`
+- `object-milestone-highlighted`
+- `object-rubble-idle`
+- `object-rubble-damaged`
+- `object-cave-idle`
+- `object-cave-active`
+- `object-cave-highlighted`
+- `object-teleport-idle`
+- `object-teleport-active`
+- `object-teleport-inactive`
+- `object-exit-idle`
+- `object-exit-active`
+- `object-exit-highlighted`
+- `guarded-location-blocked-blocked`
+- `guarded-location-blocked-selected`
+- `guarded-location-open-open`
+- `guarded-location-open-claimed`
+- `guarded-location-open-selected`
+- `terrain-road-idle`
+- `terrain-grass-idle`
+- `terrain-plains-idle`
+- `terrain-mud-idle`
+- `terrain-woods-idle`
+- `terrain-mountains-idle`
+- `terrain-lakes-idle`
+- `terrain-rivers-idle`
+- `pickup-gold-idle`
+
+Deliverable format:
+- one single combined transparent image file only
+- no coordinates
+- no metadata
+- no manifest
+- no labels
+- no text
+- no background
+- no borders
