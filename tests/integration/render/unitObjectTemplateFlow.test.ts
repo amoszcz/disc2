@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { createInitialState } from "../../../src/app/state/gameState";
 import { createBattle } from "../../../src/engine/battle/createBattle";
+import { createCenteredViewport } from "../../../src/engine/map/viewportMath";
 import { renderBattleScene } from "../../../src/render/canvas/renderBattleScene";
 import { renderMapScene } from "../../../src/render/canvas/renderMapScene";
 import { getVisualTemplateDiagnostics } from "../../../src/render/sprites/visualTemplateResolver";
@@ -9,6 +10,7 @@ import { createMockCanvasContext } from "./renderTestContext";
 describe("unit and object template flow", () => {
   test("records dedicated map diagnostics for heroes, guarded locations, and movement objects", () => {
     const state = createInitialState("advanced-terrain-scenario");
+    state.mapViewState.viewport = createCenteredViewport(state.scenario.map, { x: 20, y: 30 });
 
     renderMapScene(createMockCanvasContext(), state);
 

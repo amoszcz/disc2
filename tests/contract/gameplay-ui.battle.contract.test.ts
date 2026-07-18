@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { createInitialState } from "../../src/app/state/gameState";
 import { createBattle } from "../../src/engine/battle/createBattle";
 import { renderBattleHud } from "../../src/ui/overlays/battleHud";
+import { renderBattleTurnQueue } from "../../src/ui/panels/battleTurnQueue";
 
 describe("battle HUD contract", () => {
   test("shows the queue, active unit, target state, and both battle actions", () => {
@@ -9,7 +10,7 @@ describe("battle HUD contract", () => {
     state.battle = createBattle(state, "hero-1", "guard-force-1");
     const html = renderBattleHud(state);
 
-    expect(html).toContain('data-testid="battle-queue"');
+    expect(renderBattleTurnQueue(state)).toContain('data-testid="battle-queue"');
     expect(html).toContain('data-testid="battle-active-unit"');
     expect(html).toContain('data-testid="battle-selected-target"');
     expect(html).toContain('data-testid="battle-target-message"');

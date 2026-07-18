@@ -20,6 +20,7 @@ import { renderMainMenu } from "../../ui/overlays/mainMenu";
 import { renderVictoryMenu } from "../../ui/overlays/victoryMenu";
 import { visualTemplateCatalog } from "../../render/sprites/visualTemplateCatalog";
 import { VISUAL_TEMPLATE_INVALIDATE_EVENT } from "../../render/sprites/visualTemplateResolver";
+import { renderBattleTurnQueue } from "../../ui/panels/battleTurnQueue";
 
 function resolveScenarioId(): ScenarioId | null {
   const params = new URLSearchParams(window.location.search);
@@ -78,7 +79,11 @@ export function startGame(root: HTMLElement | null): void {
 
   root.innerHTML = `
     <section class="panel game-surface-panel" id="game-surface-panel">
-      <canvas id="game-canvas" width="896" height="640" aria-label="game canvas"></canvas>
+      <div class="game-canvas-row" id="game-canvas-row">
+        <canvas id="game-canvas" width="896" height="640" aria-label="game canvas"></canvas>
+        <aside class="scene-action-mount" id="map-action-mount"></aside>
+      </div>
+      <section class="scene-below-canvas-mount" id="battle-queue-mount"></section>
     </section>
     <aside class="panel sidebar" id="sidebar"></aside>
   `;
@@ -86,8 +91,11 @@ export function startGame(root: HTMLElement | null): void {
   const canvas = root.querySelector<HTMLCanvasElement>("#game-canvas");
   const sidebar = root.querySelector<HTMLElement>("#sidebar");
   const canvasPanel = root.querySelector<HTMLElement>("#game-surface-panel");
+  const canvasRow = root.querySelector<HTMLElement>("#game-canvas-row");
+  const mapActionMount = root.querySelector<HTMLElement>("#map-action-mount");
+  const battleQueueMount = root.querySelector<HTMLElement>("#battle-queue-mount");
 
-  if (!canvas || !sidebar || !canvasPanel) {
+  if (!canvas || !sidebar || !canvasPanel || !canvasRow || !mapActionMount || !battleQueueMount) {
     throw new Error("Failed to initialize game shell.");
   }
 
@@ -104,7 +112,7 @@ export function startGame(root: HTMLElement | null): void {
 
   let lastLayoutSignature = "";
   const syncResponsiveLayout = (): void => {
-    const nextLayout = measureGameShellLayout(root, canvasPanel, canvas);
+    const nextLayout = measureGameShellLayout(root, canvasRow, canvas);
     const layoutSignature = JSON.stringify(nextLayout);
     if (layoutSignature === lastLayoutSignature) {
       return;
@@ -146,6 +154,7 @@ export function startGame(root: HTMLElement | null): void {
     });
     observer.observe(root);
     observer.observe(canvasPanel);
+    observer.observe(canvasRow);
   }
 
   store.subscribe((state) => {
@@ -156,9 +165,13 @@ export function startGame(root: HTMLElement | null): void {
     ).__visualStateTracker = state.visualStates;
     sceneController.setMode(state.sceneMode);
     sidebar.dataset.scene = sceneController.getMode();
+    mapActionMount.dataset.scene = sceneController.getMode();
+    battleQueueMount.dataset.scene = sceneController.getMode();
     root.dataset.layoutMode = state.mobileLayoutState.layoutMode;
     root.dataset.sidebarPlacement = state.mobileLayoutState.sidebarPlacement;
     if (sceneController.getMode() === "menu") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = "";
       drawMenuScene(context, canvas);
       sidebar.innerHTML = renderMainMenu(state);
       for (const option of state.availableScenarioOptions) {
@@ -186,18 +199,24 @@ export function startGame(root: HTMLElement | null): void {
     }
 
     if (sceneController.getMode() === "battle") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = renderBattleTurnQueue(state);
       drawBattleScene(store, context);
       renderBattleSidebar(store, sidebar);
       return;
     }
 
     if (sceneController.getMode() === "storybook") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = "";
       drawStorybookScene(store, context);
       renderStorybookSidebar(store, sidebar);
       return;
     }
 
     if (sceneController.getMode() === "victory") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = "";
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.fillStyle = "#f7ecd6";
       context.fillRect(0, 0, canvas.width, canvas.height);
@@ -217,8 +236,9 @@ export function startGame(root: HTMLElement | null): void {
       return;
     }
 
+    battleQueueMount.innerHTML = "";
     drawMapScene(store, context);
-    renderMapSidebar(store, sidebar);
+    renderMapSidebar(store, sidebar, mapActionMount);
   });
 
   syncResponsiveLayout();
