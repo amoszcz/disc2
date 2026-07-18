@@ -29,6 +29,25 @@ interface TemplateBounds {
   height: number;
 }
 
+const QUEUE_THUMBNAIL_SIZE = 48;
+const GENERATED_SHEET_WIDTH = 1536;
+const GENERATED_SHEET_HEIGHT = 1024;
+
+export function createVisualTemplateThumbnailMarkup(resolvedTemplate: VisualTemplateResolverResult, label: string): string {
+  const frame = resolvedTemplate.spriteFrame;
+  if (resolvedTemplate.assetKind === "dedicated" && resolvedTemplate.assetSource && frame) {
+    const scale = QUEUE_THUMBNAIL_SIZE / Math.max(frame.sourceWidth, frame.sourceHeight);
+    const backgroundWidth = Math.round(GENERATED_SHEET_WIDTH * scale);
+    const backgroundHeight = Math.round(GENERATED_SHEET_HEIGHT * scale);
+    const offsetX = Math.round(frame.sourceX * scale);
+    const offsetY = Math.round(frame.sourceY * scale);
+    return `<span class="visual-template-thumbnail dedicated" data-testid="queue-unit-template" aria-hidden="true" style="background-image:url('${resolvedTemplate.assetSource}');background-size:${backgroundWidth}px ${backgroundHeight}px;background-position:-${offsetX}px -${offsetY}px"></span>`;
+  }
+
+  const fallback = resolvedTemplate.fallbackStyle;
+  return `<span class="visual-template-thumbnail fallback" data-testid="queue-unit-template" aria-hidden="true" style="--template-fill:${fallback.fillColor};--template-accent:${fallback.accentColor ?? fallback.fillColor};--template-border:${fallback.borderColor ?? fallback.accentColor ?? "#23170d"};--template-text:${fallback.textColor ?? "#23170d"}">${fallback.glyph ?? label.slice(0, 1)}</span>`;
+}
+
 function getContainedBounds(
   bounds: TemplateBounds,
   sourceWidth: number,

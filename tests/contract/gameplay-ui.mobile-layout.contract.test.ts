@@ -3,6 +3,7 @@ import { createInitialState, createMenuState } from "../../src/app/state/gameSta
 import { getVisibleWorldSize } from "../../src/engine/map/viewportMath";
 import { renderMainMenu } from "../../src/ui/overlays/mainMenu";
 import { renderMapHud } from "../../src/ui/hud/mapHud";
+import { renderMapActionBar } from "../../src/ui/panels/mapActionBar";
 import { createMobileLayoutState, createResponsiveCanvasView } from "../../src/render/canvas/viewportRender";
 
 describe("mobile layout UX contract", () => {
@@ -25,7 +26,7 @@ describe("mobile layout UX contract", () => {
 
     expect(html).toContain('data-testid="layout-mode">mobile<');
     expect(html).toContain("Tap to select or confirm");
-    expect(html).toContain('data-testid="map-zoom-in-button"');
+    expect(renderMapActionBar()).toContain('data-testid="map-zoom-in-button"');
   });
 
   test("starts scenarios with the selected hero centered in the initial map view when bounds allow", () => {

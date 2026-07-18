@@ -3,6 +3,7 @@ import { createInitialState } from "../../src/app/state/gameState";
 import { createBattle } from "../../src/engine/battle/createBattle";
 import { getScaledTileSize, getZoomScaleBaseline } from "../../src/engine/map/viewportMath";
 import { renderMapHud } from "../../src/ui/hud/mapHud";
+import { renderMapActionBar } from "../../src/ui/panels/mapActionBar";
 import { renderBattleHud } from "../../src/ui/overlays/battleHud";
 import { createMobileLayoutState } from "../../src/render/canvas/viewportRender";
 
@@ -14,7 +15,7 @@ describe("touch session controls contract", () => {
 
     expect(state.mobileLayoutState.layoutMode).toBe("mobile");
     expect(html).toContain("Use two fingers or the zoom buttons to zoom");
-    expect(html).toContain('data-testid="map-zoom-in-button"');
+    expect(renderMapActionBar()).toContain('data-testid="map-zoom-in-button"');
   });
 
   test("presents touch-oriented battle targeting guidance", () => {

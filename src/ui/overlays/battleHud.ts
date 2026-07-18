@@ -16,13 +16,6 @@ export function renderBattleHud(state: GameState): string {
   const isPlayerTurn = isPlayerControlledBattleUnit(state, activeUnit.id);
   const strikeReady = isPlayerTurn ? canBattleStrike(state, battle) : false;
   const isMobile = state.mobileLayoutState.layoutMode === "mobile";
-  const queueHtml = battle.turnQueue
-    .map((unitId) => {
-      const unit = state.scenario.units.find((entry) => entry.id === unitId);
-      const isActive = unitId === battle.activeUnitId;
-      return `<div class="queue-item ${isActive ? "active" : ""}" data-unit-id="${unitId}">${unit?.name ?? unitId}</div>`;
-    })
-    .join("");
 
   const targetMessage =
     attackCategory === "area"
@@ -44,10 +37,6 @@ export function renderBattleHud(state: GameState): string {
       <div class="hud-row"><strong>Attack Type</strong><span data-testid="battle-attack-category">${attackCategory}</span></div>
       <div class="hud-row"><strong>Selected Target</strong><span data-testid="battle-selected-target">${selectedTarget?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Status</strong><span data-testid="battle-defend-status">${defendState?.isActive ? "Defending" : "Ready"}</span></div>
-      <div class="overlay-box">
-        <strong>Turn Queue</strong>
-        <div data-testid="battle-queue">${queueHtml}</div>
-      </div>
       <p class="control-tip" data-testid="battle-control-tip">
         ${isMobile ? "Tap an enemy card to target it, then use Strike or Defend." : "Select a target on the canvas, then use Strike or Defend."}
       </p>

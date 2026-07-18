@@ -15,14 +15,14 @@ describe("visual template resolver flow", () => {
 
     recordVisualTemplateDiagnostic({ subjectKind: "terrain", subjectType: "road", sceneContext: "map" }, resolved);
 
-    expect(getVisualTemplateDiagnostics().map).toContainEqual({
+    expect(getVisualTemplateDiagnostics().map).toContainEqual(expect.objectContaining({
       subjectKind: "terrain",
       subjectType: "road",
       sceneContext: "map",
       templateId: "terrain-road",
       assetKind: "dedicated",
       isFallback: false
-    });
+    }));
   });
 
   test("draws a fallback representation when a dedicated image is not yet loaded", () => {

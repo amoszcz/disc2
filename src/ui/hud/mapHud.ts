@@ -28,10 +28,6 @@ export function renderMapHud(state: GameState): string {
           : ""
       }
       <p class="control-tip" data-testid="map-control-tip">${controlsMessage}</p>
-      <div class="hud-row action-row">
-        <button type="button" class="secondary-button" id="map-zoom-out-button" data-testid="map-zoom-out-button">Zoom Out</button>
-        <button type="button" class="secondary-button" id="map-zoom-in-button" data-testid="map-zoom-in-button">Zoom In</button>
-      </div>
       ${
         routePreview
           ? `<div class="hud-row"><strong>Path</strong><span data-testid="route-preview-status">${routePreview.status}</span></div>

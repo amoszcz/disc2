@@ -52,6 +52,117 @@
         overflow: hidden;
       }
 
+      .game-canvas-row {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .game-canvas-row canvas {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .scene-action-mount {
+        display: flex;
+        flex: 0 0 auto;
+      }
+
+      .map-action-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 48px;
+      }
+
+      .map-action-icon {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+        padding: 0;
+        font-size: 1.4rem;
+        line-height: 1;
+      }
+
+      .scene-below-canvas-mount:empty {
+        display: none;
+      }
+
+      .battle-turn-queue {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        margin-top: 10px;
+        padding: 8px;
+        border: 1px solid rgba(35, 23, 13, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 253, 245, 0.92);
+      }
+
+      .battle-queue-label {
+        flex: 0 0 auto;
+        font-weight: 700;
+      }
+
+      .battle-queue-items {
+        display: flex;
+        flex: 1 1 auto;
+        gap: 6px;
+        min-width: 0;
+        overflow-x: auto;
+        padding: 2px;
+      }
+
+      .battle-queue-item {
+        display: grid;
+        place-items: center;
+        flex: 0 0 52px;
+        width: 52px;
+        height: 52px;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background: rgba(106, 68, 39, 0.09);
+      }
+
+      .battle-queue-item.active {
+        border-color: #c36e17;
+        background: rgba(195, 110, 23, 0.22);
+      }
+
+      .visual-template-thumbnail {
+        display: block;
+        width: 48px;
+        height: 48px;
+        background-repeat: no-repeat;
+      }
+
+      .visual-template-thumbnail.fallback {
+        display: grid;
+        place-items: center;
+        box-sizing: border-box;
+        border: 2px solid var(--template-border);
+        background: linear-gradient(to bottom, var(--template-fill) 0 64%, var(--template-accent) 64% 82%, var(--template-fill) 82%);
+        color: var(--template-text);
+        font-weight: 700;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
       canvas {
         width: 100%;
         max-width: 100%;
@@ -156,6 +267,32 @@
 
         .game-surface-panel {
           padding: 10px;
+        }
+
+        .game-canvas-row {
+          gap: 6px;
+        }
+
+        .map-action-bar {
+          width: 44px;
+          justify-content: flex-start;
+        }
+
+        .map-action-icon {
+          width: 40px;
+          min-width: 40px;
+          height: 40px;
+          min-height: 40px;
+        }
+
+        .battle-turn-queue {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .battle-queue-items {
+          width: 100%;
         }
 
         .sidebar {
