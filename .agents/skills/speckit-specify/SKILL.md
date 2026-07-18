@@ -18,11 +18,18 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
+**Determine specification mode before dispatching hooks**:
+- Use **amend mode** when the user explicitly asks to update an existing specification, or when the request clearly extends exactly one existing specification.
+- Use **new-feature mode** when the request describes a distinct feature or no existing specification is a clear match.
+- If more than one existing specification is a plausible target, ask the user to identify it before editing.
+- One invocation MUST operate on exactly one specification. This prevents multiple specifications per invocation; it does not require creating a new specification in amend mode.
+
 **Check for extension hooks (before specification)**:
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_specify` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
+- In amend mode, skip a `before_specify` hook that creates or switches to a new feature branch; retain the branch for the existing specification.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
@@ -70,13 +77,21 @@ Given that feature description, do this:
      - "Create a dashboard for analytics" → "analytics-dashboard"
      - "Fix payment processing timeout bug" → "fix-payment-timeout"
 
-2. **Branch creation** (optional, via hook):
+2. **Branch creation** (new-feature mode only, via hook):
 
-   If a `before_specify` hook ran successfully in the Pre-Execution Checks above, it will have created/switched to a git branch and output JSON containing `BRANCH_NAME` and `FEATURE_NUM`. Note these values for reference, but the branch name does **not** dictate the spec directory name.
+   If a `before_specify` hook ran successfully in new-feature mode, it will have created/switched to a git branch and output JSON containing `BRANCH_NAME` and `FEATURE_NUM`. Note these values for reference, but the branch name does **not** dictate the spec directory name.
 
-   If the user explicitly provided `GIT_BRANCH_NAME`, pass it through to the hook so the branch script uses the exact value as the branch name (bypassing all prefix/suffix generation).
+   In amend mode, do not create a feature branch through this workflow. If the user explicitly requests a different branch, treat that as a separate branch-management request.
 
-3. **Create the spec feature directory**:
+3. **Resolve the specification target**:
+
+   **Amend mode**:
+   - Identify the single existing specification that the user explicitly named or that the request clearly extends.
+   - Verify its directory and `spec.md` exist, then set `SPECIFY_FEATURE_DIRECTORY` and `SPEC_FILE` to that target.
+   - Read the existing specification and amend only the requested content. Preserve unrelated completed sections.
+   - Do not create a directory, copy the template, overwrite `spec.md`, or create a new feature branch.
+
+   **New-feature mode**:
 
    Specs live under the default `specs/` directory unless the user explicitly provides `SPECIFY_FEATURE_DIRECTORY`.
 
@@ -105,11 +120,11 @@ Given that feature description, do this:
      This allows downstream commands (`/speckit-plan`, `/speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:
-   - You must only create one feature per `/speckit-specify` invocation
+   - You must operate on only one feature per `/speckit-specify` invocation. Create one feature in new-feature mode; amend one existing feature in amend mode.
    - The spec directory name and the git branch name are independent — they may be the same but that is the user's choice
-   - The spec directory and file are always created by this command, never by the hook
+   - In new-feature mode, the spec directory and file are created by this command, never by the hook. In amend mode, neither is recreated.
 
-4. Load the resolved active `spec-template` file to understand required sections.
+4. In new-feature mode, load the resolved active `spec-template` file to understand required sections. In amend mode, load the existing `SPEC_FILE` and preserve its completed structure.
 
 5. **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints.
 
@@ -138,11 +153,11 @@ Given that feature description, do this:
     7. Identify Key Entities (if data involved)
     8. Return: SUCCESS (spec ready for planning)
 
-6. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+6. In new-feature mode, write the specification to `SPEC_FILE` using the template structure, replacing placeholders with concrete details derived from the feature description. In amend mode, update the existing `SPEC_FILE` in place: preserve unrelated content, revise only relevant stories, requirements, assumptions, scope boundaries, and success criteria, and do not reintroduce template placeholders.
 
 7. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
-   a. **Create Spec Quality Checklist**: Generate a checklist file at `SPECIFY_FEATURE_DIRECTORY/checklists/requirements.md` using the checklist template structure with these validation items:
+   a. **Create or update the Spec Quality Checklist**: In new-feature mode, generate a checklist file at `SPECIFY_FEATURE_DIRECTORY/checklists/requirements.md`. In amend mode, update it if it exists, or create it if it does not, using the checklist structure with these validation items:
 
       ```markdown
       # Specification Quality Checklist: [FEATURE NAME]
@@ -272,10 +287,11 @@ Check if `.specify/extensions.yml` exists in the project root.
 Report completion to the user with:
 - `SPECIFY_FEATURE_DIRECTORY` — the feature directory path
 - `SPEC_FILE` — the spec file path
+- Mode — `new-feature` or `amend`
 - Checklist results summary
 - Readiness for the next phase (`/speckit-clarify` or `/speckit-plan`)
 
-**NOTE:** Branch creation is handled by the `before_specify` hook (git extension). Spec directory and file creation are always handled by this core command.
+**NOTE:** In new-feature mode, branch creation is handled by the `before_specify` hook and the core command creates the spec directory and file. In amend mode, the core command updates the identified existing specification without creating a branch, directory, or spec file.
 
 ## Quick Guidelines
 

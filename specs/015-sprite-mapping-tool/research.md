@@ -46,3 +46,13 @@
 
 - Save only selected entries: rejected because the requested correction is global and would leave the map internally inconsistent.
 - Save and flag invalid entries afterward: rejected because it persists data known to be invalid.
+
+## Decision: Reuse the resolved mapping document for browser download
+
+**Rationale**: The editor already resolves the loaded mapping together with pending crop overrides for clipboard copy. File download should serialize that same complete document so exported values match the visible editor state, preserve all metadata, and require no persistence adapter or clipboard permission.
+
+**Alternatives considered**:
+
+- Download only the persisted mapping: rejected because it omits the developer's unsaved edits and does not meet the requested export workflow.
+- Route downloads through the local save middleware: rejected because export must not write repository files and should work independently of local-save availability.
+- Replace clipboard copy with download: rejected because existing copy behavior remains useful and is explicitly retained.

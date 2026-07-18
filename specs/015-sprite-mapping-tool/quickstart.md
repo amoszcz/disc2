@@ -22,6 +22,7 @@ Expected outcomes:
 - A shared pan changes every preview consistently and reset restores the loaded coordinates.
 - A valid save updates only x/y for every entry, preserves all other JSON data, reloads the map, and clears the unsaved offset.
 - Invalid adjusted entries prevent save.
+- Downloading produces a JSON file with the current resolved mapping without saving or discarding pending changes.
 
 ## Manual developer workflow
 
@@ -38,6 +39,8 @@ Expected outcomes:
 2. Change the selected width and height sliders and verify its boundary and preview update.
 3. Zoom and pan the review view, then verify no crop values changed solely from view interaction.
 4. Confirm an invalid x/y/width/height combination disables saving; correct it and save a valid mixed set when the fixture allows it.
-7. Try an offset that makes a crop invalid; confirm Save is disabled and affected entries are listed.
+5. Make a valid unsaved crop edit, choose Download mapping JSON, and verify the downloaded JSON includes that edit while it remains pending in the editor.
+6. Block or deny clipboard access, then confirm Download mapping JSON remains available for a loaded mapping.
+7. Try an offset that makes a crop invalid; confirm Save is disabled and affected entries are listed. Download the resolved JSON if it is needed for review, then confirm no persistence occurs.
 
 See [sprite-mapping-tool.md](contracts/sprite-mapping-tool.md) for the page/save contract and [data-model.md](data-model.md) for state and validation details.

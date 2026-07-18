@@ -111,7 +111,7 @@
 - [x] T031 [P] Run and fix the focused sprite-mapping contract and integration suite through `package.json`.
 - [ ] T032 [P] Run and fix existing menu, storybook, visual-template, mobile, and build regressions using `package.json` scripts and `tests/acceptance/` coverage.
 - [ ] T033 Run the manual local-development save workflow in `specs/015-sprite-mapping-tool/quickstart.md`, restoring the WIP JSON to its intended fixture data after validation.
-- [x] T034 Reconcile completed behavior with [spec.md](spec.md), [plan.md](plan.md), [data-model.md](data-model.md), and [sprite-mapping-tool.md](contracts/sprite-mapping-tool.md).
+- [x] T034 Reconcile completed behavior with `specs/015-sprite-mapping-tool/spec.md`, `plan.md`, `data-model.md`, and `contracts/sprite-mapping-tool.md`.
 
 ---
 
@@ -186,6 +186,37 @@
 - [ ] T059 Run the amended manual drag, slider, invalid-crop, and save/reload workflow in `specs/015-sprite-mapping-tool/quickstart.md`, restoring the WIP fixture afterward.
 - [ ] T060 Reconcile amended implementation with `specs/015-sprite-mapping-tool/spec.md`, `plan.md`, `data-model.md`, and `contracts/sprite-mapping-tool.md`.
 
+---
+
+## Phase 12: User Story 7 - Download Current Mapping JSON (Priority: P2)
+
+**Goal**: Let a developer download the complete resolved mapping JSON, including pending crop edits, without relying on clipboard access or changing editor state.
+
+**Independent Test**: Edit one crop, download the JSON, parse the downloaded file, and verify the edited rectangle is present, unchanged metadata remains present, and the editor still shows the pending edit.
+
+### Tests for User Story 7
+
+- [x] T061 [P] [US7] Add resolved-export serialization, pending-override, metadata-preservation, unloaded-document, and clipboard-independent contract coverage in `tests/contract/sprite-mapping-export.contract.test.ts`.
+- [x] T062 [P] [US7] Add download-success, download-failure, and editor-state-retention integration coverage in `tests/integration/developer/spriteMappingExportFlow.test.ts`.
+- [x] T063 [P] [US7] Add browser acceptance coverage that downloads edited mapping JSON and verifies its contents in `tests/acceptance/sprite-mapping-download.spec.ts`.
+
+### Implementation for User Story 7
+
+- [x] T064 [US7] Add a Download mapping JSON control with loaded-document availability and export feedback in `src/ui/overlays/spriteMappingPanel.ts`.
+- [x] T065 [US7] Implement user-initiated JSON file download from the resolved mapping document, preserving editor state and handling download-start failure in `src/app/scene-controller/spriteMappingScene.ts`.
+- [x] T066 [US7] Extend the focused Sprite Mapping test command with export contract and integration coverage in `package.json`.
+
+**Checkpoint**: Developers can download a complete current mapping file, with or without clipboard access, without persisting or discarding any edits.
+
+---
+
+## Phase 13: Export Validation and Reconciliation
+
+- [x] T067 [P] Run and fix focused JSON-export contract and integration coverage through `package.json`.
+- [x] T068 [P] Run and fix the Sprite Mapping JSON-download browser acceptance test in `tests/acceptance/sprite-mapping-download.spec.ts`.
+- [ ] T069 Run the manual JSON-download workflow in `specs/015-sprite-mapping-tool/quickstart.md` and confirm export leaves pending edits unsaved.
+- [x] T070 Reconcile JSON-download implementation with `specs/015-sprite-mapping-tool/spec.md`, `plan.md`, `data-model.md`, and `contracts/sprite-mapping-tool.md`.
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -195,6 +226,7 @@
 - **US1 (Phase 3)**: Depends on Phase 2 and is the MVP.
 - **US2 (Phase 4)**: Depends on US1's loaded page and canvas, but remains non-persistent and independently demonstrable.
 - **US3 (Phase 5)**: Depends on foundational validation and may be implemented after US1; it uses US2's offset state to make saving observable.
+- **US7 (Phase 12)**: Depends on the existing resolved mapping and loaded-document UI seam from US1 plus the per-entry override resolution from Phase 7; it does not depend on the local save boundary.
 - **Polish (Phase 6)**: Depends on all desired stories.
 
 ### User Story Dependencies
@@ -202,6 +234,7 @@
 - **US1 (P1)**: Starts after the foundational data/state seam; no dependency on alignment or persistence.
 - **US2 (P1)**: Depends on US1's gallery and alignment canvas but does not depend on the local save adapter.
 - **US3 (P1)**: Depends on the foundational offset/validation seam and uses US1's loaded source; it does not alter review or pan rendering rules.
+- **US7 (P2)**: Depends on a loaded document and effective crop resolution; it is independently usable without Save and must not invoke local persistence.
 
 ### Parallel Opportunities
 
@@ -209,6 +242,7 @@
 - T009–T011, T017–T019, and T024–T026 can be written in parallel as contract, integration, and browser coverage for their respective stories.
 - After Phase 2, gallery/panel work and low-level canvas rendering can proceed in parallel while coordinating their shared presentation model.
 - T031 and T032 can run in parallel after all implementation work completes.
+- T061–T063 can be written in parallel because they cover separate contract, integration, and browser surfaces. T067 and T068 can run in parallel after T064–T066.
 
 ## Parallel Example: User Story 1
 
@@ -226,6 +260,14 @@ Task: "Add save/reload state integration coverage in tests/integration/developer
 Task: "Add local-development save browser coverage in tests/acceptance/sprite-mapping-save.spec.ts"
 ```
 
+## Parallel Example: User Story 7
+
+```text
+Task: "Add resolved mapping export contract coverage in tests/contract/sprite-mapping-export.contract.test.ts"
+Task: "Add export state integration coverage in tests/integration/developer/spriteMappingExportFlow.test.ts"
+Task: "Add JSON-download browser acceptance coverage in tests/acceptance/sprite-mapping-download.spec.ts"
+```
+
 ## Implementation Strategy
 
 ### MVP First (User Story 1 Only)
@@ -239,11 +281,13 @@ Task: "Add local-development save browser coverage in tests/acceptance/sprite-ma
 1. Deliver US1 for reliable atlas inspection and invalid-data visibility.
 2. Deliver US2 for reversible whole-image alignment.
 3. Deliver US3 for explicit, validated local persistence.
-4. Run cross-cutting gameplay regressions and the production build.
+4. Deliver US7 for export-only JSON download without changing persistence behavior.
+5. Run cross-cutting gameplay regressions and the production build.
 
 ## Notes
 
 - Every task follows the required checkbox, ID, optional parallel marker, story label, and file-path format.
 - The local save adapter is intentionally limited to the configured WIP coordinate map; it must not become a general repository file API.
 - The manual save validation must restore fixture data so it does not accidentally commit a test alignment.
-- **Amended scope pending task generation**: Independent per-entry x/y editing, visual-only zoom, selected-only canvas drag, width/height sliders, and mixed rectangle persistence are specified in the amendment to `spec.md` and `plan.md`. Generate their implementation tasks from this authoritative feature directory before proceeding.
+- Independent per-entry x/y editing, visual-only zoom, selected-only canvas drag, width/height sliders, mixed rectangle persistence, and JSON download are represented by Phases 7–13.
+- JSON download is intentionally separate from local save: it exports the resolved in-memory document and must not become another write route.

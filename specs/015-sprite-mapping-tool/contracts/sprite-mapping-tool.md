@@ -35,3 +35,12 @@ Define the developer-visible behavior and local save boundary for reviewing and 
 - Selected-entry width and height are independently adjustable as positive whole-pixel sliders.
 - Zoom and review pan are visual-only and leave mapping values unchanged.
 - The save request accepts pending per-entry rectangle overrides. The local boundary resolves and validates every resulting x/y/width/height rectangle atomically, then writes only those fields while preserving non-rectangle metadata.
+
+## Amendment: Resolved Mapping Download Contract
+
+- The page offers Download mapping JSON alongside Copy mapping JSON whenever a complete mapping document is loaded.
+- Download serializes the same resolved mapping document used by copy, including pending crop rectangle overrides and all unchanged metadata.
+- Download starts one `.json` file and does not invoke the local save boundary.
+- Download remains available when clipboard access is unavailable.
+- Download is unavailable before the mapping document loads and must not create an empty or malformed file.
+- A successful download confirms the result. A failure to start one reports a readable error and retains pending edits, selection, and validation state.

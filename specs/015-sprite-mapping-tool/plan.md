@@ -6,7 +6,7 @@
 
 ## Summary
 
-Add a developer-only Sprite Mapping page that loads the WIP atlas PNG and `game-atlas.json`, presents every mapped crop as a review gallery, and shows a selected crop boundary over a pannable image canvas. A shared x/y alignment offset changes every preview in real time. Saving validates the entire adjusted map and, only in the local development workflow, persists the corrected coordinates to the selected WIP JSON before reloading it. The page reuses the existing scene/menu/storybook composition patterns, Canvas rendering, and Vite tooling; it does not change normal game rendering or introduce a UI library.
+Add a developer-only Sprite Mapping page that loads the WIP atlas PNG and `game-atlas.json`, presents every mapped crop as a review gallery, and shows a selected crop boundary over a pannable image canvas. A shared x/y alignment offset changes every preview in real time. Saving validates the entire adjusted map and, only in the local development workflow, persists the corrected coordinates to the selected WIP JSON before reloading it. Developers can also download the current resolved mapping JSON, including valid or invalid pending crop edits, without persisting or discarding them. The page reuses the existing scene/menu/storybook composition patterns, Canvas rendering, and browser download capability; it does not change normal game rendering or introduce a UI library.
 
 ## Technical Context
 
@@ -16,7 +16,7 @@ Add a developer-only Sprite Mapping page that loads the WIP atlas PNG and `game-
 
 **Storage**: WIP PNG atlas and JSON coordinate map in the repository; in-memory editor state while reviewing; local development server writes only validated JSON saves
 
-**Testing**: Vitest contract and integration suites for atlas parsing, dimension mismatch detection, offset application, validation, save payload construction, and state transitions; Playwright acceptance coverage for gallery review, canvas panning, reset, invalid-save prevention, and successful local save/reload behavior
+**Testing**: Vitest contract and integration suites for atlas parsing, dimension mismatch detection, offset application, validation, save payload construction, resolved-export construction, and state transitions; Playwright acceptance coverage for gallery review, canvas panning, reset, invalid-save prevention, successful local save/reload behavior, and JSON download with pending edits
 
 **Target Platform**: Local developer browsers running the repository's Vite development server; ordinary game browser builds remain read-only
 
@@ -24,7 +24,7 @@ Add a developer-only Sprite Mapping page that loads the WIP atlas PNG and `game-
 
 **Performance Goals**: Render all current atlas entries and refresh selected/gallery previews within one animation frame after a pan update; prevent save until whole-map validation completes without perceptible delay for the current atlas
 
-**Constraints**: No new dependencies; preserve normal menu, storybook, map, and battle flows; developer page must not be player-facing; save access must be limited to the local development server and the configured WIP coordinate map; the shared correction is translation only
+**Constraints**: No new dependencies; preserve normal menu, storybook, map, and battle flows; developer page must not be player-facing; save access must be limited to the local development server and the configured WIP coordinate map; download is export-only and must not change editor state; the shared correction is translation only
 
 **Scale/Scope**: One current WIP atlas image, one coordinate JSON with roughly 100 sprite entries, one developer scene/page, one global x/y alignment offset, and one local development save endpoint
 
@@ -33,11 +33,11 @@ Add a developer-only Sprite Mapping page that loads the WIP atlas PNG and `game-
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Spec before code: Pass. [spec.md](spec.md) drives the feature, which will continue through `tasks.md` before implementation.
-- Independent slices: Pass. US1 supplies atlas review and data-quality feedback, US2 adds non-persistent alignment, and US3 adds validated local persistence. US2 builds on a reviewable loaded atlas; US3 builds on the same pure validation/offset seam but does not change review or panning behavior.
-- Feature-proving tests: Pass. US1 will use parser/gallery contracts and browser gallery review. US2 will use offset/viewport integration coverage and pointer-driven browser flows. US3 will use save-boundary contracts plus local-development acceptance coverage that reloads persisted corrected coordinates. Existing gameplay tests remain unaffected.
-- Minimal dependencies, real integrations: Pass. Browser-native Canvas and pointer APIs satisfy visual alignment. The existing Vite development server supplies the minimal local write boundary; no UI, canvas, file-picker, or server framework is added. Tests exercise the real local save adapter rather than a mock-only replacement.
+- Independent slices: Pass. US1 supplies atlas review and data-quality feedback, US2 adds non-persistent alignment, US3 adds validated local persistence, and US7 adds export-only file download. US7 reuses the resolved mapping seam but remains independently demonstrable without a save.
+- Feature-proving tests: Pass. US1 will use parser/gallery contracts and browser gallery review. US2 will use offset/viewport integration coverage and pointer-driven browser flows. US3 will use save-boundary contracts plus local-development acceptance coverage that reloads persisted corrected coordinates. US7 will use export-content integration coverage and a browser download flow with clipboard unavailable. Existing gameplay tests remain unaffected.
+- Minimal dependencies, real integrations: Pass. Browser-native Canvas, pointer input, and download capabilities satisfy the feature. The existing Vite development server supplies the minimal local write boundary; no UI, canvas, file-picker, server framework, or download library is added.
 - Small, loosely coupled design: Pass. Atlas parsing/validation, shared offset math, canvas presentation, gallery UI, developer scene state, and the local persistence adapter remain separate. Gameplay visual-template catalog and ordinary scene rendering are not coupled to the editor.
-- Artifact consistency: Pass with planned additions. This feature adds `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, and the sprite-mapping UI/save contract under `specs/015-sprite-mapping-tool/`. Vite configuration gains a documented developer-only save seam.
+- Artifact consistency: Pass with planned additions. This feature adds `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, and the sprite-mapping UI/save contract under `specs/015-sprite-mapping-tool/`. Vite configuration gains a documented developer-only save seam; the plan artifacts also document the browser-only export seam.
 
 ### Post-Design Constitution Check
 
@@ -108,3 +108,9 @@ The active design is extended beyond shared alignment. Editor state maintains pe
 Canvas dragging converts screen movement through the current canvas scale and zoom into source-pixel changes for the selected entry only. Width and height sliders emit positive whole-pixel proposals. The existing constrained local save boundary accepts a rectangle change set, resolves all entries, validates the entire resulting atlas against actual image dimensions, and writes only x/y/width/height fields while preserving all other JSON metadata.
 
 Additional automated evidence is required for selected-only drag, zoom-independent data state, slider changes, invalid resized crops, and mixed rectangle save/reload. These requirements must be added to the task list before further implementation.
+
+## Amendment: Download Resolved Mapping JSON
+
+The existing resolved mapping transformation is the single source for both clipboard copy and file download. Add a separate Download mapping JSON control beside the existing copy control. A user-triggered browser download serializes the full resolved document with a descriptive `.json` filename; it does not call the local save boundary and does not alter dirty state, selection, validation, or loaded data. Keep browser download creation isolated in the scene/UI adapter so the pure mapping and validation seams remain testable without browser APIs.
+
+Add contract and integration coverage that verifies serialization includes pending x/y/width/height overrides, preserves all unchanged metadata, remains available when clipboard access fails, disables without a loaded document, and reports download-start failure without losing edits. Add an acceptance flow that observes a downloaded JSON file after a real edit.

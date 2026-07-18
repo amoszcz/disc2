@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation passed on 2026-07-18. The first slice uses a shared image translation; individual crop editing is explicitly deferred.
+- Validation passed on 2026-07-18. The specification now covers review, crop editing, safe persistence, and an export-only JSON download that preserves pending edits without changing editor state.

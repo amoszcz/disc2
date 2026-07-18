@@ -175,3 +175,55 @@ As a developer, I can save valid changes to x, y, width, and height for multiple
 - The mapping tool now supports independent per-entry crop rectangles; the original shared alignment remains optional bulk behavior, not the only correction workflow.
 - Width and height are editable only for the selected entry through independent whole-pixel sliders.
 - Rotation, freeform crop handles, and editing identity/state/anchor metadata remain out of scope.
+
+## Amendment: Download Edited Mapping JSON
+
+### User Story 7 - Download Current Mapping JSON (Priority: P2)
+
+As a developer editing sprite mappings, I can download the current resolved mapping as a JSON file so that I can retain or share my edits without relying on clipboard access.
+
+**Why this priority**: File download provides a dependable export path for workflows where clipboard access is blocked or inconvenient, while preserving the existing copy-to-clipboard option.
+
+**Independent Test**: Make valid unsaved crop edits, download the mapping, and verify that the downloaded file is well-formed JSON containing the resolved edited values while the editor retains its pending changes.
+
+**Acceptance Scenarios**:
+
+1. **Given** a mapping document has loaded, **When** the developer chooses Download mapping JSON, **Then** one JSON file containing the current resolved mapping is downloaded.
+2. **Given** the developer has valid unsaved changes to one or more crop rectangles, **When** they download the mapping, **Then** the file contains those resolved changes and preserves unchanged entries and all metadata.
+3. **Given** the developer has not changed the mapping, **When** they download it, **Then** the file contains the loaded mapping unchanged.
+4. **Given** clipboard access is unavailable, **When** a mapping is loaded, **Then** the developer can still download its JSON file.
+5. **Given** the developer downloads a mapping, **When** the action completes, **Then** the editor confirms the result and retains its current selection, validation state, and pending edits.
+
+### Download Edge Cases
+
+- If no complete mapping document has loaded, the editor must not create an empty, partial, or malformed download.
+- If a crop is invalid for saving, the developer may still download the current resolved JSON for review; downloading must not persist it or alter validation.
+- If the browser cannot start the download, the editor must show a readable error and retain all current edits.
+- The export must preserve Unicode labels and every non-edited metadata field.
+
+### Additional Functional Requirements
+
+- **FR-025**: The page MUST provide a Download mapping JSON control in addition to its existing copy-to-clipboard control.
+- **FR-026**: The download control MUST be available whenever a complete mapping document is loaded, including when clipboard access is unavailable.
+- **FR-027**: The download action MUST produce one file with a `.json` filename extension containing a complete, well-formed representation of the current resolved mapping.
+- **FR-028**: The downloaded mapping MUST include all current pending crop edits and preserve unchanged entries and all non-edited metadata.
+- **FR-029**: Downloading MUST NOT save, discard, reset, or otherwise change the editor's mapping, selection, validation state, or pending edits.
+- **FR-030**: The page MUST confirm a successful download and report a readable error when it cannot start one.
+- **FR-031**: The page MUST prevent downloading until a complete mapping document is loaded.
+- **FR-032**: The existing copy-to-clipboard export behavior MUST remain available.
+
+### Additional Key Entity
+
+- **Resolved Mapping Export**: A complete mapping document formed from the loaded data and all current pending crop edits, delivered as a JSON file without persisting those edits.
+
+### Additional Measurable Outcomes
+
+- **SC-006**: In automated export testing, 100% of downloaded files parse as JSON and represent the loaded mapping document.
+- **SC-007**: In testing with valid pending edits, 100% of exported edited crop values match the editor's resolved values, while 100% of unaffected entries and metadata remain unchanged.
+- **SC-008**: In testing with clipboard access unavailable, a loaded mapping remains downloadable in 100% of cases.
+
+### Updated Assumptions and Scope
+
+- Downloading is export-only: it includes pending edits but does not persist them to the source mapping.
+- A descriptive JSON filename is sufficient; choosing a custom filename or destination remains the browser's responsibility.
+- Importing a downloaded mapping, automatically saving it to a repository or remote service, and exporting alternate formats remain out of scope.

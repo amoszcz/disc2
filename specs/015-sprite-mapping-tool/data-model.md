@@ -49,3 +49,13 @@ Each entry may have a pending override containing `x`, `y`, `width`, and `height
 ## Saved Mapping Revision
 
 The persisted coordinate map after all entry x/y values receive a valid shared offset. Save preserves entry count, order, crop sizes, anchors, states, directions, labels, notes, and unrelated JSON fields.
+
+## Resolved Mapping Export
+
+| Field | Meaning | Validation |
+|---|---|---|
+| `document` | Complete mapping document after applying all pending crop overrides | Must be serializable as well-formed JSON; includes loaded data even when no edits are pending |
+| `filename` | Developer-visible name for the downloaded JSON file | Must use a `.json` extension |
+| `status` | Ready, downloaded, or error feedback | Download is unavailable without a loaded document; failure retains all editor state |
+
+**State transition**: `ready` → `downloaded` after a browser accepts the export action; `ready` → `error` if the browser cannot start it. Neither transition changes mapping edits, validation, selection, or persistence state.
