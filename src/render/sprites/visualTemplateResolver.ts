@@ -18,7 +18,14 @@ import type {
   VisualTemplateDefinition,
   VisualTemplateResolverResult
 } from "../../engine/scenario/types";
-import { visualTemplateCatalog, type VisualTemplateCatalog } from "./visualTemplateCatalog";
+import { getVisualTemplateCatalog, visualTemplateCatalog, type VisualTemplateCatalog } from "./visualTemplateCatalog";
+import { getDefaultVisualTemplateId } from "./visualTemplateConfig";
+import { getTemplateFrame } from "./visualTemplateRegistry";
+
+let activeVisualTemplateId = getDefaultVisualTemplateId();
+export function setActiveVisualTemplateId(templateId: string): void { activeVisualTemplateId = templateId; }
+export function getActiveVisualTemplateId(): string { return activeVisualTemplateId; }
+function activeCatalog(): VisualTemplateCatalog { return getVisualTemplateCatalog(activeVisualTemplateId); }
 
 export const VISUAL_TEMPLATE_INVALIDATE_EVENT = "disc2:visual-template-invalidate";
 
@@ -113,12 +120,13 @@ function toResolvedTemplate(
   }
 
   if (template.intendedContexts.includes(subject.sceneContext)) {
+    const mappedFrame = getTemplateFrame(activeVisualTemplateId, template.templateId, null, null);
     return {
       templateId: template.templateId,
       resolvedFrom: `${subject.subjectKind}:${subject.subjectType}`,
       assetKind: template.assetKind,
       assetSource: template.assetSource,
-      spriteFrame: template.spriteFrame ?? null,
+      spriteFrame: mappedFrame ?? template.spriteFrame ?? null,
       requestedStateName: null,
       resolvedStateName: null,
       stateDirection: null,
@@ -138,11 +146,13 @@ function withResolvedState(
   resolvedStateName: string,
   stateDirection: FacingDirection | null = null
 ): VisualTemplateResolverResult {
+  const mappedFrame = getTemplateFrame(activeVisualTemplateId, resolvedTemplate.templateId, resolvedStateName, stateDirection);
   return {
     ...resolvedTemplate,
     requestedStateName,
     resolvedStateName,
-    stateDirection
+    stateDirection,
+    spriteFrame: mappedFrame ?? resolvedTemplate.spriteFrame
   };
 }
 
@@ -189,7 +199,7 @@ function resolveObjectState(
 
 export function resolveVisualTemplate(
   subject: VisualSubjectDescriptor,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   switch (subject.subjectKind) {
     case "unit":
@@ -213,7 +223,7 @@ export function resolveUnitVisualTemplate(
   unit: Pick<ScenarioUnit, "name">,
   sceneContext: VisualSceneContext,
   stateName?: BattleUnitAnimationStateName,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   const resolvedTemplate = resolveVisualTemplate({ subjectKind: "unit", subjectType: unit.name, sceneContext }, catalog);
   const resolvedState = resolveUnitState(unit, stateName, catalog);
@@ -223,7 +233,7 @@ export function resolveUnitVisualTemplate(
 export function resolveHeroVisualTemplate(
   hero: Pick<ScenarioHero, "name">,
   visualState?: HeroVisualStateRuntime,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   const resolvedTemplate = resolveVisualTemplate({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, catalog);
   const resolvedState = resolveHeroState(hero, visualState, catalog);
@@ -238,7 +248,7 @@ export function resolveHeroVisualTemplate(
 export function resolveMovementObjectVisualTemplate(
   objectType: string,
   stateName?: ObjectAnimationStateName,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   const resolvedTemplate = resolveVisualTemplate({ subjectKind: "movement-object", subjectType: objectType, sceneContext: "map" }, catalog);
   const profile = catalog.movementObjectStateProfiles[objectType];
@@ -249,7 +259,7 @@ export function resolveMovementObjectVisualTemplate(
 export function resolveGuardedLocationVisualTemplate(
   location: Pick<GuardedLocation, "locationType" | "accessState">,
   stateName?: ObjectAnimationStateName,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   const subjectType = `${location.locationType}:${location.accessState}`;
   const resolvedTemplate = resolveVisualTemplate(
@@ -263,14 +273,14 @@ export function resolveGuardedLocationVisualTemplate(
 
 export function resolveTerrainVisualTemplate(
   terrainType: TerrainTypeName,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   return resolveVisualTemplate({ subjectKind: "terrain", subjectType: terrainType, sceneContext: "map" }, catalog);
 }
 
 export function resolveResourcePickupVisualTemplate(
   pickup: Pick<ResourcePickup, "resourceType">,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   return resolveVisualTemplate({ subjectKind: "resource-pickup", subjectType: pickup.resourceType, sceneContext: "map" }, catalog);
 }

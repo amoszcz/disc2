@@ -580,6 +580,7 @@ export interface GameState {
   mapViewState: MapViewState;
   mapTravelState: MapTravelState;
   visualStates: VisualStateTracker;
+  activeVisualTemplateId: string;
   mobileLayoutState: MobileLayoutState;
   responsiveCanvasView: ResponsiveCanvasView;
   lastTouchInteraction: TouchInteraction | null;

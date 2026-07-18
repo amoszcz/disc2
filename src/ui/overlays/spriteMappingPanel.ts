@@ -1,13 +1,14 @@
 import { resolveEntryCoordinates } from "../../developer/sprite-mapping/atlasMapping";
 import type { SpriteMappingState } from "../../developer/sprite-mapping/spriteMappingState";
+import { renderVisualTemplateSelector } from "../visualTemplateSelector";
 
-export function renderSpriteMappingPanel(state: SpriteMappingState): string {
+export function renderSpriteMappingPanel(state: SpriteMappingState, activeTemplateId = "default-template"): string {
   const selected = state.document?.entries.find((entry) => entry.entryId === state.selectedEntryId) ?? state.document?.entries[0] ?? null;
   const selectedCoordinates = selected && state.document ? resolveEntryCoordinates(selected, state.changes) : null;
   const invalid = new Set(state.issues.filter((issue) => issue.entryId).map((issue) => issue.entryId));
   const dirty = Object.keys(state.changes.entryOverrides).length > 0 || state.changes.bulkOffset.x !== 0 || state.changes.bulkOffset.y !== 0;
   const canSave = Boolean(state.document) && dirty && invalid.size === 0 && !state.isSaving;
-  return `<div class="overlay-box sprite-mapping-panel" data-testid="sprite-mapping-panel"><strong>Sprite Mapping Tool</strong><p data-testid="sprite-mapping-message">${state.message}</p>
+  return `<div class="overlay-box sprite-mapping-panel" data-testid="sprite-mapping-panel"><strong>Sprite Mapping Tool</strong>${renderVisualTemplateSelector(activeTemplateId, "sprite-mapping-template-selector")}<p data-testid="sprite-mapping-message">${state.message}</p>
     ${state.document ? `<p data-testid="atlas-dimensions">Map: ${state.document.declaredWidth}×${state.document.declaredHeight} • Image: ${state.actualWidth}×${state.actualHeight}</p>` : ""}
     ${state.issues.filter((issue) => !issue.entryId).map((issue) => `<p class="mapping-warning" data-testid="atlas-warning">${issue.message}</p>`).join("")}
     <div class="sprite-mapping-view-controls"><button id="sprite-mapping-zoom-out" data-testid="sprite-mapping-zoom-out" ${state.zoom <= .5 ? "disabled" : ""}>−</button><output data-testid="sprite-mapping-zoom-value">${Math.round(state.zoom * 100)}%</output><button id="sprite-mapping-zoom-in" data-testid="sprite-mapping-zoom-in" ${state.zoom >= 4 ? "disabled" : ""}>+</button><button id="sprite-mapping-reset-view" data-testid="sprite-mapping-reset-view" ${state.zoom === 1 && !state.viewPan.x && !state.viewPan.y ? "disabled" : ""}>Reset view</button></div>

@@ -1,5 +1,6 @@
 import type { GameState, StorybookPreviewSubject } from "../../engine/scenario/types";
 import { resolveStorybookPreviewTemplate } from "../../render/sprites/visualTemplateResolver";
+import { renderVisualTemplateSelector } from "../visualTemplateSelector";
 
 function renderSubjectEntry(state: GameState, subject: StorybookPreviewSubject): string {
   const selection = state.storybookState?.subjectSelections[subject.subjectId] ?? {
@@ -63,6 +64,7 @@ export function renderStorybookPanel(state: GameState): string {
       <p data-testid="storybook-message">
         Inspect supported heroes, battle units, and objects through resolver-backed preview tiles.
       </p>
+      ${renderVisualTemplateSelector(state.activeVisualTemplateId, "storybook-template-selector")}
       <div data-testid="storybook-selected-subject">
         ${selectedSubject ? `${selectedSubject.displayName} (${selectedSubject.categoryLabel})` : "No subject selected"}
       </div>

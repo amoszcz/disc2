@@ -2,9 +2,11 @@ import type { GameStore } from "../state/gameState";
 import { renderStorybookScene, renderStorybookPreviewTile } from "../../render/canvas/renderStorybookScene";
 import { renderStorybookPanel } from "../../ui/overlays/storybookPanel";
 import { returnToMainMenu, selectStorybookSubject, updateStorybookSubjectSelection } from "../state/gameState";
+import { bindVisualTemplateSelector } from "../../ui/visualTemplateSelector";
 
 export function renderStorybookSidebar(store: GameStore, container: HTMLElement): void {
   container.innerHTML = renderStorybookPanel(store.getState());
+  bindVisualTemplateSelector(container, store);
 
   const returnButton = container.querySelector<HTMLButtonElement>("#storybook-return-button");
   if (returnButton) {

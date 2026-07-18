@@ -19,6 +19,7 @@ import { measureGameShellLayout, normalizeViewportForState } from "../../render/
 import { renderMainMenu } from "../../ui/overlays/mainMenu";
 import { renderVictoryMenu } from "../../ui/overlays/victoryMenu";
 import { visualTemplateCatalog } from "../../render/sprites/visualTemplateCatalog";
+import { setActiveVisualTemplateId } from "../../render/sprites/visualTemplateResolver";
 import { VISUAL_TEMPLATE_INVALIDATE_EVENT } from "../../render/sprites/visualTemplateResolver";
 import { renderBattleTurnQueue } from "../../ui/panels/battleTurnQueue";
 import { openSpriteMapping, renderSpriteMapping } from "../scene-controller/spriteMappingScene";
@@ -159,6 +160,7 @@ export function startGame(root: HTMLElement | null): void {
   }
 
   store.subscribe((state) => {
+    setActiveVisualTemplateId(state.activeVisualTemplateId);
     (
       window as Window & {
         __visualStateTracker?: GameStore["getState"] extends () => infer T ? T extends { visualStates: infer V } ? V : never : never;

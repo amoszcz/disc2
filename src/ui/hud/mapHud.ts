@@ -1,5 +1,6 @@
 import type { GameState } from "../../engine/scenario/types";
 import { renderTerrainLegend } from "../../render/canvas/renderTerrainLegend";
+import { renderVisualTemplateSelector } from "../visualTemplateSelector";
 
 export function renderMapHud(state: GameState): string {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
@@ -20,6 +21,7 @@ export function renderMapHud(state: GameState): string {
       <div class="hud-row"><strong>Hero</strong><span>${hero?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Layout</strong><span data-testid="layout-mode">${state.mobileLayoutState.layoutMode}</span></div>
       <div class="hud-row"><strong>Zoom</strong><span data-testid="map-zoom">${state.mapViewState.viewport.zoomLevel.toFixed(2)}x</span></div>
+      ${renderVisualTemplateSelector(state.activeVisualTemplateId, "map-template-selector")}
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
       ${

@@ -19,6 +19,8 @@ import { createCenteredViewport, createViewport } from "../../engine/map/viewpor
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
 import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
 import { getStorybookPreviewSubjects } from "../../render/sprites/visualTemplateCatalog";
+import { getDefaultVisualTemplateId } from "../../render/sprites/visualTemplateConfig";
+import { getVisualTemplateSource } from "../../render/sprites/visualTemplateRegistry";
 
 export function createDefaultMapViewState(
   scenario: ScenarioDefinition,
@@ -109,6 +111,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     mapViewState: createDefaultMapViewState(scenario, selectedHeroId),
     mapTravelState: createInitialMapTravelState(scenario),
     visualStates: createInitialVisualStates(scenario),
+    activeVisualTemplateId: getDefaultVisualTemplateId(),
     mobileLayoutState: getDefaultMobileLayoutState(),
     responsiveCanvasView: getDefaultResponsiveCanvasView(),
     lastTouchInteraction: null
@@ -193,6 +196,7 @@ export function setActiveWorldMap(
 export function startScenarioSession(state: GameState, scenarioId: ScenarioId): GameState {
   const preservedLayoutState = state.mobileLayoutState;
   const preservedCanvasView = state.responsiveCanvasView;
+  const preservedVisualTemplateId = state.activeVisualTemplateId;
   const nextState = createInitialState(scenarioId);
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
@@ -214,6 +218,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   );
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
+  state.activeVisualTemplateId = preservedVisualTemplateId;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
@@ -223,6 +228,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
 export function returnToMainMenu(state: GameState): GameState {
   const preservedLayoutState = state.mobileLayoutState;
   const preservedCanvasView = state.responsiveCanvasView;
+  const preservedVisualTemplateId = state.activeVisualTemplateId;
   const nextState = createMenuState();
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
@@ -239,9 +245,15 @@ export function returnToMainMenu(state: GameState): GameState {
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
+  state.activeVisualTemplateId = preservedVisualTemplateId;
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
+  return state;
+}
+
+export function selectVisualTemplate(state: GameState, templateId: string): GameState {
+  if (getVisualTemplateSource(templateId)) state.activeVisualTemplateId = templateId;
   return state;
 }
 

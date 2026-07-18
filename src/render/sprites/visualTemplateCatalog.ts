@@ -15,7 +15,8 @@ import type {
 import { visualFallbackGlyph, visualFallbackPalette } from "./placeholders";
 import guardedOpenUrl from "./assets/object-guarded-open.svg";
 import pickupGoldUrl from "./assets/object-pickup-gold.svg";
-import generatedAssetSheetUrl from "./assets/generated-asset-sheet.png";
+import generatedAssetSheetUrl from "./templates/default-template.png";
+import { getVisualTemplateSource } from "./visualTemplateRegistry";
 
 interface VisualTemplateCatalog {
   unitTemplates: Record<string, VisualTemplateDefinition>;
@@ -531,6 +532,22 @@ export const visualTemplateCatalog: VisualTemplateCatalog = {
     )
   }
 };
+
+export function getVisualTemplateCatalog(templateId: string): VisualTemplateCatalog {
+  const source = getVisualTemplateSource(templateId);
+  if (!source || templateId === "default-template") return visualTemplateCatalog;
+  const withSource = (templates: Record<string, VisualTemplateDefinition>) =>
+    Object.fromEntries(Object.entries(templates).map(([key, value]) => [key, value.assetKind === "dedicated" ? { ...value, assetSource: source.imageUrl } : value]));
+  return {
+    ...visualTemplateCatalog,
+    unitTemplates: withSource(visualTemplateCatalog.unitTemplates),
+    heroTemplates: withSource(visualTemplateCatalog.heroTemplates),
+    movementObjectTemplates: withSource(visualTemplateCatalog.movementObjectTemplates),
+    guardedLocationTemplates: withSource(visualTemplateCatalog.guardedLocationTemplates),
+    terrainTemplates: withSource(visualTemplateCatalog.terrainTemplates) as VisualTemplateCatalog["terrainTemplates"],
+    resourcePickupTemplates: withSource(visualTemplateCatalog.resourcePickupTemplates) as VisualTemplateCatalog["resourcePickupTemplates"]
+  };
+}
 
 export function getStorybookPreviewSubjects(catalog: VisualTemplateCatalog = visualTemplateCatalog): StorybookPreviewSubject[] {
   const heroes: StorybookPreviewSubject[] = Object.entries(catalog.heroStateProfiles).map(([subjectType, profile]) => ({

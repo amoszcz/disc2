@@ -6,10 +6,18 @@ import { resolve } from "node:path";
 
 declare const process: { cwd(): string };
 
-const atlasJsonPath = resolve(process.cwd(), "wip/sprite-atlas/game-atlas.json");
-const atlasImagePath = resolve(process.cwd(), "wip/sprite-atlas/a_sprite_sheet_sheet_in_2d_digital_art_displays_fa.png");
+const templatePaths = {
+  "default-template": { json: resolve(process.cwd(), "src/render/sprites/templates/default-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/default-template.png") },
+  "wip-template": { json: resolve(process.cwd(), "src/render/sprites/templates/wip-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/wip-template.png") }
+} as const;
+type TemplateId = keyof typeof templatePaths;
+function getTemplate(reqUrl: string | undefined): { id: TemplateId; json: string; image: string } {
+  const id = new URL(reqUrl ?? "/", "http://localhost").searchParams.get("templateId") ?? "default-template";
+  if (!(id in templatePaths)) throw new Error("Unknown visual template.");
+  return { id: id as TemplateId, ...templatePaths[id as TemplateId] };
+}
 
-async function readPngDimensions(): Promise<{ width: number; height: number }> {
+async function readPngDimensions(atlasImagePath: string): Promise<{ width: number; height: number }> {
   const bytes = await readFile(atlasImagePath) as unknown as Uint8Array;
   if (bytes.length < 24 || bytes[12] !== 73 || bytes[13] !== 72 || bytes[14] !== 68 || bytes[15] !== 82) throw new Error("Configured atlas image is not a PNG.");
   const numberAt = (offset: number) => bytes[offset] * 2 ** 24 + bytes[offset + 1] * 2 ** 16 + bytes[offset + 2] * 2 ** 8 + bytes[offset + 3];
@@ -35,10 +43,11 @@ export default defineConfig({
       server.middlewares.use(async (req, res, next) => {
         const request = req as unknown as { url?: string; method?: string; on(event: string, callback: (...args: any[]) => void): void };
         if (!request.url?.startsWith("/__sprite-mapping/")) return next();
-        if (request.url === "/__sprite-mapping/image" && request.method === "GET") { res.setHeader("content-type", "image/png"); res.end(await readFile(atlasImagePath)); return; }
-        if (request.url === "/__sprite-mapping/atlas" && request.method === "GET") { res.setHeader("content-type", "application/json"); res.end(JSON.stringify({ atlas: JSON.parse(await readFile(atlasJsonPath, "utf8")), imageUrl: "/__sprite-mapping/image" })); return; }
-        if (request.url === "/__sprite-mapping/atlas" && request.method === "POST") {
-          let body = ""; request.on("data", (chunk: string) => { body += chunk; }); request.on("end", async () => { try { const payload = JSON.parse(body) as { bulkOffset?: { x?: unknown; y?: unknown }; entryOverrides?: Record<string, { x?: unknown; y?: unknown; width?: unknown; height?: unknown }> }; const bulk = payload.bulkOffset ?? { x: 0, y: 0 }; const overrides = payload.entryOverrides ?? {}; if (!Number.isInteger(bulk.x) || !Number.isInteger(bulk.y) || !overrides || typeof overrides !== "object") throw new Error("Integer mapping changes are required."); const entryOverrides: Record<string, { x: number; y: number; width?: number; height?: number }> = {}; for (const [id, value] of Object.entries(overrides)) { if (!value || !Number.isInteger(value.x) || !Number.isInteger(value.y) || (value.width !== undefined && (!Number.isInteger(value.width) || Number(value.width) < 1)) || (value.height !== undefined && (!Number.isInteger(value.height) || Number(value.height) < 1))) throw new Error("Entry overrides require integer crop values."); entryOverrides[id] = { x: Number(value.x), y: Number(value.y), width: value.width === undefined ? undefined : Number(value.width), height: value.height === undefined ? undefined : Number(value.height) }; } const atlas = JSON.parse(await readFile(atlasJsonPath, "utf8")) as { sprites?: Array<Record<string, unknown>> }; if (!Array.isArray(atlas.sprites)) throw new Error("Atlas sprites are missing."); atlas.sprites = assertValidSprites(atlas.sprites, { bulkOffset: { x: Number(bulk.x), y: Number(bulk.y) }, entryOverrides }, await readPngDimensions()); await writeFile(atlasJsonPath, `${JSON.stringify(atlas, null, 2)}\n`); res.statusCode = 204; res.end(); } catch (error) { res.statusCode = 400; res.end(error instanceof Error ? error.message : "Invalid atlas save."); } }); return;
+        const template = getTemplate(request.url);
+        if (request.url?.startsWith("/__sprite-mapping/image") && request.method === "GET") { res.setHeader("content-type", "image/png"); res.end(await readFile(template.image)); return; }
+        if (request.url?.startsWith("/__sprite-mapping/atlas") && request.method === "GET") { res.setHeader("content-type", "application/json"); res.end(JSON.stringify({ atlas: JSON.parse(await readFile(template.json, "utf8")), imageUrl: `/__sprite-mapping/image?templateId=${template.id}` })); return; }
+        if (request.url?.startsWith("/__sprite-mapping/atlas") && request.method === "POST") {
+          let body = ""; request.on("data", (chunk: string) => { body += chunk; }); request.on("end", async () => { try { const payload = JSON.parse(body) as { bulkOffset?: { x?: unknown; y?: unknown }; entryOverrides?: Record<string, { x?: unknown; y?: unknown; width?: unknown; height?: unknown }> }; const bulk = payload.bulkOffset ?? { x: 0, y: 0 }; const rawOverrides = payload.entryOverrides ?? {}; if (!Number.isInteger(bulk.x) || !Number.isInteger(bulk.y) || !rawOverrides || typeof rawOverrides !== "object") throw new Error("Integer mapping changes are required."); const entryOverrides: Record<string, { x: number; y: number; width?: number; height?: number }> = {}; for (const [id, value] of Object.entries(rawOverrides)) { if (!value || !Number.isInteger(value.x) || !Number.isInteger(value.y) || (value.width !== undefined && (!Number.isInteger(value.width) || Number(value.width) < 1)) || (value.height !== undefined && (!Number.isInteger(value.height) || Number(value.height) < 1))) throw new Error("Entry overrides require integer crop values."); entryOverrides[id] = { x: Number(value.x), y: Number(value.y), width: value.width === undefined ? undefined : Number(value.width), height: value.height === undefined ? undefined : Number(value.height) }; } const atlas = JSON.parse(await readFile(template.json, "utf8")) as { sprites?: Array<Record<string, unknown>> }; if (!Array.isArray(atlas.sprites)) throw new Error("Atlas sprites are missing."); atlas.sprites = assertValidSprites(atlas.sprites, { bulkOffset: { x: Number(bulk.x), y: Number(bulk.y) }, entryOverrides }, await readPngDimensions(template.image)); await writeFile(template.json, `${JSON.stringify(atlas, null, 2)}\n`); res.statusCode = 204; res.end(); } catch (error) { res.statusCode = 400; res.end(error instanceof Error ? error.message : "Invalid atlas save."); } }); return;
         }
         res.statusCode = 404; res.end("Unknown sprite mapping endpoint.");
       });
