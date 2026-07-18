@@ -18,7 +18,7 @@ import type {
   VisualTemplateDefinition,
   VisualTemplateResolverResult
 } from "../../engine/scenario/types";
-import { getVisualTemplateCatalog, visualTemplateCatalog, type VisualTemplateCatalog } from "./visualTemplateCatalog";
+import { getVisualTemplateCatalog, type VisualTemplateCatalog } from "./visualTemplateCatalog";
 import { getDefaultVisualTemplateId } from "./visualTemplateConfig";
 import { getTemplateFrame } from "./visualTemplateRegistry";
 
@@ -288,7 +288,7 @@ export function resolveResourcePickupVisualTemplate(
 export function resolveStorybookPreviewTemplate(
   subject: StorybookPreviewSubject,
   selection: StorybookSubjectSelection,
-  catalog: VisualTemplateCatalog = visualTemplateCatalog
+  catalog: VisualTemplateCatalog = activeCatalog()
 ): VisualTemplateResolverResult {
   switch (subject.subjectKind) {
     case "hero":
