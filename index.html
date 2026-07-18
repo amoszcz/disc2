@@ -163,6 +163,24 @@
         border: 0;
       }
 
+      .sprite-mapping-panel { max-height: calc(100vh - 64px); overflow: auto; }
+      .mapping-warning { color: #8a1f11; font-weight: 700; }
+      .sprite-mapping-panel button { margin: 4px; }
+      .sprite-mapping-view-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+      .sprite-mapping-view-controls output { min-width: 3.5rem; text-align: center; font-weight: 700; }
+      [data-testid="sprite-mapping-selected"] label { display: inline-flex; align-items: center; gap: 4px; margin: 4px; }
+      [data-testid="sprite-mapping-selected"] input { width: 5.5rem; padding: 6px; }
+      [data-testid="sprite-mapping-selected"] .sprite-mapping-size-control { display: block; margin: 8px 4px; }
+      [data-testid="sprite-mapping-selected"] .sprite-mapping-size-control input { display: block; box-sizing: border-box; width: 100%; max-width: none; padding: 0; }
+      .sprite-mapping-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; margin-top: 12px; }
+      .sprite-mapping-entry { width: 100%; min-height: 80px; padding: 6px; border-radius: 8px; text-align: left; display: flex; align-items: center; gap: 7px; }
+      .sprite-mapping-entry span, [data-testid="sprite-mapping-selected"] span { display: block; font-size: .82rem; }
+      .sprite-mapping-entry small { display: block; font-size: .75rem; }
+      .sprite-mapping-preview { flex: 0 0 72px; width: 72px; height: 72px; border-radius: 5px; image-rendering: pixelated; }
+      .sprite-mapping-entry.is-selected { outline: 3px solid #ffcf55; }
+      .sprite-mapping-entry.is-invalid { background: #8a1f11; }
+      [data-testid="sprite-mapping-selected"] { margin: 8px 0; padding: 8px; background: rgba(106,68,39,.1); }
+
       canvas {
         width: 100%;
         max-width: 100%;

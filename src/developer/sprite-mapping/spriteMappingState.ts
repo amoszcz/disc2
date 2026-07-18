@@ -1,0 +1,3 @@
+import { emptyChangeSet, type AtlasDocument, type MappingChangeSet, type MappingIssue } from "./atlasMapping";
+export interface SpriteMappingState { document: AtlasDocument | null; actualWidth: number; actualHeight: number; selectedEntryId: string | null; changes: MappingChangeSet; zoom: number; viewPan: { x: number; y: number }; issues: MappingIssue[]; message: string; isSaving: boolean; }
+export function createSpriteMappingState(): SpriteMappingState { return { document: null, actualWidth: 0, actualHeight: 0, selectedEntryId: null, changes: emptyChangeSet(), zoom: 1, viewPan: { x: 0, y: 0 }, issues: [], message: "Load the WIP atlas to begin.", isSaving: false }; }

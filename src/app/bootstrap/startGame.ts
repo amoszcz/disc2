@@ -21,6 +21,7 @@ import { renderVictoryMenu } from "../../ui/overlays/victoryMenu";
 import { visualTemplateCatalog } from "../../render/sprites/visualTemplateCatalog";
 import { VISUAL_TEMPLATE_INVALIDATE_EVENT } from "../../render/sprites/visualTemplateResolver";
 import { renderBattleTurnQueue } from "../../ui/panels/battleTurnQueue";
+import { openSpriteMapping, renderSpriteMapping } from "../scene-controller/spriteMappingScene";
 
 function resolveScenarioId(): ScenarioId | null {
   const params = new URLSearchParams(window.location.search);
@@ -195,6 +196,19 @@ export function startGame(root: HTMLElement | null): void {
           });
         };
       }
+      const spriteMappingButton = sidebar.querySelector<HTMLButtonElement>('[data-menu-action="open-sprite-mapping"]');
+      if (spriteMappingButton) {
+        spriteMappingButton.onclick = () => {
+          store.update((currentState) => { currentState.sceneMode = "sprite-mapping"; openSpriteMapping(store); });
+        };
+      }
+      return;
+    }
+
+    if (sceneController.getMode() === "sprite-mapping") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = "";
+      renderSpriteMapping(store, sidebar, canvas, context);
       return;
     }
 

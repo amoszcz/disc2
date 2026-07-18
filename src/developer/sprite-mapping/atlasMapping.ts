@@ -1,0 +1,23 @@
+export interface AtlasSpriteEntry { entryId: string; displayName: string; subjectKind: string; subjectId: string; state: string | null; direction: string | null; x: number; y: number; width: number; height: number; raw: Record<string, unknown>; }
+export interface AtlasDocument { sheet: string; declaredWidth: number; declaredHeight: number; entries: AtlasSpriteEntry[]; raw: Record<string, unknown>; }
+export interface AlignmentOffset { x: number; y: number }
+export interface EntryCoordinates { x: number; y: number; width?: number; height?: number }
+export interface MappingChangeSet { bulkOffset: AlignmentOffset; entryOverrides: Record<string, EntryCoordinates> }
+export interface MappingIssue { entryId: string | null; message: string }
+
+export const emptyChangeSet = (): MappingChangeSet => ({ bulkOffset: { x: 0, y: 0 }, entryOverrides: {} });
+export const createEntryId = (sprite: Record<string, unknown>, index: number): string => `${typeof sprite.subject_id === "string" ? sprite.subject_id : `sprite-${index + 1}`}:${String(sprite.exact_state_name ?? "default")}:${String(sprite.direction ?? "none")}:${index}`;
+function numberField(value: unknown, field: string): number { if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`Atlas ${field} must be a finite number.`); return value; }
+
+export function parseAtlasDocument(value: unknown): AtlasDocument {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Atlas map must be an object.");
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.sheet !== "string" || !raw.sheet || !Array.isArray(raw.sprites) || raw.sprites.length === 0) throw new Error("Atlas map must name its sheet and contain sprite entries.");
+  const entries = raw.sprites.map((entry, index) => { if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new Error(`Sprite ${index + 1} must be an object.`); const sprite = entry as Record<string, unknown>; const subjectId = typeof sprite.subject_id === "string" ? sprite.subject_id : `sprite-${index + 1}`; return { entryId: createEntryId(sprite, index), displayName: typeof sprite.display_name === "string" ? sprite.display_name : subjectId, subjectKind: typeof sprite.subject_kind === "string" ? sprite.subject_kind : "unknown", subjectId, state: typeof sprite.exact_state_name === "string" ? sprite.exact_state_name : null, direction: typeof sprite.direction === "string" ? sprite.direction : null, x: numberField(sprite.x, `sprites[${index}].x`), y: numberField(sprite.y, `sprites[${index}].y`), width: numberField(sprite.width, `sprites[${index}].width`), height: numberField(sprite.height, `sprites[${index}].height`), raw: sprite }; });
+  return { sheet: raw.sheet, declaredWidth: numberField(raw.sheet_width, "sheet_width"), declaredHeight: numberField(raw.sheet_height, "sheet_height"), entries, raw };
+}
+
+export function resolveEntryCoordinates(entry: AtlasSpriteEntry, changes: MappingChangeSet): EntryCoordinates { const override = changes.entryOverrides[entry.entryId]; return override ? { x: override.x, y: override.y, width: override.width ?? entry.width, height: override.height ?? entry.height } : { x: entry.x + changes.bulkOffset.x, y: entry.y + changes.bulkOffset.y, width: entry.width, height: entry.height }; }
+export function resolveAtlasEntries(document: AtlasDocument, changes: MappingChangeSet): AtlasSpriteEntry[] { return document.entries.map((entry) => ({ ...entry, ...resolveEntryCoordinates(entry, changes) })); }
+export function validateAtlas(document: AtlasDocument, actualWidth: number, actualHeight: number, changes: MappingChangeSet): MappingIssue[] { const issues: MappingIssue[] = []; if (document.declaredWidth !== actualWidth || document.declaredHeight !== actualHeight) issues.push({ entryId: null, message: `Declared sheet is ${document.declaredWidth}×${document.declaredHeight}; loaded image is ${actualWidth}×${actualHeight}.` }); for (const entry of resolveAtlasEntries(document, changes)) { if (!Number.isInteger(entry.x) || !Number.isInteger(entry.y) || !Number.isInteger(entry.width) || !Number.isInteger(entry.height) || entry.width <= 0 || entry.height <= 0 || entry.x < 0 || entry.y < 0 || entry.x + entry.width > actualWidth || entry.y + entry.height > actualHeight) issues.push({ entryId: entry.entryId, message: `${entry.displayName} crop is outside the loaded image or uses invalid coordinates.` }); } return issues; }
+export function applyMappingChanges(document: AtlasDocument, changes: MappingChangeSet): Record<string, unknown> { return { ...document.raw, sprites: resolveAtlasEntries(document, changes).map((entry) => ({ ...entry.raw, x: entry.x, y: entry.y, width: entry.width, height: entry.height })) }; }

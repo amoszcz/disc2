@@ -31,6 +31,10 @@ export function renderMainMenu(state: GameState): string {
         <strong>Asset Storybook</strong>
         <span>Preview current heroes, battle units, and map objects across their supported states.</span>
       </button>
+      <button type="button" class="menu-option" data-testid="sprite-mapping-open-button" data-menu-action="open-sprite-mapping">
+        <strong>Sprite Mapping Tool</strong>
+        <span>Review and align the WIP sprite atlas coordinate map.</span>
+      </button>
       <div data-testid="scenario-option-list">${options}</div>
     </div>
   `;

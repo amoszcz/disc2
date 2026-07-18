@@ -1,0 +1,3 @@
+import { describe, expect, test } from "vitest";
+import { emptyChangeSet, parseAtlasDocument, resolveAtlasEntries } from "../../../src/developer/sprite-mapping/atlasMapping";
+describe("sprite mapping edit flow", () => test("changes only the selected entry", () => { const atlas = parseAtlasDocument({ sheet: "a.png", sheet_width: 20, sheet_height: 20, sprites: [{ subject_id: "a", x: 1, y: 1, width: 2, height: 2 }, { subject_id: "b", x: 5, y: 5, width: 2, height: 2 }] }); const changes = emptyChangeSet(); changes.entryOverrides[atlas.entries[0].entryId] = { x: 3, y: 4 }; expect(resolveAtlasEntries(atlas, changes).map(({ x, y }) => ({ x, y }))).toEqual([{ x: 3, y: 4 }, { x: 5, y: 5 }]); }));

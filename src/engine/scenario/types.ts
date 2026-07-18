@@ -2,7 +2,7 @@ export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
 export type MovementObjectType = "bridge" | "milestone" | "rubble" | "cave" | "teleport" | "exit";
 
-export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook";
+export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook" | "sprite-mapping";
 export type SideKind = "player" | "enemy" | "neutral";
 export type LocationType = "resource-site";
 export type AccessState = "blocked" | "open";
