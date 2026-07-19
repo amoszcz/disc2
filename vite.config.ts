@@ -8,7 +8,8 @@ declare const process: { cwd(): string };
 
 const templatePaths = {
   "default-template": { json: resolve(process.cwd(), "src/render/sprites/templates/default-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/default-template.png") },
-  "wip-template": { json: resolve(process.cwd(), "src/render/sprites/templates/wip-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/wip-template.png") }
+  "wip-template": { json: resolve(process.cwd(), "src/render/sprites/templates/wip-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/wip-template.png") },
+  "highres-template": { json: resolve(process.cwd(), "src/render/sprites/templates/highres-template.json"), image: resolve(process.cwd(), "src/render/sprites/templates/highres-template.png") }
 } as const;
 type TemplateId = keyof typeof templatePaths;
 function getTemplate(reqUrl: string | undefined): { id: TemplateId; json: string; image: string } {
