@@ -6,7 +6,7 @@ import { renderGuardStatusOverlay } from "../../ui/overlays/guardStatusOverlay";
 import { renderErrorOverlay } from "../../ui/overlays/errorOverlay";
 import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup";
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
-import { bindVisualTemplateSelector } from "../../ui/visualTemplateSelector";
+import { openSettings } from "../state/gameState";
 
 export function renderMapSidebar(store: GameStore, container: HTMLElement, actionContainer: HTMLElement): void {
   const state = store.getState();
@@ -49,7 +49,9 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement, actio
     )}
     ${renderErrorOverlay(logMessage, travelMessage ?? state.routeFeedback?.blockedReason ?? navigationMessage, overlayTitle)}
   `;
-  bindVisualTemplateSelector(container, store);
+  container.querySelector<HTMLButtonElement>('[data-settings-action="open"]')?.addEventListener("click", () => {
+    store.update((current) => { openSettings(current); });
+  });
 
   actionContainer.innerHTML = renderMapActionBar();
   bindMapActionBar(actionContainer, store);

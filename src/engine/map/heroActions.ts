@@ -1,14 +1,12 @@
 import type { FacingDirection, GameState, HeroAnimationStateName, LinkedMapTravelLink, Position, RouteProgressResult, RouteStep } from "../scenario/types";
 import { getWorldMapById, resolveTravelLinkAtPosition } from "../scenario/types";
 import { findGuardedLocationAtHero, isLocationBlocked } from "./guardRules";
-import { isValidMove, movementCost, positionsEqual } from "./mapRules";
+import { positionsEqual } from "./mapRules";
 import { collectPickupIfPresent } from "./pickupResolution";
 import { clearRoutePreview, createRoutePreview, isRoutePreviewOwnedByHero, markRoutePreviewForContinuation } from "./routePreviewState";
 import { findShortestRoute } from "./routePathfinding";
-import { hasMovementObjectRegions } from "./movementObjectLookup";
 import { buildRouteAttempt, validateTravelLink } from "./routeRules";
 import { createRouteFeedback, createRoutePreviewFeedback } from "./terrainFeedback";
-import { hasTerrainRegions } from "./terrainLookup";
 import { setActiveWorldMap } from "../../app/state/gameState";
 
 export interface HeroActionResult {
@@ -161,7 +159,7 @@ export function plotRoutePreview(state: GameState, destination: Position): HeroA
   return { ok: true };
 }
 
-function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigger): HeroActionResult {
+function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigger, maximumSteps = Number.POSITIVE_INFINITY): HeroActionResult {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
   const routePreview = state.activeRoutePreview;
   if (!hero || !routePreview) {
@@ -222,6 +220,10 @@ function advanceRoutePreview(state: GameState, triggerSource: RouteAdvanceTrigge
       remainingSteps.push(...previewToExecute.steps.slice(traversedSteps.length));
       break;
     }
+    if (traversedSteps.length >= maximumSteps) {
+      remainingSteps.push(...previewToExecute.steps.slice(traversedSteps.length));
+      break;
+    }
   }
 
   if (traversedSteps.length === 0) {
@@ -270,6 +272,11 @@ export function confirmRoutePreview(state: GameState): HeroActionResult {
   return advanceRoutePreview(state, "manual");
 }
 
+/** Advances only one legal route tile, allowing the app layer to schedule visible traversal. */
+export function advanceRoutePreviewStep(state: GameState): HeroActionResult {
+  return advanceRoutePreview(state, "manual", 1);
+}
+
 export function autoAdvanceRoutePreview(state: GameState): HeroActionResult {
   return advanceRoutePreview(state, "end-turn");
 }
@@ -283,41 +290,22 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
     return { ok: false, reason: "That hero is not on the active map." };
   }
 
-  if (hasTerrainRegions(state.scenario) || hasMovementObjectRegions(state.scenario)) {
-    const direction = getFacingDirection(hero.mapPosition, position);
-    const routeAttempt = buildRouteAttempt(state.scenario, hero.id, hero.mapPosition, position, hero.remainingMovement);
-    state.routeFeedback = createRouteFeedback(routeAttempt);
-    if (!routeAttempt.isLegal) {
-      return { ok: false, reason: routeAttempt.failureReason ?? "That move is not allowed." };
-    }
-
-    hero.mapPosition = { ...position };
-    hero.remainingMovement -= routeAttempt.movementCost;
-    setHeroVisualState(state, hero.id, "walk", direction);
-    const movementObjectSummary = state.routeFeedback.objectLabels.length
-      ? ` using ${state.routeFeedback.objectLabels.join(" + ").toLowerCase()}`
-      : "";
-    state.messageLog.push(
-      `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()}${movementObjectSummary} at (${position.x + 1}, ${position.y + 1}).`
-    );
-    const collectedPickup = collectPickupIfPresent(state, hero.id);
-    if (collectedPickup) {
-      setHeroVisualState(state, hero.id, "interact", direction);
-    }
-    return resolveTravelAtHeroPosition(state, hero.id);
-  }
-
-  if (!isValidMove(state.scenario.map, hero.mapPosition, position, hero.remainingMovement)) {
-    return { ok: false, reason: "That move is outside the hero's remaining movement." };
-  }
-
-  const cost = movementCost(hero.mapPosition, position);
   const direction = getFacingDirection(hero.mapPosition, position);
+  const routeAttempt = buildRouteAttempt(state.scenario, hero.id, hero.mapPosition, position, hero.remainingMovement);
+  state.routeFeedback = createRouteFeedback(routeAttempt);
+  if (!routeAttempt.isLegal) {
+    return { ok: false, reason: routeAttempt.failureReason ?? "That move is not allowed." };
+  }
+
   hero.mapPosition = { ...position };
-  hero.remainingMovement -= cost;
-  state.routeFeedback = null;
+  hero.remainingMovement -= routeAttempt.movementCost;
   setHeroVisualState(state, hero.id, "walk", direction);
-  state.messageLog.push(`${hero.name} moved to (${position.x + 1}, ${position.y + 1}).`);
+  const movementObjectSummary = state.routeFeedback.objectLabels.length
+    ? ` using ${state.routeFeedback.objectLabels.join(" + ").toLowerCase()}`
+    : "";
+  state.messageLog.push(
+    `${hero.name} moved onto ${state.routeFeedback.terrainLabel.toLowerCase()}${movementObjectSummary} at (${position.x + 1}, ${position.y + 1}).`
+  );
   const collectedPickup = collectPickupIfPresent(state, hero.id);
   if (collectedPickup) {
     setHeroVisualState(state, hero.id, "interact", direction);

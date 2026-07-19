@@ -19,8 +19,9 @@ import { createCenteredViewport, createViewport } from "../../engine/map/viewpor
 import { evaluateDefaultVictory } from "../../engine/victory/checkVictory";
 import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../../render/canvas/viewportRender";
 import { getStorybookPreviewSubjects } from "../../render/sprites/visualTemplateCatalog";
-import { getDefaultVisualTemplateId } from "../../render/sprites/visualTemplateConfig";
 import { getVisualTemplateSource } from "../../render/sprites/visualTemplateRegistry";
+import { getDefaultGameSettings, loadGameSettings, saveGameSettings } from "./gameSettings";
+import type { MovementBehavior } from "../../engine/scenario/types";
 
 export function createDefaultMapViewState(
   scenario: ScenarioDefinition,
@@ -90,7 +91,7 @@ function createStorybookState(subjects: StorybookPreviewSubject[] = getStorybook
   };
 }
 
-function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameState {
+function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode, gameSettings = typeof window === "undefined" ? getDefaultGameSettings() : loadGameSettings()): GameState {
   const scenario = loadScenario(scenarioId);
   const activePlayerId = scenario.players.find((player) => player.kind === "player")?.id ?? scenario.players[0].id;
   const selectedHeroId = scenario.heroes.find((hero) => hero.ownerPlayerId === activePlayerId)?.id ?? null;
@@ -111,7 +112,10 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode): GameS
     mapViewState: createDefaultMapViewState(scenario, selectedHeroId),
     mapTravelState: createInitialMapTravelState(scenario),
     visualStates: createInitialVisualStates(scenario),
-    activeVisualTemplateId: getDefaultVisualTemplateId(),
+    activeVisualTemplateId: gameSettings.visualTemplateId,
+    gameSettings,
+    activeTraversal: null,
+    settingsReturnScene: "menu",
     mobileLayoutState: getDefaultMobileLayoutState(),
     responsiveCanvasView: getDefaultResponsiveCanvasView(),
     lastTouchInteraction: null
@@ -144,6 +148,7 @@ export function appendMessage(state: GameState, message: string): GameState {
 }
 
 export function setBattleState(state: GameState, battle: Battle | null): GameState {
+  state.activeTraversal = null;
   state.mapViewState.lastSceneMode = state.sceneMode;
   state.battle = battle;
   state.sceneMode = battle ? "battle" : "map";
@@ -168,6 +173,7 @@ export function setActiveWorldMap(
   transitionMessage: string | null,
   travelLinkId: string | null
 ): GameState {
+  state.activeTraversal = null;
   const previousMapId = state.mapTravelState.activeMapId;
   applyScenarioWorldMap(state.scenario, nextMapId);
   state.mapTravelState.activeMapId = nextMapId;
@@ -196,8 +202,8 @@ export function setActiveWorldMap(
 export function startScenarioSession(state: GameState, scenarioId: ScenarioId): GameState {
   const preservedLayoutState = state.mobileLayoutState;
   const preservedCanvasView = state.responsiveCanvasView;
-  const preservedVisualTemplateId = state.activeVisualTemplateId;
-  const nextState = createInitialState(scenarioId);
+  const preservedSettings = state.gameSettings;
+  const nextState = createSessionState(scenarioId, "map", preservedSettings);
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
   state.availableScenarioOptions = nextState.availableScenarioOptions;
@@ -218,7 +224,10 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   );
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
-  state.activeVisualTemplateId = preservedVisualTemplateId;
+  state.activeVisualTemplateId = preservedSettings.visualTemplateId;
+  state.gameSettings = preservedSettings;
+  state.activeTraversal = null;
+  state.settingsReturnScene = "menu";
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
@@ -228,8 +237,10 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
 export function returnToMainMenu(state: GameState): GameState {
   const preservedLayoutState = state.mobileLayoutState;
   const preservedCanvasView = state.responsiveCanvasView;
-  const preservedVisualTemplateId = state.activeVisualTemplateId;
+  const preservedSettings = state.gameSettings;
   const nextState = createMenuState();
+  nextState.gameSettings = preservedSettings;
+  nextState.activeVisualTemplateId = preservedSettings.visualTemplateId;
   state.scenario = nextState.scenario;
   state.activeScenarioId = nextState.activeScenarioId;
   state.availableScenarioOptions = nextState.availableScenarioOptions;
@@ -245,7 +256,10 @@ export function returnToMainMenu(state: GameState): GameState {
   state.mapViewState = nextState.mapViewState;
   state.mapTravelState = nextState.mapTravelState;
   state.visualStates = nextState.visualStates;
-  state.activeVisualTemplateId = preservedVisualTemplateId;
+  state.activeVisualTemplateId = preservedSettings.visualTemplateId;
+  state.gameSettings = preservedSettings;
+  state.activeTraversal = null;
+  state.settingsReturnScene = "menu";
   state.mobileLayoutState = preservedLayoutState;
   state.responsiveCanvasView = preservedCanvasView;
   state.lastTouchInteraction = nextState.lastTouchInteraction;
@@ -253,7 +267,26 @@ export function returnToMainMenu(state: GameState): GameState {
 }
 
 export function selectVisualTemplate(state: GameState, templateId: string): GameState {
-  if (getVisualTemplateSource(templateId)) state.activeVisualTemplateId = templateId;
+  if (getVisualTemplateSource(templateId)) {
+    state.activeVisualTemplateId = templateId;
+    state.gameSettings = saveGameSettings({ ...state.gameSettings, visualTemplateId: templateId });
+  }
+  return state;
+}
+
+export function selectMovementBehavior(state: GameState, movementBehavior: MovementBehavior): GameState {
+  state.gameSettings = saveGameSettings({ ...state.gameSettings, movementBehavior });
+  return state;
+}
+
+export function openSettings(state: GameState): GameState {
+  state.settingsReturnScene = state.sceneMode === "map" ? "map" : "menu";
+  state.sceneMode = "settings";
+  return state;
+}
+
+export function returnFromSettings(state: GameState): GameState {
+  state.sceneMode = state.settingsReturnScene;
   return state;
 }
 

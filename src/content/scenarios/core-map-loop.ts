@@ -11,13 +11,15 @@ export const coreMapLoopScenario: ScenarioDefinition = {
       kind: "main",
       map: {
         width: 5,
-        height: 5
+        height: 5,
+        defaultTerrainType: "road"
       }
     }
   ],
   map: {
     width: 5,
-    height: 5
+    height: 5,
+    defaultTerrainType: "road"
   },
   players: [
     {

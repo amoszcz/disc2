@@ -4,7 +4,10 @@ import {
   createInitialState,
   createMenuState,
   openStorybook,
+  openSettings,
   returnToMainMenu,
+  returnFromSettings,
+  selectMovementBehavior,
   startScenarioSession
 } from "../state/gameState";
 import { createSceneController } from "../scene-controller/sceneController";
@@ -23,6 +26,9 @@ import { setActiveVisualTemplateId } from "../../render/sprites/visualTemplateRe
 import { VISUAL_TEMPLATE_INVALIDATE_EVENT } from "../../render/sprites/visualTemplateResolver";
 import { renderBattleTurnQueue } from "../../ui/panels/battleTurnQueue";
 import { openSpriteMapping, renderSpriteMapping } from "../scene-controller/spriteMappingScene";
+import { createMapTraversalController } from "../scene-controller/mapTraversalController";
+import { renderSettingsPanel } from "../../ui/overlays/settingsPanel";
+import { bindVisualTemplateSelector } from "../../ui/visualTemplateSelector";
 
 function resolveScenarioId(): ScenarioId | null {
   const params = new URLSearchParams(window.location.search);
@@ -109,7 +115,8 @@ export function startGame(root: HTMLElement | null): void {
     throw new Error("Canvas 2D context is unavailable.");
   }
 
-  bindMapInput(canvas, store);
+  const traversalController = createMapTraversalController(store);
+  bindMapInput(canvas, store, traversalController);
   bindBattleCanvasInput(canvas, store);
 
   let lastLayoutSignature = "";
@@ -204,6 +211,23 @@ export function startGame(root: HTMLElement | null): void {
           store.update((currentState) => { currentState.sceneMode = "sprite-mapping"; openSpriteMapping(store); });
         };
       }
+      const settingsButton = sidebar.querySelector<HTMLButtonElement>('[data-menu-action="open-settings"]');
+      if (settingsButton) settingsButton.onclick = () => store.update((currentState) => { openSettings(currentState); });
+      return;
+    }
+
+    if (sceneController.getMode() === "settings") {
+      mapActionMount.innerHTML = "";
+      battleQueueMount.innerHTML = "";
+      drawMenuScene(context, canvas);
+      sidebar.innerHTML = renderSettingsPanel(state);
+      sidebar.querySelector<HTMLSelectElement>('[data-testid="movement-behavior-selector"]')?.addEventListener("change", (event) => {
+        store.update((current) => { selectMovementBehavior(current, (event.currentTarget as HTMLSelectElement).value as "animated" | "immediate"); });
+      });
+      bindVisualTemplateSelector(sidebar, store);
+      sidebar.querySelector<HTMLButtonElement>('[data-settings-action="return"]')?.addEventListener("click", () => {
+        store.update((current) => { returnFromSettings(current); });
+      });
       return;
     }
 

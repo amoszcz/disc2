@@ -17,6 +17,7 @@ test("second click confirms a plotted route and moves the hero along it", async 
   });
 
   await canvas.click({ position: destinationClick });
+  await page.evaluate(() => { (window as any).__gameStore.getState().gameSettings.movementBehavior = "immediate"; });
   await canvas.click({ position: destinationClick });
 
   await expect(page.getByTestId("remaining-movement")).toHaveText("5");
@@ -27,6 +28,7 @@ test("second click confirms a plotted route and moves the hero along it", async 
 
 test("submap exit travel returns play to the configured surface destination", async ({ page }) => {
   await page.goto("/?scenario=advanced-terrain-scenario");
+  await page.evaluate(() => { (window as any).__gameStore.getState().gameSettings.movementBehavior = "immediate"; });
 
   await clickTile(page, 5, 10);
   await clickTile(page, 8, 10);

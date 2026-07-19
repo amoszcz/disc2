@@ -1,7 +1,6 @@
 import type { GameState } from "../../engine/scenario/types";
 import { canBattleStrike } from "../../engine/battle/battleTurnEngine";
 import { getBattleUnit, getUnitAttackCategory, isPlayerControlledBattleUnit } from "../../engine/battle/battleTargeting";
-import { renderVisualTemplateSelector } from "../visualTemplateSelector";
 
 export function renderBattleHud(state: GameState): string {
   const battle = state.battle;
@@ -38,7 +37,6 @@ export function renderBattleHud(state: GameState): string {
       <div class="hud-row"><strong>Attack Type</strong><span data-testid="battle-attack-category">${attackCategory}</span></div>
       <div class="hud-row"><strong>Selected Target</strong><span data-testid="battle-selected-target">${selectedTarget?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Status</strong><span data-testid="battle-defend-status">${defendState?.isActive ? "Defending" : "Ready"}</span></div>
-      ${renderVisualTemplateSelector(state.activeVisualTemplateId, "battle-template-selector")}
       <p class="control-tip" data-testid="battle-control-tip">
         ${isMobile ? "Tap an enemy card to target it, then use Strike or Defend." : "Select a target on the canvas, then use Strike or Defend."}
       </p>
