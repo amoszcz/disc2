@@ -112,6 +112,36 @@
 
 ---
 
+## Phase 7: User Story 2 Amendment - Immediate Is the Only Bypass (Priority: P2)
+
+**Goal**: Ensure route confirmation starts timed traversal for every movement setting except `immediate`, so an additional non-immediate setting cannot accidentally make heroes teleport.
+
+**Independent Test**: Confirm a route with `immediate` selected and with a non-immediate compatibility setting selected; only the immediate route completes synchronously, while the other route enters one-tile-per-second traversal.
+
+### Tests for the User Story 2 Amendment
+
+- [X] T032 [P] [US2] Add contract coverage that classifies `immediate` as the exclusive synchronous route mode and every other supported movement setting as animated in `tests/contract/game-settings.contract.test.ts`.
+- [X] T033 [P] [US2] Add route-confirmation integration coverage for a non-immediate compatibility setting starting the traversal controller in `tests/integration/map/routeTraversalFlow.test.ts`.
+- [X] T034 [P] [US2] Extend browser acceptance coverage to confirm that only the Immediate settings choice completes a route without traversal status in `tests/acceptance/game-settings.spec.ts`.
+
+### Implementation for the User Story 2 Amendment
+
+- [X] T035 [US2] Centralize the immediate-only route-execution predicate with validated movement-setting semantics in `src/app/state/gameSettings.ts` and `src/engine/scenario/types.ts`.
+- [X] T036 [US2] Start immediate completion only for the immediate setting and delegate every other setting to `MapTraversalController` in `src/app/scene-controller/mapInputController.ts`.
+
+**Checkpoint**: Immediate is the only synchronous route mode; all non-immediate settings retain one-tile-per-second traversal.
+
+---
+
+## Phase 8: Amendment Validation
+
+**Purpose**: Verify the new immediate-only invariant across documented and compatibility workflows.
+
+- [X] T037 [P] Run focused settings and traversal tests, plus the amended quickstart scenario, and record results in `specs/020-animate-path-movement/quickstart.md`.
+- [X] T038 Verify [spec.md](spec.md), [plan.md](plan.md), [data-model.md](data-model.md), [contracts/game-settings-and-traversal.md](contracts/game-settings-and-traversal.md), and `tasks.md` preserve the immediate-only invariant in `specs/020-animate-path-movement/tasks.md`.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -122,6 +152,8 @@
 - **US2 (Phase 4)**: Depends on Phase 2 and integrates with US1's traversal controller for animated behavior.
 - **US3 (Phase 5)**: Depends on Phase 2; uses US2's settings behavior and can be delivered after it.
 - **Polish (Phase 6)**: Depends on all selected user-story phases.
+- **US2 Amendment (Phase 7)**: Depends on the completed US2 settings and traversal work; it blocks amendment validation.
+- **Amendment Validation (Phase 8)**: Depends on the Phase 7 amendment tasks.
 
 ### User Story Dependencies
 
@@ -130,6 +162,7 @@ Foundational
     └── US1: animated traversal (MVP)
           └── US2: movement behavior selection + persistence
                 └── US3: settings navigation + template relocation
+          └── US2 amendment: immediate-only bypass
 ```
 
 ### Parallel Opportunities
@@ -139,6 +172,7 @@ Foundational
 - T015–T017 can be authored in parallel; they target separate test layers.
 - T021–T023 can be authored in parallel; they target separate test files.
 - T029 and T030 can run in parallel after all feature work is complete.
+- T032–T034 can run in parallel before T035 and T036; T037 can run after the amendment implementation is complete.
 
 ## Parallel Example: User Story 1
 
@@ -162,6 +196,7 @@ Task: "Add traversal browser acceptance coverage in tests/acceptance/animated-ro
 1. Add the persisted behavior choice (US2) only after timed traversal works.
 2. Add Settings navigation and template relocation (US3) without changing storybook or mapper selection flows.
 3. Finish with existing route/template regression suites and the quickstart scenarios.
+4. Add the US2 amendment tests and immediate-only predicate, then validate that no non-immediate setting bypasses traversal.
 
 ## Notes
 

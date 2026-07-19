@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation passed on the first review. The specification makes reasonable defaults for session-only persistence and the binary animated/immediate behavior while preserving current route rules.
+- Validation passed after amendment. The specification preserves persistent settings and defines immediate as the sole movement setting that bypasses route animation; all other settings retain the established traversal behavior.

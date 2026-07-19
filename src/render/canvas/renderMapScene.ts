@@ -50,6 +50,17 @@ function getRouteDirection(heroState: HeroVisualStateRuntime | undefined, heroPo
   return "up";
 }
 
+function getHeroRenderPosition(state: GameState, heroId: string, fallbackPosition: { x: number; y: number }): { x: number; y: number } {
+  const traversal = state.activeTraversal;
+  if (!traversal || traversal.heroId !== heroId) return fallbackPosition;
+
+  const progress = Math.min(1, Math.max(0, traversal.progress));
+  return {
+    x: traversal.fromPosition.x + (traversal.toPosition.x - traversal.fromPosition.x) * progress,
+    y: traversal.fromPosition.y + (traversal.toPosition.y - traversal.fromPosition.y) * progress
+  };
+}
+
 export function renderMapScene(context: CanvasRenderingContext2D, state: GameState): void {
   const { map } = state.scenario;
   const activeMapId = state.mapTravelState.activeMapId;
@@ -176,7 +187,7 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
   for (const hero of state.scenario.heroes.filter(
     (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId
   )) {
-    const point = worldTileToCanvasPoint(hero.mapPosition, metrics.viewport, context.canvas, map);
+    const point = worldTileToCanvasPoint(getHeroRenderPosition(state, hero.id, hero.mapPosition), metrics.viewport, context.canvas, map);
     const trackedHeroState = state.visualStates.heroStates[hero.id];
     const routeOwnedByHero = state.activeRoutePreview?.heroId === hero.id ? state.activeRoutePreview : null;
     const effectiveHeroState =

@@ -6,7 +6,7 @@
 
 ## Summary
 
-Replace synchronous route teleportation with a cancellable map-traversal flow that executes confirmed route steps at one tile per second by default. Add a persisted settings scene for animated versus immediate movement and visual-template selection, moving template switching out of the map HUD while preserving the shared template catalog and existing storybook/mapper controls.
+Replace synchronous route teleportation with a cancellable map-traversal flow that executes confirmed route steps at one tile per second for every non-immediate movement setting. Treat immediate as the sole bypass for synchronous completion. Add a persisted settings scene for movement and visual-template selection, moving template switching out of the map HUD while preserving the shared template catalog and existing storybook/mapper controls.
 
 ## Technical Context
 
@@ -26,14 +26,14 @@ Replace synchronous route teleportation with a cancellable map-traversal flow th
 
 **Constraints**: No new dependencies; preserve route legality, costs, continuation, encounters, map travel, and visual-template fallbacks; settings survive reloads and later sessions
 
-**Scale/Scope**: One active hero traversal at a time, two movement behaviors, one dedicated settings scene, and the existing shared visual-template catalog
+**Scale/Scope**: One active hero traversal at a time, an immediate bypass plus one or more non-immediate movement settings, one dedicated settings scene, and the existing shared visual-template catalog
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Spec before code: Pass. Work is driven by [spec.md](spec.md) and proceeds through this plan and follow-up tasks.
-- Independent slices: Pass. P1 delivers observable timed traversal; P2 adds a selectable immediate alternative and persistent settings; P2 centralizes visual-template selection without changing storybook or mapper workflows.
+- Independent slices: Pass. P1 delivers observable timed traversal; P2 makes immediate the sole selectable bypass and preserves animation for every other setting; P2 centralizes visual-template selection without changing storybook or mapper workflows.
 - Feature-proving tests: Pass. Contract coverage will define settings and traversal behavior; integration coverage will exercise timing, cancellation, partial routes, and persistence; Playwright will prove player-facing settings and movement flows.
 - Minimal dependencies, real integrations: Pass. Browser timers and local storage meet the requirement without third-party packages; tests exercise browser-backed persistence rather than mocks alone.
 - Small, loosely coupled design: Pass. Route execution, persisted settings, settings UI, and scene navigation form separate seams around the existing route engine and presentation layers.
@@ -108,7 +108,7 @@ tests/
 2. Add traversal state/controller ownership in the app layer. Start it for animated confirmations, schedule one tick per second, disable competing map movement, and clean it up on completion, cancellation, scene change, battle, travel, or forced stop.
 3. Define a typed, versioned game-settings adapter. Load validated preferences at bootstrap; preserve them through `createInitialState`, scenario starts, and returns to menu; persist changes immediately.
 4. Add the `settings` scene and settings panel with entry/return actions. Relocate the gameplay template selector into this page; retain storybook and sprite-mapping selectors.
-5. Add focused contract, integration, and acceptance coverage, then run existing route and template tests to demonstrate compatibility.
+5. Add focused contract, integration, and acceptance coverage, including an invariant that every non-immediate setting starts timed traversal, then run existing route and template tests to demonstrate compatibility.
 
 ## Complexity Tracking
 

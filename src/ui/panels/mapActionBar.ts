@@ -12,16 +12,16 @@ interface MapActionPresentation {
   isAvailable: boolean;
 }
 
-function getMapActions(): MapActionPresentation[] {
+function getMapActions(isTraversalActive = false): MapActionPresentation[] {
   return [
     { id: "map-zoom-out", name: "Zoom Out", icon: "−", isAvailable: true },
     { id: "map-zoom-in", name: "Zoom In", icon: "+", isAvailable: true },
-    { id: "end-turn", name: "End Turn", icon: "⏭", isAvailable: true }
+    { id: "end-turn", name: "End Turn", icon: "⏭", isAvailable: !isTraversalActive }
   ];
 }
 
-export function renderMapActionBar(): string {
-  return `<div class="map-action-bar" data-testid="map-action-bar" aria-label="Map actions">${getMapActions()
+export function renderMapActionBar(isTraversalActive = false): string {
+  return `<div class="map-action-bar" data-testid="map-action-bar" aria-label="Map actions">${getMapActions(isTraversalActive)
     .map(
       (action) => `<button type="button" class="map-action-icon" id="${action.id}-button" data-testid="${action.id}-button" aria-label="${action.name}" title="${action.name}" ${
         action.isAvailable ? "" : "disabled"
@@ -57,6 +57,10 @@ export function applyMapZoom(store: GameStore, direction: "in" | "out"): void {
 
 export function endMapTurn(store: GameStore): void {
   store.update((state) => {
+    if (state.activeTraversal) {
+      appendMessage(state, "Wait for the hero to finish traversing the route before ending the turn.");
+      return;
+    }
     const turnEndRouteResult = autoAdvanceActiveRouteBeforeTurnEnd(state);
     const routeOwnerId = state.activeRoutePreview?.heroId ?? state.selectedHeroId;
     const routeOwner = routeOwnerId ? state.scenario.heroes.find((hero) => hero.id === routeOwnerId) : null;

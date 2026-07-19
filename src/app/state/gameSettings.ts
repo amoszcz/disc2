@@ -1,4 +1,4 @@
-import type { GameSettings, MovementBehavior } from "../../engine/scenario/types";
+import { IMMEDIATE_MOVEMENT_BEHAVIOR, type GameSettings, type MovementBehavior } from "../../engine/scenario/types";
 import { getDefaultVisualTemplateId } from "../../render/sprites/visualTemplateConfig";
 import { getVisualTemplateSource } from "../../render/sprites/visualTemplateRegistry";
 
@@ -9,7 +9,12 @@ export function getDefaultGameSettings(): GameSettings {
 }
 
 function isMovementBehavior(value: unknown): value is MovementBehavior {
-  return value === "animated" || value === "immediate";
+  return value === "animated" || value === IMMEDIATE_MOVEMENT_BEHAVIOR;
+}
+
+/** Immediate is the sole movement setting that bypasses timed route traversal. */
+export function isImmediateMovementBehavior(value: string): boolean {
+  return value === IMMEDIATE_MOVEMENT_BEHAVIOR;
 }
 
 export function normalizeGameSettings(value: Partial<GameSettings> | null | undefined): GameSettings {

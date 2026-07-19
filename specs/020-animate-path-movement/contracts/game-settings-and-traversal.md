@@ -8,7 +8,7 @@ The application exposes a dedicated Settings scene from both the main menu and a
 |---|---|
 | Settings entry | A visible Settings action is available from the main menu and map UI. |
 | Current settings | The page identifies the active movement behavior and visual template. |
-| Movement choice | Exactly `Animated (1 tile/second)` and `Immediate` are selectable. |
+| Movement choice | Immediate is selectable as the sole non-animated choice. Each available non-immediate choice is identified as animating route steps at one tile per second. |
 | Template choice | Lists each ready template from the shared catalog once and identifies the active choice. |
 | Return action | Returns to the scene from which the player opened Settings without resetting gameplay state. |
 | Persistence | A changed setting is still active after reload and a later scenario start. |
@@ -31,8 +31,9 @@ The existing `map-template-selector` is removed from gameplay.
 
 | Situation | Required observable behavior |
 |---|---|
-| Animated route confirmation | The hero moves one completed route tile per second in the displayed order. |
+| Non-immediate route confirmation | The hero moves one completed route tile per second in the displayed order. |
 | Immediate route confirmation | The hero reaches the same legal endpoint without the per-tile delay. |
+| Any movement setting other than immediate | The confirmation starts the same timed traversal behavior; immediate is the only setting that may complete the route synchronously. |
 | Partial route | The hero stops at the last affordable legal tile and the remaining valid route is retained for continuation. |
 | Forced stop | Encounter, blocked location, map transition, invalidation, or cancellation stops later ticks before they run. |
 | Input during traversal | A second movement confirmation for the traversing hero is ignored or clearly rejected. |

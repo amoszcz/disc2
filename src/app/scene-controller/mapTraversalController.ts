@@ -10,13 +10,30 @@ export interface MapTraversalController {
   isActive(): boolean;
 }
 
+export function canAnimateTraversalStep(remainingMovement: number, stepMovementCost: number): boolean {
+  return stepMovementCost <= remainingMovement;
+}
+
 export function createMapTraversalController(store: GameStore): MapTraversalController {
   let timer: number | null = null;
+  let animationFrame: number | null = null;
+  let segmentStartedAt = 0;
 
   const stop = (): void => {
     if (timer !== null) window.clearInterval(timer);
+    if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
     timer = null;
+    animationFrame = null;
     store.update((state) => { state.activeTraversal = null; });
+  };
+
+  const drawSegment = (timestamp: number): void => {
+    store.update((state) => {
+      if (!state.activeTraversal) return;
+      state.activeTraversal.progress = Math.min(1, Math.max(0, (timestamp - segmentStartedAt) / STEP_INTERVAL_MS));
+    });
+    if (store.getState().activeTraversal) animationFrame = window.requestAnimationFrame(drawSegment);
+    else animationFrame = null;
   };
 
   const tick = (): void => {
@@ -43,6 +60,18 @@ export function createMapTraversalController(store: GameStore): MapTraversalCont
         return;
       }
       if (progress.remainingSteps.length === 0 || !state.activeRoutePreview) shouldStop = true;
+      else {
+        const nextStep = state.activeRoutePreview.steps[0];
+        const hero = state.scenario.heroes.find((entry) => entry.id === traversal.heroId);
+        if (!nextStep || !hero || !canAnimateTraversalStep(hero.remainingMovement, nextStep.movementCost)) {
+          shouldStop = true;
+          return;
+        }
+        traversal.fromPosition = { ...progress.finalPosition };
+        traversal.toPosition = { ...nextStep.position };
+        traversal.progress = 0;
+        segmentStartedAt = performance.now();
+      }
     });
     if (shouldStop) stop();
   };
@@ -52,15 +81,23 @@ export function createMapTraversalController(store: GameStore): MapTraversalCont
       const state = store.getState();
       const route = state.activeRoutePreview;
       if (timer !== null || !route || !state.selectedHeroId || route.heroId !== state.selectedHeroId) return false;
+      const hero = state.scenario.heroes.find((entry) => entry.id === route.heroId);
+      const firstStep = route.steps[0];
+      if (!hero || !firstStep || !canAnimateTraversalStep(hero.remainingMovement, firstStep.movementCost)) return false;
+      segmentStartedAt = performance.now();
       store.update((current) => {
         current.activeTraversal = {
           heroId: route.heroId,
           destinationPosition: { ...route.destinationPosition },
-          status: "active"
+          status: "active",
+          fromPosition: { ...hero.mapPosition },
+          toPosition: { ...firstStep.position },
+          progress: 0
         };
         appendMessage(current, "Hero traversal started: one tile per second.");
       });
       timer = window.setInterval(tick, STEP_INTERVAL_MS);
+      animationFrame = window.requestAnimationFrame(drawSegment);
       return true;
     },
     stop,

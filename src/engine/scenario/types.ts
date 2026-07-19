@@ -3,7 +3,8 @@ export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "m
 export type MovementObjectType = "bridge" | "milestone" | "rubble" | "cave" | "teleport" | "exit";
 
 export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook" | "sprite-mapping" | "settings";
-export type MovementBehavior = "animated" | "immediate";
+export const IMMEDIATE_MOVEMENT_BEHAVIOR = "immediate" as const;
+export type MovementBehavior = "animated" | typeof IMMEDIATE_MOVEMENT_BEHAVIOR;
 export type SideKind = "player" | "enemy" | "neutral";
 export type LocationType = "resource-site";
 export type AccessState = "blocked" | "open";
@@ -321,6 +322,9 @@ export interface MapTraversalState {
   heroId: string;
   destinationPosition: Position;
   status: "active" | "stopped";
+  fromPosition: Position;
+  toPosition: Position;
+  progress: number;
 }
 
 export interface MapViewport {

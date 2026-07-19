@@ -6,7 +6,7 @@ Persisted player preferences, loaded at application startup and retained when a 
 
 | Field | Values | Rules |
 |---|---|---|
-| `movementBehavior` | `animated`, `immediate` | Defaults to `animated`; determines the next confirmed route's execution mode. |
+| `movementBehavior` | `immediate` or a non-immediate movement setting | Defaults to a non-immediate setting; only `immediate` completes a confirmed route synchronously. |
 | `visualTemplateId` | A ready template identifier | Defaults to configured default; invalid or unavailable stored values fall back to the configured default. |
 
 **Persistence rules**:
@@ -14,6 +14,7 @@ Persisted player preferences, loaded at application startup and retained when a 
 - Store one versioned, normalized record in browser-local storage.
 - Read failures, malformed records, and unavailable template IDs must not prevent the game from opening.
 - A setting update is immediately written and becomes the source for later game sessions.
+- Route execution treats `immediate` as the only value that bypasses traversal; every other valid movement setting uses one-tile-per-second traversal.
 
 ## Traversal State
 

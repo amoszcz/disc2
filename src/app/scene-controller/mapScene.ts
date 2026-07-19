@@ -53,7 +53,7 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement, actio
     store.update((current) => { openSettings(current); });
   });
 
-  actionContainer.innerHTML = renderMapActionBar();
+  actionContainer.innerHTML = renderMapActionBar(state.activeTraversal !== null);
   bindMapActionBar(actionContainer, store);
 }
 

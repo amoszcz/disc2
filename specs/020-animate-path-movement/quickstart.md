@@ -33,12 +33,13 @@ npm run test:template-selector
 1. Open Settings from the main menu; select **Immediate** and a valid non-default template.
 2. Return, start a scenario, and confirm a route; it should complete immediately and render using the selected template.
 3. Reload the page, start a scenario, and verify both choices persist.
-4. Open Settings during gameplay, switch to **Animated (1 tile/second)**, return to the map, and confirm a new multi-tile route.
+4. Open Settings during gameplay, select any available setting other than **Immediate**, return to the map, and confirm a new multi-tile route.
 5. Verify that gameplay no longer displays a template selector and that storybook and sprite-mapping selectors still work.
 
 See [data-model.md](data-model.md) for state and persistence rules and [game-settings-and-traversal.md](contracts/game-settings-and-traversal.md) for observable UI contracts.
 
 ## Validation record
 
+- 2026-07-19: Immediate-only bypass validation passed: focused settings and route-traversal suites, immediate/non-immediate browser flows, and the production build all passed.
 - 2026-07-19: Focused settings, traversal, pathfinding, template-selection, build, and browser acceptance flows passed.
 - The repository-wide Vitest run retains one unrelated failing viewport interaction contract in `tests/contract/viewport-interaction.contract.test.ts`; no viewport module was changed by this feature.

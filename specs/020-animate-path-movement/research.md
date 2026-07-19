@@ -37,4 +37,12 @@
 - **Decision**: After every completed route step, check the same world-transition, encounter, blocked-location, and route-continuation conditions as normal movement; end the traversal immediately when any requires it.
 - **Rationale**: This maintains game correctness and prevents a timer from advancing a hero after an encounter, world-map transition, invalidation, or the end of affordable movement.
 - **Alternatives considered**:
-  - Defer all event checks until the final tile. Rejected because it permits illegal or misleading intermediate movement.
+- Defer all event checks until the final tile. Rejected because it permits illegal or misleading intermediate movement.
+
+## Decision 6: Make immediate the exclusive non-animated route mode
+
+- **Decision**: Route confirmation uses immediate completion only when the selected movement setting is `immediate`; every other setting starts the existing timed traversal flow.
+- **Rationale**: This expresses the player-facing rule directly and keeps any present or later non-immediate setting from silently reverting heroes to teleporting.
+- **Alternatives considered**:
+  - Start traversal only for a specific named animated setting: rejected because another valid non-immediate setting would incorrectly bypass animation.
+  - Treat unknown settings as immediate: rejected because it violates the immediate-only opt-out rule and produces the least visible behavior on invalid or newly introduced values.

@@ -1,4 +1,5 @@
 import type { GameStore } from "../state/gameState";
+import { isImmediateMovementBehavior } from "../state/gameSettings";
 import { clearOwnedRoutePreview, confirmRoutePreview, plotRoutePreview, selectHero } from "../../engine/map/heroActions";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
@@ -84,7 +85,7 @@ function handleMapTap(store: GameStore, point: ScreenPoint, traversalController?
     const shouldConfirmRoute =
       isRoutePreviewOwnedByHero(state.activeRoutePreview, state.selectedHeroId) &&
       isSameRouteDestination(state.activeRoutePreview, { x, y });
-    if (shouldConfirmRoute && state.gameSettings.movementBehavior === "animated") {
+    if (shouldConfirmRoute && !isImmediateMovementBehavior(state.gameSettings.movementBehavior)) {
       if (!traversalController?.start()) state.messageLog.push("Unable to start route traversal.");
       return;
     }
