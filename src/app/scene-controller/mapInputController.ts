@@ -2,6 +2,7 @@ import type { GameStore } from "../state/gameState";
 import { clearOwnedRoutePreview, confirmRoutePreview, plotRoutePreview, selectHero } from "../../engine/map/heroActions";
 import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { setBattleState } from "../state/gameState";
+import type { MapTraversalController } from "./mapTraversalController";
 import { isRoutePreviewOwnedByHero, isSameRouteDestination } from "../../engine/map/routePreviewState";
 import {
   createInteractionTarget,
@@ -26,9 +27,13 @@ function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | WheelEven
   };
 }
 
-function handleMapTap(store: GameStore, point: ScreenPoint): void {
+function handleMapTap(store: GameStore, point: ScreenPoint, traversalController?: MapTraversalController): void {
   store.update((state) => {
     if (state.sceneMode !== "map") {
+      return;
+    }
+    if (state.activeTraversal) {
+      state.messageLog.push("The hero is already traversing the route.");
       return;
     }
 
@@ -79,6 +84,10 @@ function handleMapTap(store: GameStore, point: ScreenPoint): void {
     const shouldConfirmRoute =
       isRoutePreviewOwnedByHero(state.activeRoutePreview, state.selectedHeroId) &&
       isSameRouteDestination(state.activeRoutePreview, { x, y });
+    if (shouldConfirmRoute && state.gameSettings.movementBehavior === "animated") {
+      if (!traversalController?.start()) state.messageLog.push("Unable to start route traversal.");
+      return;
+    }
     const result = shouldConfirmRoute ? confirmRoutePreview(state) : plotRoutePreview(state, { x, y });
     if (!result.ok) {
       state.messageLog.push(result.reason ?? "That move is not allowed.");
@@ -111,7 +120,7 @@ function handleMapTap(store: GameStore, point: ScreenPoint): void {
   });
 }
 
-export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void {
+export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore, traversalController?: MapTraversalController): void {
   const activeTouchPoints = new Map<number, ScreenPoint>();
   const capturePointer = (pointerId: number): void => {
     try {
@@ -135,7 +144,7 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
       return;
     }
 
-    handleMapTap(store, getCanvasPoint(canvas, event));
+    handleMapTap(store, getCanvasPoint(canvas, event), traversalController);
   });
 
   canvas.addEventListener("mousedown", (event) => {
@@ -383,7 +392,7 @@ export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore): void 
     });
 
     if (shouldTap) {
-      handleMapTap(store, point);
+        handleMapTap(store, point, traversalController);
     }
   };
 

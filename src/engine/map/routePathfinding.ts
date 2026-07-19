@@ -1,8 +1,6 @@
 import type { Position, RouteAttempt, RouteStep, ScenarioDefinition } from "../scenario/types";
-import { hasMovementObjectRegions } from "./movementObjectLookup";
-import { isWithinBounds, movementCost as legacyMovementCost, positionsEqual } from "./mapRules";
+import { isWithinBounds, positionsEqual } from "./mapRules";
 import { buildRouteAttempt } from "./routeRules";
-import { hasTerrainRegions } from "./terrainLookup";
 import { terrainLabel } from "./terrainLookup";
 
 interface PathNode {
@@ -28,49 +26,8 @@ const DIRECTIONS_8: Position[] = [
   { x: 1, y: 1 }
 ];
 
-const DIRECTIONS_4: Position[] = [
-  { x: 0, y: -1 },
-  { x: -1, y: 0 },
-  { x: 1, y: 0 },
-  { x: 0, y: 1 }
-];
-
 function keyFor(position: Position): string {
   return `${position.x},${position.y}`;
-}
-
-function buildLegacyStepAttempt(
-  scenario: ScenarioDefinition,
-  heroId: string,
-  fromPosition: Position,
-  toPosition: Position
-): RouteAttempt {
-  const movementCost = legacyMovementCost(fromPosition, toPosition);
-  const isLegal = isWithinBounds(scenario.map, toPosition);
-  return {
-    heroId,
-    fromPosition,
-    toPosition,
-    direction: fromPosition.x !== toPosition.x && fromPosition.y !== toPosition.y ? "diagonal" : "orthogonal",
-    resolvedTerrain: {
-      position: { ...toPosition },
-      terrainType: scenario.map.defaultTerrainType ?? "plains",
-      baseTerrainType: scenario.map.defaultTerrainType ?? "plains",
-      isTraversable: isLegal,
-      movementCost,
-      movementObjects: {
-        position: { ...toPosition },
-        effects: [],
-        objectTypes: [],
-        passabilityOverride: null,
-        movementDeltaTotal: 0,
-        resolutionOrder: []
-      }
-    },
-    movementCost,
-    isLegal,
-    failureReason: isLegal ? null : "That destination is outside the map."
-  };
 }
 
 export function createRouteStep(routeAttempt: RouteAttempt): RouteStep {
@@ -90,16 +47,11 @@ function getRouteAttemptForStep(
   fromPosition: Position,
   toPosition: Position
 ): RouteAttempt {
-  if (hasTerrainRegions(scenario) || hasMovementObjectRegions(scenario)) {
-    return buildRouteAttempt(scenario, heroId, fromPosition, toPosition, Number.POSITIVE_INFINITY);
-  }
-
-  return buildLegacyStepAttempt(scenario, heroId, fromPosition, toPosition);
+  return buildRouteAttempt(scenario, heroId, fromPosition, toPosition, Number.POSITIVE_INFINITY);
 }
 
 function getNeighborPositions(scenario: ScenarioDefinition, position: Position): Position[] {
-  const directions = hasTerrainRegions(scenario) || hasMovementObjectRegions(scenario) ? DIRECTIONS_8 : DIRECTIONS_4;
-  return directions
+  return DIRECTIONS_8
     .map((direction) => ({ x: position.x + direction.x, y: position.y + direction.y }))
     .filter((candidate) => isWithinBounds(scenario.map, candidate));
 }

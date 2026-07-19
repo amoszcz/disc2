@@ -2,7 +2,8 @@ export type ResourceType = "gold";
 export type TerrainTypeName = "road" | "grass" | "plains" | "mud" | "woods" | "mountains" | "lakes" | "rivers";
 export type MovementObjectType = "bridge" | "milestone" | "rubble" | "cave" | "teleport" | "exit";
 
-export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook" | "sprite-mapping";
+export type SceneMode = "menu" | "map" | "battle" | "victory" | "storybook" | "sprite-mapping" | "settings";
+export type MovementBehavior = "animated" | "immediate";
 export type SideKind = "player" | "enemy" | "neutral";
 export type LocationType = "resource-site";
 export type AccessState = "blocked" | "open";
@@ -311,6 +312,17 @@ export interface RouteProgressResult {
   triggerSource: "manual" | "end-turn";
 }
 
+export interface GameSettings {
+  movementBehavior: MovementBehavior;
+  visualTemplateId: string;
+}
+
+export interface MapTraversalState {
+  heroId: string;
+  destinationPosition: Position;
+  status: "active" | "stopped";
+}
+
 export interface MapViewport {
   zoomLevel: number;
   minZoom: number;
@@ -581,6 +593,9 @@ export interface GameState {
   mapTravelState: MapTravelState;
   visualStates: VisualStateTracker;
   activeVisualTemplateId: string;
+  gameSettings: GameSettings;
+  activeTraversal: MapTraversalState | null;
+  settingsReturnScene: "menu" | "map";
   mobileLayoutState: MobileLayoutState;
   responsiveCanvasView: ResponsiveCanvasView;
   lastTouchInteraction: TouchInteraction | null;

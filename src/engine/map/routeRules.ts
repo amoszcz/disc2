@@ -1,9 +1,7 @@
 import type { LinkedMapTravelLink, Position, RouteAttempt, ScenarioDefinition } from "../scenario/types";
-import { movementCost as legacyMovementCost, isWithinBounds } from "./mapRules";
+import { isWithinBounds } from "./mapRules";
 import { getWorldMapById } from "../scenario/types";
-import { hasMovementObjectRegions } from "./movementObjectLookup";
 import { resolveMovementTile } from "./movementObjectRules";
-import { hasTerrainRegions } from "./terrainLookup";
 
 export function isAdjacent8(from: Position, to: Position): boolean {
   const dx = Math.abs(to.x - from.x);
@@ -58,7 +56,7 @@ export function buildRouteAttempt(
   const resolvedTerrain = resolveMovementTile(scenario, toPosition);
   const movementCost = routeMovementCost(resolvedTerrain.movementCost, direction);
 
-  if ((hasTerrainRegions(scenario) || hasMovementObjectRegions(scenario)) && !isAdjacent8(fromPosition, toPosition)) {
+  if (!isAdjacent8(fromPosition, toPosition)) {
     return {
       heroId,
       fromPosition,
@@ -107,16 +105,6 @@ export function buildRouteAttempt(
     isLegal: true,
     failureReason: null
   };
-}
-
-export function legacyMoveWithinAllowance(
-  scenario: ScenarioDefinition,
-  fromPosition: Position,
-  toPosition: Position,
-  remainingMovement: number
-): boolean {
-  const cost = legacyMovementCost(fromPosition, toPosition);
-  return isWithinBounds(scenario.map, toPosition) && cost > 0 && cost <= remainingMovement;
 }
 
 export function validateTravelLink(scenario: ScenarioDefinition, link: LinkedMapTravelLink): { ok: boolean; reason?: string } {

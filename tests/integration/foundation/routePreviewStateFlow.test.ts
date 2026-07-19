@@ -29,6 +29,24 @@ describe("route preview foundation flow", () => {
     expect(diagonalRoute.totalMovementCost).toBeGreaterThan(orthogonalRoute.totalMovementCost);
   });
 
+  test("allows diagonal routes in scenarios without terrain regions", () => {
+    const state = createInitialState("core-map-loop");
+    const route = findShortestRoute(state.scenario, "hero-1", { x: 0, y: 2 }, { x: 1, y: 3 });
+
+    expect(route.ok).toBe(true);
+    expect(route.steps).toHaveLength(1);
+    expect(route.steps[0]).toMatchObject({ position: { x: 1, y: 3 }, movementCost: 2 });
+  });
+
+  test("uses the same diagonal movement policy for direct movement in every scenario", () => {
+    const state = createInitialState("core-map-loop");
+
+    const result = moveSelectedHero(state, { x: 1, y: 3 });
+
+    expect(result.ok).toBe(true);
+    expect(state.scenario.heroes[0].remainingMovement).toBe(0);
+  });
+
   test("creates preview state with ownership and destination checks", () => {
     const preview = createRoutePreview("hero-1", { x: 5, y: 10 }, { x: 6, y: 10 }, [
       { position: { x: 6, y: 10 }, movementCost: 1, terrainLabel: "Road", objectLabels: [] }
