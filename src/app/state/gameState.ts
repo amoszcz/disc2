@@ -21,6 +21,7 @@ import { getDefaultMobileLayoutState, getDefaultResponsiveCanvasView } from "../
 import { getStorybookPreviewSubjects } from "../../render/sprites/visualTemplateCatalog";
 import { getVisualTemplateSource } from "../../render/sprites/visualTemplateRegistry";
 import { getDefaultGameSettings, loadGameSettings, saveGameSettings } from "./gameSettings";
+import { createFogOfWarState, refreshFogOfWar } from "../../engine/map/fogOfWar";
 import type { MovementBehavior } from "../../engine/scenario/types";
 
 export function createDefaultMapViewState(
@@ -96,7 +97,7 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode, gameSe
   const activePlayerId = scenario.players.find((player) => player.kind === "player")?.id ?? scenario.players[0].id;
   const selectedHeroId = scenario.heroes.find((hero) => hero.ownerPlayerId === activePlayerId)?.id ?? null;
 
-  return {
+  const state: GameState = {
     scenario,
     activeScenarioId: scenarioId,
     availableScenarioOptions: getScenarioOptions(),
@@ -114,12 +115,15 @@ function createSessionState(scenarioId: ScenarioId, sceneMode: SceneMode, gameSe
     visualStates: createInitialVisualStates(scenario),
     activeVisualTemplateId: gameSettings.visualTemplateId,
     gameSettings,
+    fogOfWar: createFogOfWarState(),
     activeTraversal: null,
     settingsReturnScene: "menu",
     mobileLayoutState: getDefaultMobileLayoutState(),
     responsiveCanvasView: getDefaultResponsiveCanvasView(),
     lastTouchInteraction: null
   };
+  refreshFogOfWar(state);
+  return state;
 }
 
 export function createInitialState(scenarioId: ScenarioId = getDefaultScenarioId()): GameState {
@@ -196,6 +200,7 @@ export function setActiveWorldMap(
     zoomGesture: null,
     isDefaultView: true
   };
+  refreshFogOfWar(state);
   return state;
 }
 
@@ -226,6 +231,7 @@ export function startScenarioSession(state: GameState, scenarioId: ScenarioId): 
   state.visualStates = nextState.visualStates;
   state.activeVisualTemplateId = preservedSettings.visualTemplateId;
   state.gameSettings = preservedSettings;
+  state.fogOfWar = nextState.fogOfWar;
   state.activeTraversal = null;
   state.settingsReturnScene = "menu";
   state.mobileLayoutState = preservedLayoutState;
@@ -258,6 +264,7 @@ export function returnToMainMenu(state: GameState): GameState {
   state.visualStates = nextState.visualStates;
   state.activeVisualTemplateId = preservedSettings.visualTemplateId;
   state.gameSettings = preservedSettings;
+  state.fogOfWar = nextState.fogOfWar;
   state.activeTraversal = null;
   state.settingsReturnScene = "menu";
   state.mobileLayoutState = preservedLayoutState;
@@ -276,6 +283,18 @@ export function selectVisualTemplate(state: GameState, templateId: string): Game
 
 export function selectMovementBehavior(state: GameState, movementBehavior: MovementBehavior): GameState {
   state.gameSettings = saveGameSettings({ ...state.gameSettings, movementBehavior });
+  return state;
+}
+
+export function selectFogOfWarEnabled(state: GameState, fogOfWarEnabled: boolean): GameState {
+  state.gameSettings = saveGameSettings({ ...state.gameSettings, fogOfWarEnabled });
+  refreshFogOfWar(state);
+  return state;
+}
+
+export function selectFogVisibilityRadius(state: GameState, fogVisibilityRadius: number): GameState {
+  state.gameSettings = saveGameSettings({ ...state.gameSettings, fogVisibilityRadius });
+  refreshFogOfWar(state);
   return state;
 }
 

@@ -316,6 +316,14 @@ export interface RouteProgressResult {
 export interface GameSettings {
   movementBehavior: MovementBehavior;
   visualTemplateId: string;
+  fogOfWarEnabled: boolean;
+  fogVisibilityRadius: number;
+}
+
+export type FogTileState = "visible" | "visited" | "unexplored";
+
+export interface FogOfWarState {
+  visitedTilesByMapId: Record<string, string[]>;
 }
 
 export interface MapTraversalState {
@@ -598,6 +606,7 @@ export interface GameState {
   visualStates: VisualStateTracker;
   activeVisualTemplateId: string;
   gameSettings: GameSettings;
+  fogOfWar: FogOfWarState;
   activeTraversal: MapTraversalState | null;
   settingsReturnScene: "menu" | "map";
   mobileLayoutState: MobileLayoutState;
