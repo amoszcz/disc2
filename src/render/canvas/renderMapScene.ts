@@ -17,6 +17,7 @@ import {
 } from "../sprites/visualTemplateResolver";
 import { renderGuardedLocations } from "./renderGuardedLocations";
 import { createTileVisualBounds, getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
+import { getFogTileState } from "../../engine/map/fogOfWar";
 
 export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): number {
   return getBaseTileSize(map, canvas?.width, canvas?.height);
@@ -83,9 +84,10 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
       context.strokeStyle = palette.tileBorder;
       context.strokeRect(point.x, point.y, tileSize, tileSize);
 
-        const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
-        if (movementObjects.effects.length > 0) {
-          const primaryObject = movementObjects.effects[0];
+      const fogState = getFogTileState(state, { x, y });
+      const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
+      if (fogState !== "unexplored" && movementObjects.effects.length > 0) {
+        const primaryObject = movementObjects.effects[0];
         const primaryTemplate = resolveMovementObjectVisualTemplate(primaryObject.objectType, getMovementObjectVisualState(primaryObject.objectType));
         recordVisualTemplateDiagnostic(
           { subjectKind: "movement-object", subjectType: primaryObject.objectType, sceneContext: "map" },
@@ -160,7 +162,7 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
   }
 
   for (const pickup of state.scenario.resourcePickups.filter(
-    (entry) => !entry.collectedState && entry.mapId === activeMapId
+    (entry) => !entry.collectedState && entry.mapId === activeMapId && getFogTileState(state, entry.mapPosition) !== "unexplored"
   )) {
     const point = worldTileToCanvasPoint(pickup.mapPosition, metrics.viewport, context.canvas, map);
     const pickupTemplate = resolveResourcePickupVisualTemplate(pickup);
@@ -179,13 +181,13 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
   renderGuardedLocations(
     context,
     tileSize,
-    state.scenario.guardedLocations.filter((location) => location.mapId === activeMapId),
+    state.scenario.guardedLocations.filter((location) => location.mapId === activeMapId && getFogTileState(state, location.mapPosition) !== "unexplored"),
     metrics.viewport,
     map
   );
 
   for (const hero of state.scenario.heroes.filter(
-    (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId
+    (entry) => entry.availabilityState !== "defeated" && entry.mapId === activeMapId && getFogTileState(state, entry.mapPosition) !== "unexplored"
   )) {
     const point = worldTileToCanvasPoint(getHeroRenderPosition(state, hero.id, hero.mapPosition), metrics.viewport, context.canvas, map);
     const trackedHeroState = state.visualStates.heroStates[hero.id];
@@ -214,5 +216,69 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
       );
       context.lineWidth = 1;
     }
+  }
+
+  if (state.gameSettings.fogOfWarEnabled) {
+    for (let y = metrics.startTileY; y < metrics.endTileY; y += 1) {
+      for (let x = metrics.startTileX; x < metrics.endTileX; x += 1) {
+        const fogState = getFogTileState(state, { x, y });
+        if (fogState === "visible") continue;
+        const point = worldTileToCanvasPoint({ x, y }, metrics.viewport, context.canvas, map);
+        context.fillStyle = fogState === "visited" ? "rgba(16, 22, 32, 0.5)" : "rgba(16, 22, 32, 0.9)";
+        context.fillRect(point.x, point.y, tileSize, tileSize);
+      }
+    }
+  }
+
+  // Keep route feedback on top of fog so planning remains legible without revealing objects.
+  if (routePreview && routeOwner && routeOwner.mapId === activeMapId && routePreview.steps.length > 0) {
+    const pathPoints = [routeOwner.mapPosition, ...routePreview.steps.map((step) => step.position)].map((position) =>
+      worldTileToCanvasPoint(position, metrics.viewport, context.canvas, map)
+    );
+    context.strokeStyle = routePreviewPalette.line;
+    context.lineWidth = Math.max(2, Math.floor(tileSize / 14));
+    context.setLineDash([Math.max(4, Math.floor(tileSize / 5)), Math.max(3, Math.floor(tileSize / 7))]);
+    context.beginPath();
+    context.moveTo(pathPoints[0].x + tileSize / 2, pathPoints[0].y + tileSize / 2);
+    for (const point of pathPoints.slice(1)) context.lineTo(point.x + tileSize / 2, point.y + tileSize / 2);
+    context.stroke();
+    context.setLineDash([]);
+    for (const point of pathPoints.slice(1, -1)) {
+      context.fillStyle = routePreviewPalette.dot;
+      context.beginPath();
+      context.arc(point.x + tileSize / 2, point.y + tileSize / 2, Math.max(2, Math.floor(tileSize / 10)), 0, Math.PI * 2);
+      context.fill();
+    }
+    const destinationPoint = pathPoints[pathPoints.length - 1];
+    context.strokeStyle = routePreviewPalette.pole;
+    context.lineWidth = Math.max(2, Math.floor(tileSize / 18));
+    context.beginPath();
+    context.moveTo(destinationPoint.x + tileSize / 2, destinationPoint.y + tileSize - Math.max(4, Math.floor(tileSize / 8)));
+    context.lineTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(4, Math.floor(tileSize / 10)));
+    context.stroke();
+    context.fillStyle = routePreviewPalette.flag;
+    context.beginPath();
+    context.moveTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(4, Math.floor(tileSize / 10)));
+    context.lineTo(destinationPoint.x + tileSize - Math.max(4, Math.floor(tileSize / 10)), destinationPoint.y + Math.max(8, Math.floor(tileSize / 4)));
+    context.lineTo(destinationPoint.x + tileSize / 2, destinationPoint.y + Math.max(10, Math.floor(tileSize / 3)));
+    context.closePath();
+    context.fill();
+    context.lineWidth = 1;
+  }
+
+  const selectedHero = state.scenario.heroes.find(
+    (hero) => hero.id === state.selectedHeroId && hero.mapId === activeMapId && hero.availabilityState !== "defeated"
+  );
+  if (selectedHero) {
+    const point = worldTileToCanvasPoint(getHeroRenderPosition(state, selectedHero.id, selectedHero.mapPosition), metrics.viewport, context.canvas, map);
+    context.strokeStyle = "#fff";
+    context.lineWidth = Math.max(1, Math.floor(tileSize / 20));
+    context.strokeRect(
+      point.x + Math.max(2, Math.floor(tileSize / 8)),
+      point.y + Math.max(2, Math.floor(tileSize / 8)),
+      tileSize - Math.max(4, Math.floor(tileSize / 4)),
+      tileSize - Math.max(4, Math.floor(tileSize / 4))
+    );
+    context.lineWidth = 1;
   }
 }

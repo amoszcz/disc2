@@ -8,6 +8,8 @@ import {
   returnToMainMenu,
   returnFromSettings,
   selectMovementBehavior,
+  selectFogOfWarEnabled,
+  selectFogVisibilityRadius,
   startScenarioSession
 } from "../state/gameState";
 import { createSceneController } from "../scene-controller/sceneController";
@@ -223,6 +225,13 @@ export function startGame(root: HTMLElement | null): void {
       sidebar.innerHTML = renderSettingsPanel(state);
       sidebar.querySelector<HTMLSelectElement>('[data-testid="movement-behavior-selector"]')?.addEventListener("change", (event) => {
         store.update((current) => { selectMovementBehavior(current, (event.currentTarget as HTMLSelectElement).value as "animated" | "immediate"); });
+      });
+      sidebar.querySelector<HTMLInputElement>('[data-testid="fog-of-war-enabled-control"]')?.addEventListener("change", (event) => {
+        store.update((current) => { selectFogOfWarEnabled(current, (event.currentTarget as HTMLInputElement).checked); });
+      });
+      sidebar.querySelector<HTMLInputElement>('[data-testid="fog-visibility-radius-control"]')?.addEventListener("change", (event) => {
+        const radius = Number((event.currentTarget as HTMLInputElement).value);
+        if (Number.isInteger(radius) && radius > 0) store.update((current) => { selectFogVisibilityRadius(current, radius); });
       });
       bindVisualTemplateSelector(sidebar, store);
       sidebar.querySelector<HTMLButtonElement>('[data-settings-action="return"]')?.addEventListener("click", () => {

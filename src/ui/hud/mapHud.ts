@@ -23,6 +23,7 @@ export function renderMapHud(state: GameState): string {
       <button type="button" class="menu-option" data-testid="map-settings-open-button" data-settings-action="open">Settings</button>
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
+      <div class="hud-row"><strong>Fog</strong><span data-testid="fog-of-war-status">${state.gameSettings.fogOfWarEnabled ? `Enabled (${state.gameSettings.fogVisibilityRadius} tiles)` : "Disabled"}</span></div>
       ${
         state.mapTravelState.transitionMessage
           ? `<div class="hud-row"><strong>Travel</strong><span data-testid="travel-message">${state.mapTravelState.transitionMessage}</span></div>`

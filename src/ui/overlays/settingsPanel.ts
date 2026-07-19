@@ -9,6 +9,8 @@ export function renderSettingsPanel(state: GameState): string {
       <option value="animated" ${state.gameSettings.movementBehavior === "animated" ? "selected" : ""}>Animated (1 tile/second)</option>
       <option value="immediate" ${state.gameSettings.movementBehavior === "immediate" ? "selected" : ""}>Immediate</option>
     </select></label>
+    <label>Fog of war <input type="checkbox" data-testid="fog-of-war-enabled-control" ${state.gameSettings.fogOfWarEnabled ? "checked" : ""}></label>
+    <label>Visibility radius <input type="number" min="1" step="1" data-testid="fog-visibility-radius-control" value="${state.gameSettings.fogVisibilityRadius}"></label>
     ${renderVisualTemplateSelector(state.activeVisualTemplateId, "settings-template-selector")}
     <button type="button" class="menu-option" data-testid="settings-return-button" data-settings-action="return">Return</button>
   </div>`;

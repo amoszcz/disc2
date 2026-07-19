@@ -10,6 +10,7 @@ import { createMockCanvasContext } from "./renderTestContext";
 describe("unit and object template flow", () => {
   test("records dedicated map diagnostics for heroes, guarded locations, and movement objects", () => {
     const state = createInitialState("advanced-terrain-scenario");
+    state.gameSettings.fogOfWarEnabled = false;
     state.mapViewState.viewport = createCenteredViewport(state.scenario.map, { x: 20, y: 30 });
 
     renderMapScene(createMockCanvasContext(), state);

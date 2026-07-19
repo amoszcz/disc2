@@ -8,6 +8,7 @@ import { findShortestRoute } from "./routePathfinding";
 import { buildRouteAttempt, validateTravelLink } from "./routeRules";
 import { createRouteFeedback, createRoutePreviewFeedback } from "./terrainFeedback";
 import { setActiveWorldMap } from "../../app/state/gameState";
+import { refreshFogOfWar } from "./fogOfWar";
 
 export interface HeroActionResult {
   ok: boolean;
@@ -310,5 +311,6 @@ export function moveSelectedHero(state: GameState, position: Position): HeroActi
   if (collectedPickup) {
     setHeroVisualState(state, hero.id, "interact", direction);
   }
+  refreshFogOfWar(state);
   return resolveTravelAtHeroPosition(state, hero.id);
 }

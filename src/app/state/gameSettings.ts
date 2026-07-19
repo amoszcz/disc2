@@ -1,11 +1,17 @@
 import { IMMEDIATE_MOVEMENT_BEHAVIOR, type GameSettings, type MovementBehavior } from "../../engine/scenario/types";
 import { getDefaultVisualTemplateId } from "../../render/sprites/visualTemplateConfig";
 import { getVisualTemplateSource } from "../../render/sprites/visualTemplateRegistry";
+import { DEFAULT_FOG_VISIBILITY_RADIUS } from "../../engine/map/fogOfWar";
 
 const STORAGE_KEY = "disc2:game-settings:v1";
 
 export function getDefaultGameSettings(): GameSettings {
-  return { movementBehavior: "animated", visualTemplateId: getDefaultVisualTemplateId() };
+  return {
+    movementBehavior: "animated",
+    visualTemplateId: getDefaultVisualTemplateId(),
+    fogOfWarEnabled: true,
+    fogVisibilityRadius: DEFAULT_FOG_VISIBILITY_RADIUS
+  };
 }
 
 function isMovementBehavior(value: unknown): value is MovementBehavior {
@@ -21,7 +27,12 @@ export function normalizeGameSettings(value: Partial<GameSettings> | null | unde
   const defaults = getDefaultGameSettings();
   return {
     movementBehavior: isMovementBehavior(value?.movementBehavior) ? value.movementBehavior : defaults.movementBehavior,
-    visualTemplateId: value?.visualTemplateId && getVisualTemplateSource(value.visualTemplateId) ? value.visualTemplateId : defaults.visualTemplateId
+    visualTemplateId: value?.visualTemplateId && getVisualTemplateSource(value.visualTemplateId) ? value.visualTemplateId : defaults.visualTemplateId,
+    fogOfWarEnabled: typeof value?.fogOfWarEnabled === "boolean" ? value.fogOfWarEnabled : defaults.fogOfWarEnabled,
+    fogVisibilityRadius:
+      typeof value?.fogVisibilityRadius === "number" && Number.isInteger(value.fogVisibilityRadius) && value.fogVisibilityRadius > 0
+        ? value.fogVisibilityRadius
+        : defaults.fogVisibilityRadius
   };
 }
 
