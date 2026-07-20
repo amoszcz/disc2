@@ -36,6 +36,14 @@ const atlasByTemplateId: Readonly<Record<string, unknown>> = {
   "highres-template": highresAtlas
 };
 
+export function getTemplateSheetDimensions(templateId: string): { width: number; height: number } | null {
+  const atlas = atlasByTemplateId[templateId] as { sheet_width?: unknown; sheet_height?: unknown } | undefined;
+  if (typeof atlas?.sheet_width !== "number" || typeof atlas.sheet_height !== "number") {
+    return null;
+  }
+  return { width: atlas.sheet_width, height: atlas.sheet_height };
+}
+
 /** Registered atlas entries are the source of crop coordinates whenever their template is active. */
 export function getTemplateFrame(
   templateId: string,

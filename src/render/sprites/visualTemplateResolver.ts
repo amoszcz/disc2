@@ -20,7 +20,7 @@ import type {
 } from "../../engine/scenario/types";
 import { getVisualTemplateCatalog, type VisualTemplateCatalog } from "./visualTemplateCatalog";
 import { getDefaultVisualTemplateId } from "./visualTemplateConfig";
-import { getTemplateFrame } from "./visualTemplateRegistry";
+import { getTemplateFrame, getTemplateSheetDimensions } from "./visualTemplateRegistry";
 
 let activeVisualTemplateId = getDefaultVisualTemplateId();
 export function setActiveVisualTemplateId(templateId: string): void { activeVisualTemplateId = templateId; }
@@ -37,15 +37,19 @@ interface TemplateBounds {
 }
 
 const QUEUE_THUMBNAIL_SIZE = 48;
-const GENERATED_SHEET_WIDTH = 1536;
-const GENERATED_SHEET_HEIGHT = 1024;
+const DEFAULT_SHEET_WIDTH = 1536;
+const DEFAULT_SHEET_HEIGHT = 1024;
 
 export function createVisualTemplateThumbnailMarkup(resolvedTemplate: VisualTemplateResolverResult, label: string): string {
   const frame = resolvedTemplate.spriteFrame;
   if (resolvedTemplate.assetKind === "dedicated" && resolvedTemplate.assetSource && frame) {
     const scale = QUEUE_THUMBNAIL_SIZE / Math.max(frame.sourceWidth, frame.sourceHeight);
-    const backgroundWidth = Math.round(GENERATED_SHEET_WIDTH * scale);
-    const backgroundHeight = Math.round(GENERATED_SHEET_HEIGHT * scale);
+    // Atlas sizes differ between selectable templates. Using the default-sheet
+    // dimensions here misaligned the high-resolution queue portraits even
+    // though their canvas rendering used the correct frame coordinates.
+    const sheet = getTemplateSheetDimensions(activeVisualTemplateId);
+    const backgroundWidth = Math.round((sheet?.width ?? DEFAULT_SHEET_WIDTH) * scale);
+    const backgroundHeight = Math.round((sheet?.height ?? DEFAULT_SHEET_HEIGHT) * scale);
     const offsetX = Math.round(frame.sourceX * scale);
     const offsetY = Math.round(frame.sourceY * scale);
     return `<span class="visual-template-thumbnail dedicated" data-testid="queue-unit-template" aria-hidden="true" style="background-image:url('${resolvedTemplate.assetSource}');background-size:${backgroundWidth}px ${backgroundHeight}px;background-position:-${offsetX}px -${offsetY}px"></span>`;

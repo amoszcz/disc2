@@ -1,6 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { createInitialState, selectVisualTemplate, startScenarioSession } from "../../../src/app/state/gameState";
-import { getActiveVisualTemplateId, resolveHeroVisualTemplate, resolveStorybookPreviewTemplate, resolveUnitVisualTemplate, setActiveVisualTemplateId } from "../../../src/render/sprites/visualTemplateResolver";
+import {
+  createVisualTemplateThumbnailMarkup,
+  getActiveVisualTemplateId,
+  resolveHeroVisualTemplate,
+  resolveStorybookPreviewTemplate,
+  resolveUnitVisualTemplate,
+  setActiveVisualTemplateId
+} from "../../../src/render/sprites/visualTemplateResolver";
 import { getStorybookPreviewSubjects } from "../../../src/render/sprites/visualTemplateCatalog";
 
 describe("template selection flow", () => {
@@ -20,5 +27,15 @@ describe("template selection flow", () => {
 
     startScenarioSession(state, "core-map-loop");
     expect(state.activeVisualTemplateId).toBe("wip-template");
+  });
+
+  test("scales queue portraits against the active atlas dimensions", () => {
+    setActiveVisualTemplateId("highres-template");
+
+    const markup = createVisualTemplateThumbnailMarkup(resolveUnitVisualTemplate({ name: "Militia" }, "battle"), "Militia");
+
+    expect(markup).toContain("background-size:482px 482px");
+    expect(markup).toContain("background-position:-1px -97px");
+    setActiveVisualTemplateId("default-template");
   });
 });

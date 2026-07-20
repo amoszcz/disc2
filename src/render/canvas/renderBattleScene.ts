@@ -43,6 +43,9 @@ function drawUnitCard(
   const top = center.y - slotHeight / 2 + inset;
   const width = slotWidth - inset * 2;
   const height = slotHeight - inset * 2;
+  const artHeight = Math.floor(height * 0.6);
+  const detailsTop = top + artHeight;
+  const detailsHeight = height - artHeight;
   const isActive = state.battle?.activeUnitId === unit.id;
   const isLegalTarget = legalTargetUnitIds.includes(unit.id);
   const isSelectedTarget = selectedTargetUnitId === unit.id;
@@ -53,10 +56,13 @@ function drawUnitCard(
   recordVisualTemplateDiagnostic({ subjectKind: "unit", subjectType: unit.name, sceneContext: "battle" }, resolvedTemplate);
   context.fillStyle = !isAlive ? "#9f9487" : "#eadbc7";
   context.fillRect(left, top, width, height);
-  drawResolvedVisualTemplate(context, resolvedTemplate, { x: left, y: top, width, height });
+  // Keep the portrait separate from the details panel. This is especially
+  // important for the high-resolution template, whose full figures were
+  // previously obscured by the card labels.
+  drawResolvedVisualTemplate(context, resolvedTemplate, { x: left, y: top, width, height: artHeight });
   if (!isAlive) {
     context.fillStyle = "rgba(35, 23, 13, 0.35)";
-    context.fillRect(left, top, width, height);
+    context.fillRect(left, top, width, artHeight);
   }
 
   context.lineWidth = isSelectedTarget ? 4 : isLegalTarget ? 3 : isActive ? 3 : 1;
@@ -72,16 +78,21 @@ function drawUnitCard(
   }
 
   context.fillStyle = "#ffffff";
-  context.fillRect(left, top + height * 0.6, width, height * 0.4);
+  context.fillRect(left, detailsTop, width, detailsHeight);
   context.fillStyle = "#23170d";
-  context.font = `bold ${Math.max(11, Math.floor(slotHeight * 0.24))}px Georgia`;
-  context.fillText(unit.name, left + 6, top + Math.max(18, Math.floor(slotHeight * 0.32)), width - 12);
-  context.font = `${Math.max(10, Math.floor(slotHeight * 0.2))}px Georgia`;
-  context.fillText(`${unit.currentHealth}/${unit.maxHealth} HP`, left + 6, top + Math.max(34, Math.floor(slotHeight * 0.62)));
+  context.font = `bold ${Math.max(10, Math.floor(slotHeight * 0.12))}px Georgia`;
+  context.fillText(unit.name, left + 5, detailsTop + Math.max(13, Math.floor(detailsHeight * 0.4)), width - 10);
+  context.font = `${Math.max(9, Math.floor(slotHeight * 0.1))}px Georgia`;
 
   if (isAlive) {
-    context.fillStyle = slot.side === "attacker" ? palette.attacker : palette.defender;
-    context.fillText(getUnitAttackCategory(state, unit.id).toUpperCase(), left + 6, top + Math.max(48, Math.floor(slotHeight * 0.88)));
+    context.fillText(
+      `${unit.currentHealth}/${unit.maxHealth} HP · ${getUnitAttackCategory(state, unit.id).toUpperCase()}`,
+      left + 5,
+      detailsTop + Math.max(27, Math.floor(detailsHeight * 0.84)),
+      width - 10
+    );
+  } else {
+    context.fillText("Defeated", left + 5, detailsTop + Math.max(27, Math.floor(detailsHeight * 0.84)), width - 10);
   }
 
   context.restore();

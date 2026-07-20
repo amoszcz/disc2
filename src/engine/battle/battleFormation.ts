@@ -3,7 +3,10 @@ import type { Battle, BattleFormation, BattleFormationSlot, BattleSide, GameStat
 export const BATTLE_FORMATION_ROWS = 3;
 export const BATTLE_FORMATION_COLUMNS = 4;
 export const BATTLE_SLOT_WIDTH = 76;
-export const BATTLE_SLOT_HEIGHT = 56;
+// Battle cards need enough vertical room to show the dedicated unit artwork
+// without drawing the identity and health labels over it. Rows remain 150px
+// apart in the reference formation, leaving a clear gap between these cards.
+export const BATTLE_SLOT_HEIGHT = 104;
 export const BATTLE_REFERENCE_WIDTH = 896;
 export const BATTLE_REFERENCE_HEIGHT = 640;
 
