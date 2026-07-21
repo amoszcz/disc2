@@ -16,6 +16,7 @@ describe("gameplay control layout contract", () => {
     expect(html).toContain('title="Zoom In"');
     expect(html).toContain('title="End Turn"');
     expect(html).toContain('class="ui-button ui-button--icon ui-button--default map-action-icon"');
+    expect(html).toContain("map-action-icon--end-turn");
     expect(html).not.toContain(">Zoom Out<");
     expect(html).not.toContain(">End Turn<");
   });

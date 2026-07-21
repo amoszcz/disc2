@@ -53,6 +53,10 @@
 - Small, loosely coupled design: Identify the feature seams, module boundaries,
   and coupling risks, and explain how the design keeps components small and
   independently changeable.
+- Strategy UX clarity: For player-facing work, describe the primary action flow,
+  how selection and consequences are made visible before commitment, how
+  unavailable actions are explained, and any cancellation, confirmation, or
+  recovery path. Confirm essential feedback works without hover on touch input.
 - Artifact consistency: Identify which templates, docs, or workflow artifacts
   must change alongside this plan to remain constitution-compliant.
 

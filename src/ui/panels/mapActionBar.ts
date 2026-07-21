@@ -28,7 +28,7 @@ export function renderMapActionBar(isTraversalActive = false): string {
         children: `<span aria-hidden="true">${action.icon}</span>`,
         id: `${action.id}-button`,
         testId: `${action.id}-button`,
-        className: "map-action-icon",
+        className: ["map-action-icon", action.id === "end-turn" && "map-action-icon--end-turn"].filter(Boolean).join(" "),
         ariaLabel: action.name,
         title: action.name,
         disabled: !action.isAvailable,

@@ -31,12 +31,15 @@ export function renderMapHud(state: GameState): string {
           : ""
       }
       <p class="control-tip" data-testid="map-control-tip">${controlsMessage}</p>
+      <p data-testid="end-turn-consequence">${state.activeTraversal ? "End Turn is unavailable while the hero is traversing." : routePreview ? "Ending the turn will advance the plotted route before the next side acts when movement allows." : "Ending the turn passes control to the next side."}</p>
       ${
         routePreview
           ? `<div class="hud-row"><strong>Path</strong><span data-testid="route-preview-status">${routePreview.status}</span></div>
       <div class="hud-row"><strong>Target</strong><span data-testid="route-preview-destination">(${routePreview.destinationPosition.x + 1}, ${routePreview.destinationPosition.y + 1})</span></div>
       <div class="hud-row"><strong>Steps</strong><span data-testid="route-preview-steps">${routePreview.steps.length}</span></div>
-      <div class="hud-row"><strong>Total Cost</strong><span data-testid="route-preview-cost">${routePreview.totalMovementCost}</span></div>`
+      <div class="hud-row"><strong>Total Cost</strong><span data-testid="route-preview-cost">${routePreview.totalMovementCost}</span></div>
+      <p data-testid="route-preview-guidance">Review the route details, then select the destination again to confirm. You can replace it by selecting another tile.</p>
+      ${renderButton({ children: "Cancel route", testId: "route-cancel-button", variant: "secondary", data: { "route-action": "cancel" } })}`
           : ""
       }
       ${state.activeTraversal ? `<div class="hud-row"><strong>Traversal</strong><span data-testid="route-traversal-status">Moving 1 tile/second</span></div>` : ""}

@@ -15,6 +15,12 @@ behavior, preferring integration, contract, or acceptance-style coverage over
 implementation-detail tests. If automated tests are omitted, record the
 justification in the plan or tasks file.
 
+For player-facing work, include behavior-level tests for the primary interaction
+and applicable consequence feedback, unavailable-action explanation, and
+confirmation, cancellation, or recovery states. Cover both desktop and
+touch-capable input when the feature supports both; hover alone is not adequate
+proof of essential feedback.
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`

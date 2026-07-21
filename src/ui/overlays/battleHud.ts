@@ -30,6 +30,18 @@ export function renderBattleHud(state: GameState): string {
             ? "Tap a highlighted enemy to select a strike target."
             : "Click a highlighted enemy to select a strike target."
           : "No legal strike target is available.";
+  const strikeUnavailableReason = !isPlayerTurn
+    ? "Wait for the active player-controlled unit."
+    : battle.isTransitioning
+      ? "Wait for the current battle action to finish."
+      : !strikeReady
+        ? targetMessage
+        : null;
+  const defendUnavailableReason = !isPlayerTurn
+    ? "Wait for the active player-controlled unit."
+    : battle.isTransitioning
+      ? "Wait for the current battle action to finish."
+      : null;
 
   return `
     <div class="overlay-box" data-testid="battle-hud">
@@ -42,9 +54,12 @@ export function renderBattleHud(state: GameState): string {
         ${isMobile ? "Tap an enemy card to target it, then use Strike or Defend." : "Select a target on the canvas, then use Strike or Defend."}
       </p>
       <p data-testid="battle-target-message">${targetMessage}</p>
+      ${strikeUnavailableReason ? `<p data-testid="battle-strike-unavailable-reason">Strike unavailable: ${strikeUnavailableReason}</p>` : ""}
+      ${defendUnavailableReason ? `<p data-testid="battle-defend-unavailable-reason">Defend unavailable: ${defendUnavailableReason}</p>` : ""}
       <div class="hud-row action-row">
         ${renderButton({ id: "battle-attack-button", testId: "battle-attack-button", children: "Strike", disabled: !isPlayerTurn || !strikeReady || battle.isTransitioning })}
         ${renderButton({ id: "battle-defend-button", testId: "battle-defend-button", children: "Defend", variant: "secondary", disabled: !isPlayerTurn || battle.isTransitioning })}
+        ${selectedTarget ? renderButton({ id: "battle-clear-target-button", testId: "battle-clear-target-button", children: "Clear Target", variant: "quiet", disabled: !isPlayerTurn || battle.isTransitioning }) : ""}
       </div>
     </div>
   `;
