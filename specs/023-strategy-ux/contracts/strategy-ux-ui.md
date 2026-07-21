@@ -18,3 +18,10 @@
 - Essential decision and availability information is visible without hover.
 - Keyboard focus and touch activation expose the same action and recovery paths.
 - Primary controls remain named, visible, and non-overlapping on supported mobile layouts.
+
+## Retained Rule Boundaries
+
+- Cancelling a route or clearing a battle target only clears uncommitted player input; it never restores movement, resources, turns, or resolved combat state.
+- Replacing a route continues to use existing route validation and movement-cost rules.
+- Battle availability remains governed by the active unit, legal target set, and transition state.
+- End turn retains its existing traversal and route-advance rules; the UI explains those outcomes without changing them.

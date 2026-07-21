@@ -6,12 +6,12 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the existing map, battle, and end-turn decision states and their retained game-rule boundaries in `specs/023-strategy-ux/contracts/strategy-ux-ui.md`
+- [X] T001 Record the existing map, battle, and end-turn decision states and their retained game-rule boundaries in `specs/023-strategy-ux/contracts/strategy-ux-ui.md`
 
 ## Phase 2: Foundational Decision Presentation
 
 - [ ] T002 Create shared derived decision-preview and availability-explanation helpers from current game state in `src/ui/`
-- [ ] T003 Add contract coverage for derived selection, consequence, availability, and recovery presentations in `tests/contract/strategy-ux.contract.test.ts`
+- [X] T003 Add contract coverage for derived selection, consequence, availability, and recovery presentations in `tests/contract/strategy-ux.contract.test.ts`
 
 ## Phase 3: User Story 1 - Planned Map Actions (P1)
 
@@ -19,11 +19,11 @@
 
 **Independent Test**: Desktop and touch flows show selection, cost, known effects, invalid-route reason, and cancellation without consuming movement.
 
-- [ ] T004 [P] [US1] Add map decision-preview and recovery contract coverage in `tests/contract/strategy-ux.contract.test.ts`
+- [X] T004 [P] [US1] Add map decision-preview and recovery contract coverage in `tests/contract/strategy-ux.contract.test.ts`
 - [ ] T005 [P] [US1] Add route preview, replacement, cancellation, and stale-preview integration coverage in `tests/integration/map/strategyUxRouteFlow.test.ts`
-- [ ] T006 [US1] Render selected subject, known route consequences, confirmation state, and recovery affordance in `src/ui/hud/mapHud.ts`
+- [X] T006 [US1] Render selected subject, known route consequences, confirmation state, and recovery affordance in `src/ui/hud/mapHud.ts`
 - [ ] T007 [US1] Bind explicit route cancellation and preserve replacement behavior without changing movement rules in `src/app/scene-controller/mapInputController.ts` and `src/engine/map/routePreviewState.ts`
-- [ ] T008 [US1] Present invalid destination and traversal-blocked explanations in the relevant map context in `src/app/scene-controller/mapScene.ts` and `src/ui/panels/mapActionBar.ts`
+- [X] T008 [US1] Present invalid destination and traversal-blocked explanations in the relevant map context in `src/app/scene-controller/mapScene.ts` and `src/ui/panels/mapActionBar.ts`
 - [ ] T009 [US1] Add desktop and touch acceptance coverage for map preview and recovery in `tests/acceptance/strategy-ux-map.spec.ts`
 
 ## Phase 4: User Story 2 - Battle and Turn Availability (P2)
@@ -32,11 +32,11 @@
 
 **Independent Test**: Legal and illegal strike, defend, and end-turn paths display a specific reason or consequence across desktop and mobile layouts.
 
-- [ ] T010 [P] [US2] Add battle and end-turn availability contract coverage in `tests/contract/strategy-ux.contract.test.ts`
+- [X] T010 [P] [US2] Add battle and end-turn availability contract coverage in `tests/contract/strategy-ux.contract.test.ts`
 - [ ] T011 [P] [US2] Add battle target replacement and unavailable-action integration coverage in `tests/integration/battle/strategyUxBattleFlow.test.ts`
-- [ ] T012 [US2] Render specific Strike and Defend blocking reasons, selected-target effect, and target recovery in `src/ui/overlays/battleHud.ts`
-- [ ] T013 [US2] Bind target clearing or replacement without changing battle resolution rules in `src/app/scene-controller/battleInputController.ts`
-- [ ] T014 [US2] Render a distinct end-turn consequence summary and unavailable reason in `src/ui/panels/mapActionBar.ts` and `src/ui/hud/mapHud.ts`
+- [X] T012 [US2] Render specific Strike and Defend blocking reasons, selected-target effect, and target recovery in `src/ui/overlays/battleHud.ts`
+- [X] T013 [US2] Bind target clearing or replacement without changing battle resolution rules in `src/app/scene-controller/battleInputController.ts`
+- [X] T014 [US2] Render a distinct end-turn consequence summary and unavailable reason in `src/ui/panels/mapActionBar.ts` and `src/ui/hud/mapHud.ts`
 - [ ] T015 [US2] Add desktop and touch acceptance coverage for battle and end-turn clarity in `tests/acceptance/strategy-ux-battle-turn.spec.ts`
 
 ## Phase 5: User Story 3 - Consistent Direct Controls (P3)
