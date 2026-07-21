@@ -15,6 +15,8 @@ test("battle diagnostics expose action-oriented unit states", async ({ page }) =
   await canvas.click({ position: { x: 508, y: 266 } });
   await expect(page.getByTestId("battle-attack-button")).toBeEnabled();
   await page.getByTestId("battle-attack-button").click();
+  await expect(page.getByTestId("battle-attack-button")).toBeDisabled();
+  await page.waitForTimeout(300);
 
   const diagnostics = await page.evaluate(() => {
     const entries = (window as Window & { __visualTemplateDiagnostics?: { battle: any[] } }).__visualTemplateDiagnostics?.battle ?? [];

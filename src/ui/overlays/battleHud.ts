@@ -42,8 +42,8 @@ export function renderBattleHud(state: GameState): string {
       </p>
       <p data-testid="battle-target-message">${targetMessage}</p>
       <div class="hud-row action-row">
-        <button type="button" id="battle-attack-button" data-testid="battle-attack-button" ${!isPlayerTurn || !strikeReady ? "disabled" : ""}>Strike</button>
-        <button type="button" id="battle-defend-button" data-testid="battle-defend-button" ${!isPlayerTurn ? "disabled" : ""}>Defend</button>
+        <button type="button" id="battle-attack-button" data-testid="battle-attack-button" ${!isPlayerTurn || !strikeReady || battle.isTransitioning ? "disabled" : ""}>Strike</button>
+        <button type="button" id="battle-defend-button" data-testid="battle-defend-button" ${!isPlayerTurn || battle.isTransitioning ? "disabled" : ""}>Defend</button>
       </div>
     </div>
   `;

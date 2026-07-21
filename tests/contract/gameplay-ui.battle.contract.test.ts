@@ -18,4 +18,15 @@ describe("battle HUD contract", () => {
     expect(html).toContain("Strike");
     expect(html).toContain("Defend");
   });
+
+  test("locks battle actions while a state template is being displayed", () => {
+    const state = createInitialState();
+    state.battle = createBattle(state, "hero-1", "guard-force-1");
+    state.battle.isTransitioning = true;
+
+    const html = renderBattleHud(state);
+
+    expect(html).toMatch(/data-testid="battle-attack-button" disabled/);
+    expect(html).toMatch(/data-testid="battle-defend-button" disabled/);
+  });
 });

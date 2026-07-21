@@ -52,6 +52,7 @@ export function createBattle(state: GameState, heroId: string, guardForceId: str
     activeUnitId: participants[0]?.unitId ?? "",
     targetingState: null,
     defendStates: [],
+    isTransitioning: false,
     battleState: "active",
     outcome: null
   };

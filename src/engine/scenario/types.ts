@@ -584,6 +584,7 @@ export interface Battle {
   activeUnitId: string;
   targetingState: BattleTargetingState | null;
   defendStates: BattleDefendState[];
+  isTransitioning?: boolean;
   battleState: BattleState;
   outcome: BattleOutcome | null;
 }

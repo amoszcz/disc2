@@ -17,6 +17,8 @@ import { applyBattleOutcome } from "../state/applyBattleOutcome";
 import { checkScenarioEnd } from "./checkScenarioEnd";
 import type { GameState, ScreenPoint } from "../../engine/scenario/types";
 
+export const BATTLE_STATE_DISPLAY_DURATION_MS = 500;
+
 function getCanvasPoint(canvas: HTMLCanvasElement, event: MouseEvent | PointerEvent): ScreenPoint {
   const bounds = canvas.getBoundingClientRect();
   const scaleX = canvas.width / bounds.width;
@@ -41,44 +43,44 @@ function resolveBattleConclusion(state: GameState): boolean {
   return true;
 }
 
-function continueBattleUntilPlayerTurn(state: GameState): void {
-  while (state.battle && !activeBattleUnitIsPlayerControlled(state, state.battle)) {
-    const message = performAutomaticBattleAction(state, state.battle);
-    state.messageLog.push(message);
-
-    if (resolveBattleConclusion(state)) {
-      return;
-    }
-
-    advanceBattleQueue(state, state.battle);
-  }
-}
-
-function resolvePlayerBattleAction(state: GameState, message: string): void {
-  state.messageLog.push(message);
-
-  if (resolveBattleConclusion(state)) {
-    return;
-  }
-
-  if (!state.battle) {
-    return;
-  }
-
-  advanceBattleQueue(state, state.battle);
-  continueBattleUntilPlayerTurn(state);
-}
-
-function schedulePlayerBattleContinuation(store: GameStore, message: string): void {
+function scheduleBattleContinuation(store: GameStore, message: string): void {
   window.setTimeout(() => {
+    let shouldPerformAutomaticAction = false;
     store.update((state) => {
       if (state.sceneMode !== "battle" || !state.battle) {
         return;
       }
 
-      resolvePlayerBattleAction(state, message);
+      state.messageLog.push(message);
+      if (resolveBattleConclusion(state) || !state.battle) {
+        return;
+      }
+
+      advanceBattleQueue(state, state.battle);
+      state.battle.isTransitioning = !activeBattleUnitIsPlayerControlled(state, state.battle);
+      shouldPerformAutomaticAction = state.battle.isTransitioning;
     });
-  }, 0);
+    if (shouldPerformAutomaticAction) {
+      scheduleAutomaticBattleAction(store);
+    }
+  }, BATTLE_STATE_DISPLAY_DURATION_MS);
+}
+
+function scheduleAutomaticBattleAction(store: GameStore): void {
+  window.setTimeout(() => {
+    let message: string | null = null;
+    store.update((state) => {
+      if (state.sceneMode !== "battle" || !state.battle || activeBattleUnitIsPlayerControlled(state, state.battle)) {
+        return;
+      }
+
+      state.battle.isTransitioning = true;
+      message = performAutomaticBattleAction(state, state.battle);
+    });
+    if (message) {
+      scheduleBattleContinuation(store, message);
+    }
+  }, BATTLE_STATE_DISPLAY_DURATION_MS);
 }
 
 function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string | null {
@@ -123,7 +125,7 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
     strikeButton.onclick = () => {
       let battleMessage: string | null = null;
       store.update((state) => {
-        if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+        if (state.sceneMode !== "battle" || !state.battle || state.battle.isTransitioning || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
           return;
         }
 
@@ -133,10 +135,11 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
         }
 
         battleMessage = performStrikeAction(state, state.battle);
+        state.battle.isTransitioning = true;
       });
 
       if (battleMessage) {
-        schedulePlayerBattleContinuation(store, battleMessage);
+        scheduleBattleContinuation(store, battleMessage);
       }
     };
   }
@@ -145,15 +148,16 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
     defendButton.onclick = () => {
       let battleMessage: string | null = null;
       store.update((state) => {
-        if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+        if (state.sceneMode !== "battle" || !state.battle || state.battle.isTransitioning || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
           return;
         }
 
         battleMessage = performDefendAction(state, state.battle);
+        state.battle.isTransitioning = true;
       });
 
       if (battleMessage) {
-        schedulePlayerBattleContinuation(store, battleMessage);
+        scheduleBattleContinuation(store, battleMessage);
       }
     };
   }
@@ -162,7 +166,7 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
 export function bindBattleCanvasInput(canvas: HTMLCanvasElement, store: GameStore): void {
   const selectBattleTarget = (point: ScreenPoint, pointerType: string): void => {
     store.update((state) => {
-      if (state.sceneMode !== "battle" || !state.battle || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
+      if (state.sceneMode !== "battle" || !state.battle || state.battle.isTransitioning || !activeBattleUnitIsPlayerControlled(state, state.battle)) {
         return;
       }
 
