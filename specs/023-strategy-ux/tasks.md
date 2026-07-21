@@ -46,15 +46,15 @@
 **Independent Test**: Keyboard and touch-capable flows complete representative menu, map, battle, settings, and victory actions without hidden essential feedback.
 
 - [ ] T016 [P] [US3] Add responsive placement and non-hover feedback contract coverage in `tests/contract/strategy-ux.contract.test.ts`
-- [ ] T017 [P] [US3] Add keyboard and mobile acceptance coverage for named primary controls in `tests/acceptance/strategy-ux-controls.spec.ts`
+- [X] T017 [P] [US3] Add keyboard and mobile acceptance coverage for named primary controls in `tests/acceptance/strategy-ux-controls.spec.ts`
 - [ ] T018 [US3] Apply shared visual hierarchy and visible availability/recovery feedback across map, battle, menu, settings, and victory UI in `src/ui/hud/mapHud.ts`, `src/ui/overlays/battleHud.ts`, `src/ui/overlays/mainMenu.ts`, `src/ui/overlays/settingsPanel.ts`, and `src/ui/overlays/victoryMenu.ts`
 - [ ] T019 [US3] Preserve reachable, non-overlapping primary controls and visible focus feedback at mobile breakpoints in `index.html`
 
 ## Phase 6: Polish and Validation
 
-- [ ] T020 [P] Run the production build and resolve failures through `package.json`
-- [ ] T021 [P] Run focused map, battle, menu, mobile, and strategy UX suites from `specs/023-strategy-ux/quickstart.md`
-- [ ] T022 Execute desktop keyboard and touch-capable browser validation from `specs/023-strategy-ux/quickstart.md`
+- [X] T020 [P] Run the production build and resolve failures through `package.json`
+- [X] T021 [P] Run focused map, battle, menu, mobile, and strategy UX suites from `specs/023-strategy-ux/quickstart.md`
+- [X] T022 Execute desktop keyboard and touch-capable browser validation from `specs/023-strategy-ux/quickstart.md`
 - [ ] T023 Verify delivered behavior matches `specs/023-strategy-ux/spec.md`, `specs/023-strategy-ux/plan.md`, and `specs/023-strategy-ux/contracts/strategy-ux-ui.md`
 
 ## Dependencies & Execution Order

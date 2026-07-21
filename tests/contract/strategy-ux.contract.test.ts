@@ -29,4 +29,10 @@ describe("strategy UX contract", () => {
     expect(html).toContain('data-testid="battle-strike-unavailable-reason"');
     expect(html).toContain("Wait for the current battle action to finish.");
   });
+
+  test("keeps essential end-turn feedback visible in a mobile layout", () => {
+    const state = createInitialState();
+    state.mobileLayoutState.layoutMode = "mobile";
+    expect(renderMapHud(state)).toContain('data-testid="end-turn-consequence"');
+  });
 });
