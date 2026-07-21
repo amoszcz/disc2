@@ -59,6 +59,7 @@ export function renderBattleHud(state: GameState): string {
       <div class="hud-row action-row">
         ${renderButton({ id: "battle-attack-button", testId: "battle-attack-button", children: "Strike", disabled: !isPlayerTurn || !strikeReady || battle.isTransitioning })}
         ${renderButton({ id: "battle-defend-button", testId: "battle-defend-button", children: "Defend", variant: "secondary", disabled: !isPlayerTurn || battle.isTransitioning })}
+        ${selectedTarget ? renderButton({ id: "battle-clear-target-button", testId: "battle-clear-target-button", children: "Clear Target", variant: "quiet", disabled: !isPlayerTurn || battle.isTransitioning }) : ""}
       </div>
     </div>
   `;

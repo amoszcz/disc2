@@ -120,6 +120,7 @@ function findClickedBattleUnitId(state: GameState, point: ScreenPoint): string |
 export function bindBattleActionInput(container: HTMLElement, store: GameStore): void {
   const strikeButton = container.querySelector<HTMLButtonElement>("#battle-attack-button");
   const defendButton = container.querySelector<HTMLButtonElement>("#battle-defend-button");
+  const clearTargetButton = container.querySelector<HTMLButtonElement>("#battle-clear-target-button");
 
   if (strikeButton) {
     strikeButton.onclick = () => {
@@ -159,6 +160,16 @@ export function bindBattleActionInput(container: HTMLElement, store: GameStore):
       if (battleMessage) {
         scheduleBattleContinuation(store, battleMessage);
       }
+    };
+  }
+
+  if (clearTargetButton) {
+    clearTargetButton.onclick = () => {
+      store.update((state) => {
+        if (!state.battle?.targetingState || state.battle.isTransitioning || !activeBattleUnitIsPlayerControlled(state, state.battle)) return;
+        state.battle.targetingState.selectedTargetUnitId = null;
+        state.messageLog.push("Strike target cleared. Choose another highlighted enemy.");
+      });
     };
   }
 }
