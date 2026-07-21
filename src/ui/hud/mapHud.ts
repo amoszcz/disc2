@@ -1,5 +1,6 @@
 import type { GameState } from "../../engine/scenario/types";
 import { renderTerrainLegend } from "../../render/canvas/renderTerrainLegend";
+import { renderButton } from "../components/button";
 
 export function renderMapHud(state: GameState): string {
   const hero = state.scenario.heroes.find((entry) => entry.id === state.selectedHeroId);
@@ -20,7 +21,7 @@ export function renderMapHud(state: GameState): string {
       <div class="hud-row"><strong>Hero</strong><span>${hero?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Layout</strong><span data-testid="layout-mode">${state.mobileLayoutState.layoutMode}</span></div>
       <div class="hud-row"><strong>Zoom</strong><span data-testid="map-zoom">${state.mapViewState.viewport.zoomLevel.toFixed(2)}x</span></div>
-      <button type="button" class="menu-option" data-testid="map-settings-open-button" data-settings-action="open">Settings</button>
+      ${renderButton({ children: "Settings", className: "menu-option", testId: "map-settings-open-button", variant: "secondary", data: { "settings-action": "open" } })}
       <div class="hud-row"><strong>Movement</strong><span data-testid="remaining-movement">${hero?.remainingMovement ?? 0}</span></div>
       <div class="hud-row"><strong>Gold</strong><span data-testid="resource-gold">${player?.resourceStockpile.gold ?? 0}</span></div>
       <div class="hud-row"><strong>Fog</strong><span data-testid="fog-of-war-status">${state.gameSettings.fogOfWarEnabled ? `Enabled (${state.gameSettings.fogVisibilityRadius} tiles)` : "Disabled"}</span></div>

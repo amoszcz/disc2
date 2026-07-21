@@ -17,6 +17,8 @@ describe("battle HUD contract", () => {
     expect(html).toContain("Archer");
     expect(html).toContain("Strike");
     expect(html).toContain("Defend");
+    expect(html).toContain('class="ui-button ui-button--primary ui-button--default"');
+    expect(html).toContain('class="ui-button ui-button--secondary ui-button--default"');
   });
 
   test("locks battle actions while a state template is being displayed", () => {

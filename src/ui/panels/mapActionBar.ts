@@ -4,6 +4,7 @@ import { startGuardEncounter } from "../../engine/map/startGuardEncounter";
 import { zoomViewportAtPoint } from "../../engine/map/viewportMath";
 import { advanceTurn, autoAdvanceActiveRouteBeforeTurnEnd, carryRoutePreviewAcrossTurn, resetMovementForActivePlayer } from "../../engine/turn/turnEngine";
 import { checkScenarioEnd } from "../../app/scene-controller/checkScenarioEnd";
+import { renderButton } from "../components/button";
 
 interface MapActionPresentation {
   id: "map-zoom-out" | "map-zoom-in" | "end-turn";
@@ -23,9 +24,16 @@ function getMapActions(isTraversalActive = false): MapActionPresentation[] {
 export function renderMapActionBar(isTraversalActive = false): string {
   return `<div class="map-action-bar" data-testid="map-action-bar" aria-label="Map actions">${getMapActions(isTraversalActive)
     .map(
-      (action) => `<button type="button" class="map-action-icon" id="${action.id}-button" data-testid="${action.id}-button" aria-label="${action.name}" title="${action.name}" ${
-        action.isAvailable ? "" : "disabled"
-      }><span aria-hidden="true">${action.icon}</span></button>`
+      (action) => renderButton({
+        children: `<span aria-hidden="true">${action.icon}</span>`,
+        id: `${action.id}-button`,
+        testId: `${action.id}-button`,
+        className: "map-action-icon",
+        ariaLabel: action.name,
+        title: action.name,
+        disabled: !action.isAvailable,
+        variant: "icon"
+      })
     )
     .join("")}</div>`;
 }

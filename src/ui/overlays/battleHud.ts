@@ -1,6 +1,7 @@
 import type { GameState } from "../../engine/scenario/types";
 import { canBattleStrike } from "../../engine/battle/battleTurnEngine";
 import { getBattleUnit, getUnitAttackCategory, isPlayerControlledBattleUnit } from "../../engine/battle/battleTargeting";
+import { renderButton } from "../components/button";
 
 export function renderBattleHud(state: GameState): string {
   const battle = state.battle;
@@ -42,8 +43,8 @@ export function renderBattleHud(state: GameState): string {
       </p>
       <p data-testid="battle-target-message">${targetMessage}</p>
       <div class="hud-row action-row">
-        <button type="button" id="battle-attack-button" data-testid="battle-attack-button" ${!isPlayerTurn || !strikeReady || battle.isTransitioning ? "disabled" : ""}>Strike</button>
-        <button type="button" id="battle-defend-button" data-testid="battle-defend-button" ${!isPlayerTurn || battle.isTransitioning ? "disabled" : ""}>Defend</button>
+        ${renderButton({ id: "battle-attack-button", testId: "battle-attack-button", children: "Strike", disabled: !isPlayerTurn || !strikeReady || battle.isTransitioning })}
+        ${renderButton({ id: "battle-defend-button", testId: "battle-defend-button", children: "Defend", variant: "secondary", disabled: !isPlayerTurn || battle.isTransitioning })}
       </div>
     </div>
   `;
