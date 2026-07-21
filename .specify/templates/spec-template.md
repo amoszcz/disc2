@@ -40,6 +40,11 @@
 1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 2. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
+<!-- For player-facing interactions, include scenarios for consequence feedback
+before commitment, unavailable-action explanation, and cancellation or recovery
+when the action is reversible or consequential. Do not rely on hover as the
+only way to communicate essential feedback. -->
+
 ---
 
 ### User Story 2 - [Brief Title] (Priority: P2)
@@ -81,6 +86,8 @@
 
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
+- For player-facing actions, what feedback explains an unavailable action and
+  what cancellation, confirmation, or recovery path prevents accidental commitment?
 
 ## Requirements *(mandatory)*
 

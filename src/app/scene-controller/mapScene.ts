@@ -7,6 +7,7 @@ import { renderErrorOverlay } from "../../ui/overlays/errorOverlay";
 import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup";
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
 import { openSettings } from "../state/gameState";
+import { clearOwnedRoutePreview } from "../../engine/map/heroActions";
 
 export function renderMapSidebar(store: GameStore, container: HTMLElement, actionContainer: HTMLElement): void {
   const state = store.getState();
@@ -51,6 +52,13 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement, actio
   `;
   container.querySelector<HTMLButtonElement>('[data-settings-action="open"]')?.addEventListener("click", () => {
     store.update((current) => { openSettings(current); });
+  });
+  container.querySelector<HTMLButtonElement>('[data-route-action="cancel"]')?.addEventListener("click", () => {
+    store.update((current) => {
+      if (!current.selectedHeroId) return;
+      const result = clearOwnedRoutePreview(current, current.selectedHeroId);
+      current.messageLog.push(result.ok ? "Route preview cancelled without spending movement." : result.reason ?? "No route preview is available to cancel.");
+    });
   });
 
   actionContainer.innerHTML = renderMapActionBar(state.activeTraversal !== null);

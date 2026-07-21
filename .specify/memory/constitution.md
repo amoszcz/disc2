@@ -1,19 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 -> 1.1.0
+- Version change: 1.1.0 -> 1.2.0
 - Modified principles:
-  - II. Independently Valuable Slices -> II. Feature-Slice Delivery
-  - III. Evidence Before Merge -> III. Feature-Proving Tests
-  - IV. Minimal Surface Area -> IV. Minimal Dependencies, Real Integrations
-  - V. Artifact Consistency -> V. Small, Loosely Coupled Design
-- Added sections:
   - None
+- Added sections:
+  - VI. Strategy UX Clarity
 - Removed sections:
   - None
 - Templates requiring updates:
-  - .specify/templates/plan-template.md updated
-  - .specify/templates/spec-template.md updated
-  - .specify/templates/tasks-template.md updated
+  - ✅ .specify/templates/plan-template.md
+  - ✅ .specify/templates/spec-template.md
+  - ✅ .specify/templates/tasks-template.md
 - Follow-up TODOs:
   - None
 -->
@@ -63,6 +60,20 @@ abstraction layers MUST solve an immediate problem in the current feature, not a
 speculative future one. Rationale: small clean code and loose coupling keep
 change cost low and make feature-level testing practical.
 
+### VI. Strategy UX Clarity
+Player-facing strategy interactions MUST make the current selection, available
+actions, and meaningful consequences understandable before the player commits.
+Movement, targeting, turn-ending, and other consequential actions MUST provide
+clear feedback; unavailable actions MUST communicate their reason near the
+control or interaction context. When an action is reversible, users MUST be able
+to change or cancel it before commitment; irreversible actions MUST be visibly
+distinguished or confirmed. Primary interactions MUST work through direct,
+accessible input on desktop and touch-capable mobile devices, and essential
+feedback MUST NOT depend on hover alone. Layout and control placement SHOULD
+preserve spatial consistency across screens. Rationale: strategy decisions are
+only satisfying when players can understand intent, consequences, and recovery
+without hunting for rules or fearing accidental commitment.
+
 ## Delivery Constraints
 
 - The authoritative workflow artifacts live under `.specify/`.
@@ -78,6 +89,9 @@ change cost low and make feature-level testing practical.
 - Feature plans and tasks MUST prefer testing through public interfaces,
   end-to-end flows inside the repository boundary, or real adapter seams before
   adding implementation-detail assertions.
+- Player-facing feature artifacts MUST identify the primary action flow,
+  consequence preview or feedback, unavailable-action explanation, and any
+  confirmation, cancellation, or recovery path that applies.
 
 ## Workflow & Quality Gates
 
@@ -92,6 +106,9 @@ change cost low and make feature-level testing practical.
   include automated test tasks for every behavior-changing story by default,
   favor integration or contract coverage where practical, and mark cross-cutting
   work separately from story-specific implementation.
+- For player-facing changes, plans and tasks MUST include behavior-level proof
+  for the primary interaction and its relevant feedback, unavailable, and
+  recoverability states across supported input modes.
 - Any exception to these gates MUST be documented where the exception is taken,
   not inferred later from commit history or discussion.
 
@@ -106,4 +123,4 @@ policy is semantic: MAJOR for incompatible governance changes or removed
 principles, MINOR for new principles or materially stronger obligations, PATCH
 for clarifications that do not change expected behavior.
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-08 | **Last Amended**: 2026-07-12
+**Version**: 1.2.0 | **Ratified**: 2026-07-08 | **Last Amended**: 2026-07-21
