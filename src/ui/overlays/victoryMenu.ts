@@ -1,4 +1,5 @@
 import type { GameState } from "../../engine/scenario/types";
+import { renderButton } from "../components/button";
 
 export function renderVictoryMenu(state: GameState): string {
   const scenarioName = state.activeScenarioId
@@ -11,7 +12,7 @@ export function renderVictoryMenu(state: GameState): string {
       <strong>Victory</strong>
       <p>${scenarioName} is complete.</p>
       <p>${isMobile ? "The run is complete. Use the button below to return to the menu and start again." : "The guards have been defeated and the scenario is complete."}</p>
-      <button type="button" id="return-to-menu-button" data-testid="return-to-menu-button">Return to Menu</button>
+      ${renderButton({ id: "return-to-menu-button", testId: "return-to-menu-button", children: "Return to Menu" })}
     </div>
   `;
 }

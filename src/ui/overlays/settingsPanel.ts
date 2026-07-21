@@ -1,5 +1,6 @@
 import type { GameState } from "../../engine/scenario/types";
 import { renderVisualTemplateSelector } from "../visualTemplateSelector";
+import { renderButton } from "../components/button";
 
 export function renderSettingsPanel(state: GameState): string {
   return `<div class="overlay-box settings-panel" data-testid="settings-panel">
@@ -12,6 +13,6 @@ export function renderSettingsPanel(state: GameState): string {
     <label>Fog of war <input type="checkbox" data-testid="fog-of-war-enabled-control" ${state.gameSettings.fogOfWarEnabled ? "checked" : ""}></label>
     <label>Visibility radius <input type="number" min="1" step="1" data-testid="fog-visibility-radius-control" value="${state.gameSettings.fogVisibilityRadius}"></label>
     ${renderVisualTemplateSelector(state.activeVisualTemplateId, "settings-template-selector")}
-    <button type="button" class="menu-option" data-testid="settings-return-button" data-settings-action="return">Return</button>
+    ${renderButton({ children: "Return", className: "menu-option", testId: "settings-return-button", variant: "secondary", data: { "settings-action": "return" } })}
   </div>`;
 }

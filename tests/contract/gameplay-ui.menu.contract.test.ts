@@ -15,5 +15,7 @@ describe("main menu contract", () => {
     expect(html).toContain('data-testid="scenario-start-core-map-loop"');
     expect(html).toContain('data-testid="scenario-start-advanced-terrain-scenario"');
     expect(html).toContain('data-testid="scenario-start-submap-expedition-scenario"');
+    expect(html).toContain('class="ui-button ui-button--primary ui-button--default menu-option"');
+    expect(html).toContain('data-menu-action="open-settings"');
   });
 });

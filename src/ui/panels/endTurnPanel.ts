@@ -1,10 +1,10 @@
 import type { GameState } from "../../engine/scenario/types";
+import { renderButton } from "../components/button";
 
 export function renderEndTurnPanel(state: GameState): string {
-  const disabled = state.sceneMode !== "map" ? "disabled" : "";
   return `
     <div class="overlay-box">
-      <button type="button" id="end-turn-button" data-testid="end-turn-button" ${disabled}>${state.mobileLayoutState.layoutMode === "mobile" ? "End Turn" : "End Turn"}</button>
+      ${renderButton({ id: "end-turn-button", testId: "end-turn-button", disabled: state.sceneMode !== "map", children: "End Turn" })}
     </div>
   `;
 }

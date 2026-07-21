@@ -1,6 +1,7 @@
 import type { GameState, StorybookPreviewSubject } from "../../engine/scenario/types";
 import { resolveStorybookPreviewTemplate } from "../../render/sprites/visualTemplateResolver";
 import { renderVisualTemplateSelector } from "../visualTemplateSelector";
+import { renderButton } from "../components/button";
 
 function renderSubjectEntry(state: GameState, subject: StorybookPreviewSubject): string {
   const selection = state.storybookState?.subjectSelections[subject.subjectId] ?? {
@@ -69,7 +70,7 @@ export function renderStorybookPanel(state: GameState): string {
         ${selectedSubject ? `${selectedSubject.displayName} (${selectedSubject.categoryLabel})` : "No subject selected"}
       </div>
       <p data-testid="storybook-transition-summary">${transitionSummary}</p>
-      <button type="button" id="storybook-return-button" data-testid="storybook-return-button">Return to Menu</button>
+      ${renderButton({ id: "storybook-return-button", testId: "storybook-return-button", children: "Return to Menu", variant: "secondary" })}
       <div data-testid="storybook-entry-list">
         ${(storybookState?.subjects ?? []).map((subject) => renderSubjectEntry(state, subject)).join("")}
       </div>
