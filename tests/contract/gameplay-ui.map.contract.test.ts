@@ -12,5 +12,6 @@ describe("map HUD contract", () => {
     expect(html).toContain("Aren");
     expect(html).toContain('data-testid="remaining-movement">2<');
     expect(html).toContain('data-testid="resource-gold">0<');
+    expect(html).toContain('data-testid="end-turn-consequence">Ending the turn passes control to the next side.<');
   });
 });

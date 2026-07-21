@@ -31,6 +31,7 @@ export function renderMapHud(state: GameState): string {
           : ""
       }
       <p class="control-tip" data-testid="map-control-tip">${controlsMessage}</p>
+      <p data-testid="end-turn-consequence">${state.activeTraversal ? "End Turn is unavailable while the hero is traversing." : routePreview ? "Ending the turn will advance the plotted route before the next side acts when movement allows." : "Ending the turn passes control to the next side."}</p>
       ${
         routePreview
           ? `<div class="hud-row"><strong>Path</strong><span data-testid="route-preview-status">${routePreview.status}</span></div>
