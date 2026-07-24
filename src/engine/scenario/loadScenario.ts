@@ -1,4 +1,6 @@
 import type { ScenarioDefinition, ScenarioOption } from "./types";
+import type { GeneratedCampaignMap } from "../campaign-map/types";
+import { adaptScenarioWorldMap } from "../campaign-map/adaptScenarioWorldMap";
 import { applyScenarioWorldMap, cloneScenario, getMainWorldMapId, getScenarioWorldMaps, getWorldMapById } from "./types";
 import { coreMapLoopScenario } from "../../content/scenarios/core-map-loop";
 import { advancedTerrainScenario } from "../../content/scenarios/advanced-terrain-scenario";
@@ -192,6 +194,13 @@ export function loadScenario(scenarioId: ScenarioId = "core-map-loop"): Scenario
   const scenario = cloneScenario(source);
   validateScenario(scenario);
   return scenario;
+}
+
+/** Resolves semantic map data without changing authored scenario gameplay state. */
+export function resolveCampaignMap(scenario: ScenarioDefinition, mapId: string): GeneratedCampaignMap {
+  const worldMap = getWorldMapById(scenario, mapId);
+  if (!worldMap) throw new Error(`Unknown world map: ${mapId}`);
+  return adaptScenarioWorldMap(scenario, worldMap);
 }
 
 export function getScenarioOptions(): ScenarioOption[] {

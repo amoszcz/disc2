@@ -1,0 +1,4 @@
+import type { CampaignLocation } from "../../../engine/campaign-map/types";
+import type { Position } from "../../../engine/scenario/types";
+export interface CampaignLabel { location: CampaignLocation; position: Position; }
+export function layoutCampaignLabels(locations: CampaignLocation[], zoom: number): CampaignLabel[] { const used: Position[] = []; return [...locations].sort((a, b) => b.importance - a.importance).filter((location) => zoom >= .7 || location.importance >= 8).filter((location) => { const position = { x: location.position.x + .15, y: location.position.y - .15 }; if (used.some((other) => Math.hypot(other.x - position.x, other.y - position.y) < 1.2)) return false; used.push(position); return true; }).map((location) => ({ location, position: { x: location.position.x + .15, y: location.position.y - .15 } })); }

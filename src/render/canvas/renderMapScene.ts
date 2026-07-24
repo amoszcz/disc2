@@ -4,7 +4,6 @@ import type { FacingDirection, HeroVisualStateRuntime, ObjectAnimationStateName 
 import { resolveMovementObjectStack } from "../../engine/map/movementObjectLookup";
 import { resolveTerrainTile } from "../../engine/map/terrainLookup";
 import { getBaseTileSize } from "../../engine/map/viewportMath";
-import { palette } from "../sprites/placeholders";
 import { routePreviewPalette } from "../sprites/placeholders";
 import {
   drawResolvedVisualTemplate,
@@ -16,8 +15,10 @@ import {
   resolveTerrainVisualTemplate
 } from "../sprites/visualTemplateResolver";
 import { renderGuardedLocations } from "./renderGuardedLocations";
-import { createTileVisualBounds, getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
+import { getViewportRenderMetrics, worldTileToCanvasPoint } from "./viewportRender";
 import { getFogTileState } from "../../engine/map/fogOfWar";
+import { resolveCampaignMap } from "../../engine/scenario/loadScenario";
+import { renderCampaignMap } from "./campaign-map";
 
 export function getTileSize(map: MapDefinition, canvas?: HTMLCanvasElement): number {
   return getBaseTileSize(map, canvas?.width, canvas?.height);
@@ -72,17 +73,17 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
   context.fillStyle = "#f6ecd0";
   context.fillRect(0, 0, context.canvas.width, context.canvas.height);
   resetVisualTemplateDiagnostics("map");
+  const campaignMap = resolveCampaignMap(state.scenario, activeMapId);
+  renderCampaignMap(context, campaignMap, metrics);
 
   for (let y = metrics.startTileY; y < metrics.endTileY; y += 1) {
     for (let x = metrics.startTileX; x < metrics.endTileX; x += 1) {
-      const terrainTile = state.scenario.terrainRegions?.length ? resolveTerrainTile(state.scenario, { x, y }) : null;
       const point = worldTileToCanvasPoint({ x, y }, metrics.viewport, context.canvas, map);
-      const terrainType = terrainTile?.terrainType ?? state.scenario.map.defaultTerrainType ?? "plains";
+      const terrainType = state.scenario.terrainRegions?.length
+        ? resolveTerrainTile(state.scenario, { x, y }).terrainType
+        : state.scenario.map.defaultTerrainType ?? "plains";
       const terrainTemplate = resolveTerrainVisualTemplate(terrainType);
       recordVisualTemplateDiagnostic({ subjectKind: "terrain", subjectType: terrainType, sceneContext: "map" }, terrainTemplate);
-      drawResolvedVisualTemplate(context, terrainTemplate, createTileVisualBounds(point, tileSize, 0));
-      context.strokeStyle = palette.tileBorder;
-      context.strokeRect(point.x, point.y, tileSize, tileSize);
 
       const fogState = getFogTileState(state, { x, y });
       const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });

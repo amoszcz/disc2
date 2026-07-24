@@ -12,9 +12,9 @@
 
 **Purpose**: Establish the feature-local seams and test commands without introducing dependencies.
 
-- [ ] T001 Create campaign-map module and render-layer directories with public barrel exports in `src/engine/campaign-map/index.ts` and `src/render/canvas/campaign-map/index.ts`
-- [ ] T002 [P] Add a focused campaign-map Vitest command and acceptance command to `package.json`
-- [ ] T003 [P] Add a Canvas cache-capable test context and deterministic test fixtures in `tests/integration/campaign-map/renderTestContext.ts` and `tests/integration/campaign-map/fixtures.ts`
+- [X] T001 Create campaign-map module and render-layer directories with public barrel exports in `src/engine/campaign-map/index.ts` and `src/render/canvas/campaign-map/index.ts`
+- [X] T002 [P] Add a focused campaign-map Vitest command and acceptance command to `package.json`
+- [X] T003 [P] Add a Canvas cache-capable test context and deterministic test fixtures in `tests/integration/campaign-map/renderTestContext.ts` and `tests/integration/campaign-map/fixtures.ts`
 
 ---
 
@@ -24,14 +24,14 @@
 
 **CRITICAL**: Complete this phase before user-story implementation.
 
-- [ ] T004 Define semantic campaign-map types, biome/location/road unions, metadata, validation, and generation-config types in `src/engine/campaign-map/types.ts`
-- [ ] T005 [P] Implement named deterministic seed streams and stable seed derivation in `src/engine/campaign-map/seedStreams.ts`
-- [ ] T006 [P] Implement coordinate keys, bounds, neighbor enumeration, path cost helpers, and deterministic comparison utilities in `src/engine/campaign-map/geometry.ts`
-- [ ] T007 Implement the scenario-world-map adapter that maps current cells, rectangular terrain, movement objects, guarded locations, pickups, heroes, and links to semantic map data in `src/engine/campaign-map/adaptScenarioWorldMap.ts`
-- [ ] T008 Integrate campaign-map resolution and map identity with loading while retaining existing authored scenario behavior in `src/engine/scenario/types.ts` and `src/engine/scenario/loadScenario.ts`
-- [ ] T009 Implement a semantic traversal lookup adapter that preserves current terrain, bridge, passability, and unavailable-route explanations in `src/engine/campaign-map/resolveCampaignTraversal.ts`
-- [ ] T010 [P] Add data-contract coverage for stable map identity, dimensions, cells, locations, connections, and schema-version boundaries in `tests/contract/campaign-map-data.contract.test.ts`
-- [ ] T011 [P] Add deterministic-stream and scenario-adapter integration coverage for every existing world map in `tests/integration/campaign-map/scenarioMapAdapterFlow.test.ts`
+- [X] T004 Define semantic campaign-map types, biome/location/road unions, metadata, validation, and generation-config types in `src/engine/campaign-map/types.ts`
+- [X] T005 [P] Implement named deterministic seed streams and stable seed derivation in `src/engine/campaign-map/seedStreams.ts`
+- [X] T006 [P] Implement coordinate keys, bounds, neighbor enumeration, path cost helpers, and deterministic comparison utilities in `src/engine/campaign-map/geometry.ts`
+- [X] T007 Implement the scenario-world-map adapter that maps current cells, rectangular terrain, movement objects, guarded locations, pickups, heroes, and links to semantic map data in `src/engine/campaign-map/adaptScenarioWorldMap.ts`
+- [X] T008 Integrate campaign-map resolution and map identity with loading while retaining existing authored scenario behavior in `src/engine/scenario/types.ts` and `src/engine/scenario/loadScenario.ts`
+- [X] T009 Implement a semantic traversal lookup adapter that preserves current terrain, bridge, passability, and unavailable-route explanations in `src/engine/campaign-map/resolveCampaignTraversal.ts`
+- [X] T010 [P] Add data-contract coverage for stable map identity, dimensions, cells, locations, connections, and schema-version boundaries in `tests/contract/campaign-map-data.contract.test.ts`
+- [X] T011 [P] Add deterministic-stream and scenario-adapter integration coverage for every existing world map in `tests/integration/campaign-map/scenarioMapAdapterFlow.test.ts`
 - [ ] T012 Add traversal parity coverage for terrain costs, bridge crossings, blocked tiles, and inter-map links in `tests/integration/campaign-map/campaignTraversalAdapterFlow.test.ts`
 
 **Checkpoint**: Semantic maps can be resolved from all current scenarios deterministically, and route behavior remains unchanged through the adapter.
@@ -47,19 +47,19 @@
 ### Tests for User Story 1
 
 - [ ] T013 [P] [US1] Add presentation-contract coverage for semantic layers, no dominant grid borders, alignment, fog safety, and route-feedback ordering in `tests/contract/campaign-map-ui.contract.test.ts`
-- [ ] T014 [P] [US1] Add integration coverage for the renderer consuming semantic data while preserving hero, route-preview, fog, and location overlays in `tests/integration/campaign-map/semanticMapRenderFlow.test.ts`
+- [X] T014 [P] [US1] Add integration coverage for the renderer consuming semantic data while preserving hero, route-preview, fog, and location overlays in `tests/integration/campaign-map/semanticMapRenderFlow.test.ts`
 - [ ] T015 [P] [US1] Add integration coverage that semantic traversal keeps existing preview, replace, cancel, confirmation, and unavailable feedback semantics in `tests/integration/map/campaignMapRouteFlow.test.ts`
 - [ ] T016 [P] [US1] Add desktop and touch-capable acceptance coverage for readable map launch, route consequence preview, cancellation, unavailable feedback, and route commit in `tests/acceptance/campaign-map-traversal.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Implement illustrated base terrain, broad biome-mass, water, corruption, and texture layer functions driven only by semantic cells in `src/render/canvas/campaign-map/renderTerrainLayers.ts`
-- [ ] T018 [P] [US1] Implement deterministic reusable procedural stamp definitions and placement/drawing helpers for forests, mountains, swamps, and landmarks in `src/render/canvas/campaign-map/stamps.ts`
-- [ ] T019 [P] [US1] Implement semantic road, bridge, river, location, and faction-boundary layer functions in `src/render/canvas/campaign-map/renderStrategicLayers.ts`
-- [ ] T020 [P] [US1] Implement zoom-aware deterministic label candidate layout, collision avoidance, and major-label prioritization in `src/render/canvas/campaign-map/labelLayout.ts`
-- [ ] T021 [US1] Implement the map render cache keyed by semantic revision, scale bucket, and device scale with safe HTMLCanvas/OffscreenCanvas fallback in `src/render/canvas/campaign-map/renderCache.ts`
-- [ ] T022 [US1] Compose static semantic layers and existing dynamic hero, route, selection, guarded-location, visual-template, and fog overlays in `src/render/canvas/campaign-map/renderCampaignMap.ts`
-- [ ] T023 [US1] Refactor map render orchestration to resolve the active semantic map, use the campaign renderer, preserve viewport culling/transforms, and remove visible tile-border drawing in `src/render/canvas/renderMapScene.ts`
+- [X] T017 [P] [US1] Implement illustrated base terrain, broad biome-mass, water, corruption, and texture layer functions driven only by semantic cells in `src/render/canvas/campaign-map/renderTerrainLayers.ts`
+- [X] T018 [P] [US1] Implement deterministic reusable procedural stamp definitions and placement/drawing helpers for forests, mountains, swamps, and landmarks in `src/render/canvas/campaign-map/stamps.ts`
+- [X] T019 [P] [US1] Implement semantic road, bridge, river, location, and faction-boundary layer functions in `src/render/canvas/campaign-map/renderStrategicLayers.ts`
+- [X] T020 [P] [US1] Implement zoom-aware deterministic label candidate layout, collision avoidance, and major-label prioritization in `src/render/canvas/campaign-map/labelLayout.ts`
+- [X] T021 [US1] Implement the map render cache keyed by semantic revision, scale bucket, and device scale with safe HTMLCanvas/OffscreenCanvas fallback in `src/render/canvas/campaign-map/renderCache.ts`
+- [X] T022 [US1] Compose static semantic layers and existing dynamic hero, route, selection, guarded-location, visual-template, and fog overlays in `src/render/canvas/campaign-map/renderCampaignMap.ts`
+- [X] T023 [US1] Refactor map render orchestration to resolve the active semantic map, use the campaign renderer, preserve viewport culling/transforms, and remove visible tile-border drawing in `src/render/canvas/renderMapScene.ts`
 - [ ] T024 [US1] Route current pathfinding and movement-rule terrain/crossing reads through the semantic traversal adapter without changing the public hero-action workflow in `src/engine/map/routeRules.ts`, `src/engine/map/routePathfinding.ts`, and `src/engine/map/movementObjectRules.ts`
 - [ ] T025 [US1] Keep map HUD/action-bar language and touch/desktop input feedback aligned with the new semantic route and location presentation in `src/app/scene-controller/mapScene.ts`, `src/ui/hud/mapHud.ts`, and `src/app/scene-controller/mapInputController.ts`
 - [ ] T026 [US1] Update visual-template diagnostics to distinguish semantic campaign terrain and landmark rendering while preserving existing template coverage in `src/render/sprites/visualTemplateResolver.ts`
@@ -78,19 +78,19 @@
 
 - [ ] T027 [P] [US2] Add deterministic-generation contract coverage for named streams, semantic equality, and decoration isolation in `tests/contract/campaign-map-determinism.contract.test.ts`
 - [ ] T028 [P] [US2] Add validation-contract coverage for essential reachability, location spacing, crossings/passes, start choices, progression, biome diversity, and route loops in `tests/contract/campaign-map-validation.contract.test.ts`
-- [ ] T029 [P] [US2] Add integration coverage for generated terrain, biomes, regions, rivers, mountains, landmarks, graph routes, and road paths in `tests/integration/campaign-map/proceduralCampaignMapFlow.test.ts`
+- [X] T029 [P] [US2] Add integration coverage for generated terrain, biomes, regions, rivers, mountains, landmarks, graph routes, and road paths in `tests/integration/campaign-map/proceduralCampaignMapFlow.test.ts`
 - [ ] T030 [P] [US2] Add integration coverage for generated road/pass/bridge traversal and semantic route feedback in `tests/integration/map/generatedCampaignRouteFlow.test.ts`
 - [ ] T031 [P] [US2] Add acceptance coverage for surveying generated strategic features and completing a legal early objective route in `tests/acceptance/procedural-campaign-map.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T032 [P] [US2] Implement seeded scalar terrain fields, domain variation, biome classification, smoothing, and small-component cleanup in `src/engine/campaign-map/generateTerrain.ts`
-- [ ] T033 [P] [US2] Implement broad named region growing with biome identity, danger, faction, corruption, and region boundaries in `src/engine/campaign-map/generateRegions.ts`
-- [ ] T034 [P] [US2] Implement constrained scored landmark placement for starts, castles, towns, shrines, ruins, vaults, resource sites, and passes in `src/engine/campaign-map/placeLocations.ts`
-- [ ] T035 [P] [US2] Implement elongated mountain-range paths, legal passes, downhill river flow, and crossing candidates in `src/engine/campaign-map/generateBarriers.ts`
-- [ ] T036 [US2] Implement connected strategic graph construction with loops, early choices, reward branches, danger progression, and candidate-edge selection in `src/engine/campaign-map/buildStrategicGraph.ts`
-- [ ] T037 [US2] Implement terrain-aware A* road routing, path simplification, existing-road preference, bridge/pass selection, and independent semantic connections in `src/engine/campaign-map/routeConnections.ts`
-- [ ] T038 [US2] Implement map validation, bounded deterministic repair/retry, metrics, and developer-visible rejection state in `src/engine/campaign-map/validateCampaignMap.ts` and `src/engine/campaign-map/generateCampaignMap.ts`
+- [X] T032 [P] [US2] Implement seeded scalar terrain fields, domain variation, biome classification, smoothing, and small-component cleanup in `src/engine/campaign-map/generateTerrain.ts`
+- [X] T033 [P] [US2] Implement broad named region growing with biome identity, danger, faction, corruption, and region boundaries in `src/engine/campaign-map/generateRegions.ts`
+- [X] T034 [P] [US2] Implement constrained scored landmark placement for starts, castles, towns, shrines, ruins, vaults, resource sites, and passes in `src/engine/campaign-map/placeLocations.ts`
+- [X] T035 [P] [US2] Implement elongated mountain-range paths, legal passes, downhill river flow, and crossing candidates in `src/engine/campaign-map/generateBarriers.ts`
+- [X] T036 [US2] Implement connected strategic graph construction with loops, early choices, reward branches, danger progression, and candidate-edge selection in `src/engine/campaign-map/buildStrategicGraph.ts`
+- [X] T037 [US2] Implement terrain-aware A* road routing, path simplification, existing-road preference, bridge/pass selection, and independent semantic connections in `src/engine/campaign-map/routeConnections.ts`
+- [X] T038 [US2] Implement map validation, bounded deterministic repair/retry, metrics, and developer-visible rejection state in `src/engine/campaign-map/validateCampaignMap.ts` and `src/engine/campaign-map/generateCampaignMap.ts`
 - [ ] T039 [US2] Add explicit generation configuration and migrate one main campaign scenario while retaining adapter fallback for other maps/submaps in `src/content/scenarios/advanced-terrain-scenario.ts`, `src/engine/scenario/types.ts`, and `src/engine/scenario/loadScenario.ts`
 - [ ] T040 [US2] Connect generated semantic roads, crossings, terrain costs, locations, and validation acceptance to the existing route, fog, guarded-location, and map-link seams in `src/engine/map/routeRules.ts`, `src/engine/map/fogOfWar.ts`, and `src/engine/map/guardRules.ts`
 
