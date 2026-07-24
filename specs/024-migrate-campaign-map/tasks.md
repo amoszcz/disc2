@@ -32,7 +32,7 @@
 - [X] T009 Implement a semantic traversal lookup adapter that preserves current terrain, bridge, passability, and unavailable-route explanations in `src/engine/campaign-map/resolveCampaignTraversal.ts`
 - [X] T010 [P] Add data-contract coverage for stable map identity, dimensions, cells, locations, connections, and schema-version boundaries in `tests/contract/campaign-map-data.contract.test.ts`
 - [X] T011 [P] Add deterministic-stream and scenario-adapter integration coverage for every existing world map in `tests/integration/campaign-map/scenarioMapAdapterFlow.test.ts`
-- [ ] T012 Add traversal parity coverage for terrain costs, bridge crossings, blocked tiles, and inter-map links in `tests/integration/campaign-map/campaignTraversalAdapterFlow.test.ts`
+- [X] T012 Add traversal parity coverage for terrain costs, bridge crossings, blocked tiles, and inter-map links in `tests/integration/campaign-map/campaignTraversalAdapterFlow.test.ts`
 
 **Checkpoint**: Semantic maps can be resolved from all current scenarios deterministically, and route behavior remains unchanged through the adapter.
 
@@ -108,7 +108,7 @@
 
 - [X] T041 [P] [US3] Add geometry coverage for label collision, world/screen alignment, zoom thresholds, culling, and scale-bucket cache keys in `tests/integration/campaign-map/campaignMapGeometryFlow.test.ts`
 - [X] T042 [P] [US3] Add render-cache integration coverage for correct invalidation and no terrain regeneration during pan, route, hero, or fog updates in `tests/integration/campaign-map/campaignMapRenderCacheFlow.test.ts`
-- [ ] T043 [P] [US3] Add developer-diagnostics contract coverage for seed, validation, overlays, cache boundaries, and fog-safe normal presentation in `tests/contract/campaign-map-diagnostics.contract.test.ts`
+- [X] T043 [P] [US3] Add developer-diagnostics contract coverage for seed, validation, overlays, cache boundaries, and fog-safe normal presentation in `tests/contract/campaign-map-diagnostics.contract.test.ts`
 - [ ] T044 [P] [US3] Add desktop/mobile acceptance coverage for zoom simplification, label priority, aligned selection, and touch movement without hover in `tests/acceptance/campaign-map-navigation.spec.ts`
 
 ### Implementation for User Story 3
