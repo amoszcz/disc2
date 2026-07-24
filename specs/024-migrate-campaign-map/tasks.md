@@ -76,8 +76,8 @@
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] Add deterministic-generation contract coverage for named streams, semantic equality, and decoration isolation in `tests/contract/campaign-map-determinism.contract.test.ts`
-- [ ] T028 [P] [US2] Add validation-contract coverage for essential reachability, location spacing, crossings/passes, start choices, progression, biome diversity, and route loops in `tests/contract/campaign-map-validation.contract.test.ts`
+- [X] T027 [P] [US2] Add deterministic-generation contract coverage for named streams, semantic equality, and decoration isolation in `tests/contract/campaign-map-determinism.contract.test.ts`
+- [X] T028 [P] [US2] Add validation-contract coverage for essential reachability, location spacing, crossings/passes, start choices, progression, biome diversity, and route loops in `tests/contract/campaign-map-validation.contract.test.ts`
 - [X] T029 [P] [US2] Add integration coverage for generated terrain, biomes, regions, rivers, mountains, landmarks, graph routes, and road paths in `tests/integration/campaign-map/proceduralCampaignMapFlow.test.ts`
 - [ ] T030 [P] [US2] Add integration coverage for generated road/pass/bridge traversal and semantic route feedback in `tests/integration/map/generatedCampaignRouteFlow.test.ts`
 - [ ] T031 [P] [US2] Add acceptance coverage for surveying generated strategic features and completing a legal early objective route in `tests/acceptance/procedural-campaign-map.spec.ts`
@@ -106,15 +106,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T041 [P] [US3] Add geometry coverage for label collision, world/screen alignment, zoom thresholds, culling, and scale-bucket cache keys in `tests/integration/campaign-map/campaignMapGeometryFlow.test.ts`
-- [ ] T042 [P] [US3] Add render-cache integration coverage for correct invalidation and no terrain regeneration during pan, route, hero, or fog updates in `tests/integration/campaign-map/campaignMapRenderCacheFlow.test.ts`
+- [X] T041 [P] [US3] Add geometry coverage for label collision, world/screen alignment, zoom thresholds, culling, and scale-bucket cache keys in `tests/integration/campaign-map/campaignMapGeometryFlow.test.ts`
+- [X] T042 [P] [US3] Add render-cache integration coverage for correct invalidation and no terrain regeneration during pan, route, hero, or fog updates in `tests/integration/campaign-map/campaignMapRenderCacheFlow.test.ts`
 - [ ] T043 [P] [US3] Add developer-diagnostics contract coverage for seed, validation, overlays, cache boundaries, and fog-safe normal presentation in `tests/contract/campaign-map-diagnostics.contract.test.ts`
 - [ ] T044 [P] [US3] Add desktop/mobile acceptance coverage for zoom simplification, label priority, aligned selection, and touch movement without hover in `tests/acceptance/campaign-map-navigation.spec.ts`
 
 ### Implementation for User Story 3
 
 - [ ] T045 [US3] Add scale-aware culling, layer simplification, and viewport-safe cache compositing while retaining existing viewport math/input behavior in `src/render/canvas/campaign-map/renderCampaignMap.ts` and `src/render/canvas/campaign-map/renderCache.ts`
-- [ ] T046 [US3] Implement map developer diagnostic state, seed/regeneration action boundary, and overlay definitions in `src/developer/campaign-map/campaignMapDiagnostics.ts`
+- [X] T046 [US3] Implement map developer diagnostic state, seed/regeneration action boundary, and overlay definitions in `src/developer/campaign-map/campaignMapDiagnostics.ts`
 - [ ] T047 [US3] Render optional semantic cell, region, graph, route-search, placement, validation, and cache-boundary overlays in `src/render/canvas/campaign-map/renderDiagnostics.ts` and `src/render/canvas/campaign-map/renderCampaignMap.ts`
 - [ ] T048 [US3] Add a developer-facing campaign-map diagnostics panel/control that cannot expose information in ordinary gameplay in `src/ui/overlays/campaignMapDiagnosticsPanel.ts` and `src/app/scene-controller/mapScene.ts`
 - [ ] T049 [US3] Preserve responsive canvas sizing, two-finger zoom, and no-hover essential feedback under label and overlay changes in `src/render/canvas/viewportRender.ts` and `src/app/scene-controller/mapInputController.ts`
