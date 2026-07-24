@@ -91,8 +91,8 @@
 - [X] T036 [US2] Implement connected strategic graph construction with loops, early choices, reward branches, danger progression, and candidate-edge selection in `src/engine/campaign-map/buildStrategicGraph.ts`
 - [X] T037 [US2] Implement terrain-aware A* road routing, path simplification, existing-road preference, bridge/pass selection, and independent semantic connections in `src/engine/campaign-map/routeConnections.ts`
 - [X] T038 [US2] Implement map validation, bounded deterministic repair/retry, metrics, and developer-visible rejection state in `src/engine/campaign-map/validateCampaignMap.ts` and `src/engine/campaign-map/generateCampaignMap.ts`
-- [ ] T039 [US2] Add explicit generation configuration and migrate one main campaign scenario while retaining adapter fallback for other maps/submaps in `src/content/scenarios/advanced-terrain-scenario.ts`, `src/engine/scenario/types.ts`, and `src/engine/scenario/loadScenario.ts`
-- [ ] T040 [US2] Connect generated semantic roads, crossings, terrain costs, locations, and validation acceptance to the existing route, fog, guarded-location, and map-link seams in `src/engine/map/routeRules.ts`, `src/engine/map/fogOfWar.ts`, and `src/engine/map/guardRules.ts`
+- [X] T039 [US2] Add explicit generation configuration and migrate one main campaign scenario while retaining adapter fallback for other maps/submaps in `src/content/scenarios/advanced-terrain-scenario.ts`, `src/engine/scenario/types.ts`, and `src/engine/scenario/loadScenario.ts`
+- [X] T040 [US2] Connect generated semantic roads, crossings, terrain costs, locations, and validation acceptance to the existing route, fog, guarded-location, and map-link seams in `src/engine/map/routeRules.ts`, `src/engine/map/fogOfWar.ts`, and `src/engine/map/guardRules.ts`
 
 **Checkpoint**: A migrated main scenario produces a validated, deterministic strategic campaign map; unmigrated scenarios and submaps continue through the adapter.
 
