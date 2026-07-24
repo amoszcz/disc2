@@ -60,7 +60,7 @@
 - [X] T021 [US1] Implement the map render cache keyed by semantic revision, scale bucket, and device scale with safe HTMLCanvas/OffscreenCanvas fallback in `src/render/canvas/campaign-map/renderCache.ts`
 - [X] T022 [US1] Compose static semantic layers and existing dynamic hero, route, selection, guarded-location, visual-template, and fog overlays in `src/render/canvas/campaign-map/renderCampaignMap.ts`
 - [X] T023 [US1] Refactor map render orchestration to resolve the active semantic map, use the campaign renderer, preserve viewport culling/transforms, and remove visible tile-border drawing in `src/render/canvas/renderMapScene.ts`
-- [ ] T024 [US1] Route current pathfinding and movement-rule terrain/crossing reads through the semantic traversal adapter without changing the public hero-action workflow in `src/engine/map/routeRules.ts`, `src/engine/map/routePathfinding.ts`, and `src/engine/map/movementObjectRules.ts`
+- [X] T024 [US1] Route current pathfinding and movement-rule terrain/crossing reads through the semantic traversal adapter without changing the public hero-action workflow in `src/engine/map/routeRules.ts`, `src/engine/map/routePathfinding.ts`, and `src/engine/map/movementObjectRules.ts`
 - [ ] T025 [US1] Keep map HUD/action-bar language and touch/desktop input feedback aligned with the new semantic route and location presentation in `src/app/scene-controller/mapScene.ts`, `src/ui/hud/mapHud.ts`, and `src/app/scene-controller/mapInputController.ts`
 - [ ] T026 [US1] Update visual-template diagnostics to distinguish semantic campaign terrain and landmark rendering while preserving existing template coverage in `src/render/sprites/visualTemplateResolver.ts`
 

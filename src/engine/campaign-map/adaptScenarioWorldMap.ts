@@ -1,5 +1,6 @@
 import type { ScenarioDefinition, ScenarioWorldMap, TerrainTypeName } from "../scenario/types";
-import { resolveMovementTile } from "../map/movementObjectRules";
+import { resolveTerrainTile } from "../map/terrainLookup";
+import { resolveMovementObjectStack } from "../map/movementObjectLookup";
 import type { CampaignBiome, CampaignCell, CampaignLocation, GeneratedCampaignMap } from "./types";
 
 const terrainBiome: Record<TerrainTypeName, CampaignBiome> = { road: "road", grass: "plains", plains: "plains", mud: "swamp", woods: "forest", mountains: "mountains", lakes: "water", rivers: "water" };
@@ -7,8 +8,9 @@ export function adaptScenarioWorldMap(scenario: ScenarioDefinition, worldMap: Sc
   const mapScenario = { ...scenario, map: worldMap.map, terrainRegions: worldMap.terrainRegions, movementObjectRegions: worldMap.movementObjectRegions };
   const cells: CampaignCell[] = [];
   for (let y = 0; y < worldMap.map.height; y += 1) for (let x = 0; x < worldMap.map.width; x += 1) {
-    const movement = resolveMovementTile(mapScenario, { x, y }); const biome = terrainBiome[movement.baseTerrainType];
-    cells.push({ x, y, elevation: biome === "mountains" ? .8 : biome === "water" ? .1 : .45, moisture: biome === "swamp" || biome === "water" ? .8 : .4, corruption: 0, temperature: .5, biome, regionId: `region-${biome}`, movementCost: movement.movementCost, walkable: movement.isTraversable, roadType: biome === "road" ? "secondary" : null, riverFlow: movement.baseTerrainType === "rivers" ? 1 : 0, crossing: movement.movementObjects.objectTypes.includes("bridge") ? "bridge" : null, tags: movement.movementObjects.objectTypes });
+    const terrain = resolveTerrainTile(mapScenario, { x, y }); const objects = resolveMovementObjectStack(mapScenario, { x, y }); const bridge = terrain.terrainType === "rivers" && objects.passabilityOverride === "traversable"; const biome = terrainBiome[terrain.terrainType];
+    const movementCost = bridge ? 1 : terrain.movementCost;
+    cells.push({ x, y, elevation: biome === "mountains" ? .8 : biome === "water" ? .1 : .45, moisture: biome === "swamp" || biome === "water" ? .8 : .4, corruption: 0, temperature: .5, biome, regionId: `region-${biome}`, movementCost: Number.isFinite(movementCost) ? Math.max(1, movementCost + objects.movementDeltaTotal) : movementCost, walkable: terrain.isTraversable || bridge, roadType: biome === "road" ? "secondary" : null, riverFlow: terrain.terrainType === "rivers" ? 1 : 0, crossing: bridge ? "bridge" : null, tags: objects.objectTypes });
   }
   const locations: CampaignLocation[] = [
     ...scenario.heroes.filter((hero) => hero.mapId === worldMap.id).map((hero) => ({ id: `hero-${hero.id}`, name: hero.name, type: "start" as const, position: hero.mapPosition, importance: 10, tags: ["hero"] })),
