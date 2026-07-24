@@ -9,6 +9,7 @@ export const advancedTerrainScenario: ScenarioDefinition = {
       id: "surface",
       name: "Broken Causeway",
       kind: "main",
+      campaignGeneration: { seed: 24024, enabled: true },
       map: {
         width: 64,
         height: 64,

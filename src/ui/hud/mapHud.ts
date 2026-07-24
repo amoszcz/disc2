@@ -12,11 +12,13 @@ export function renderMapHud(state: GameState): string {
   const controlsMessage = isMobile
     ? "Tap to select or confirm. Drag with one finger to pan. Use two fingers or the zoom buttons to zoom."
     : "Click to select or confirm. Use the mouse wheel to zoom and middle mouse drag to pan.";
+  const campaignPresentation = activeMap?.campaignGeneration?.enabled ? "Generated campaign" : "Adapted campaign";
 
   return `
     <div class="overlay-box" data-testid="map-hud">
       <div class="hud-row"><strong>Scene</strong><span>Adventure Map</span></div>
       <div class="hud-row"><strong>Map</strong><span data-testid="active-map-name">${activeMap?.name ?? state.scenario.name}</span></div>
+      <div class="hud-row"><strong>Presentation</strong><span data-testid="campaign-map-presentation">${campaignPresentation}</span></div>
       <div class="hud-row"><strong>Active Side</strong><span>${player?.name ?? "Unknown"}</span></div>
       <div class="hud-row"><strong>Hero</strong><span>${hero?.name ?? "None"}</span></div>
       <div class="hud-row"><strong>Layout</strong><span data-testid="layout-mode">${state.mobileLayoutState.layoutMode}</span></div>

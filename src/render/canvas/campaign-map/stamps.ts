@@ -1,0 +1,6 @@
+import type { CampaignBiome, GeneratedCampaignMap } from "../../../engine/campaign-map/types";
+import type { ViewportRenderMetrics } from "../viewportRender";
+import { campaignCellAt } from "../../../engine/campaign-map/adaptScenarioWorldMap";
+import { worldTileToCanvasPoint } from "../viewportRender";
+const glyphs: Partial<Record<CampaignBiome, string>> = { forest: "♠", deadForest: "♠", swamp: "≈", corruptedSwamp: "≈", mountains: "▲", snowPeaks: "▲" };
+export function renderCampaignStamps(context: CanvasRenderingContext2D, map: GeneratedCampaignMap, metrics: ViewportRenderMetrics): void { if (metrics.viewport.zoomLevel < .75) return; const size = metrics.scaledTileSize; context.textAlign = "center"; context.textBaseline = "middle"; context.font = `${Math.max(10, Math.floor(size * .55))}px Georgia`; for (let y = metrics.startTileY; y < metrics.endTileY; y += 2) for (let x = metrics.startTileX; x < metrics.endTileX; x += 2) { const cell = campaignCellAt(map, x, y); const glyph = cell ? glyphs[cell.biome] : undefined; if (!cell || !glyph) continue; const point = worldTileToCanvasPoint(cell, metrics.viewport, context.canvas, map); context.fillStyle = cell.biome === "mountains" || cell.biome === "snowPeaks" ? "#ddd0b0" : "rgba(13, 23, 16, .7)"; context.fillText(glyph, point.x + size / 2, point.y + size / 2); } }

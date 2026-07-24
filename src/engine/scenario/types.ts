@@ -487,6 +487,7 @@ export interface ScenarioWorldMap {
   map: MapDefinition;
   terrainRegions?: TerrainRegion[];
   movementObjectRegions?: MovementObjectRegion[];
+  campaignGeneration?: { seed: number; enabled: boolean };
 }
 
 export interface LinkedMapTravelLink {

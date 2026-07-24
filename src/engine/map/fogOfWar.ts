@@ -1,5 +1,6 @@
 import type { FogOfWarState, FogTileState, GameState, Position } from "../scenario/types";
 import { isWithinBounds } from "./mapRules";
+import { resolveCampaignMap } from "../scenario/loadScenario";
 
 export const DEFAULT_FOG_VISIBILITY_RADIUS = 3;
 
@@ -14,7 +15,7 @@ export function createFogOfWarState(): FogOfWarState {
 export function getCurrentVisibleTileKeys(state: GameState): Set<string> {
   const visible = new Set<string>();
   const radius = state.gameSettings.fogVisibilityRadius;
-  const map = state.scenario.map;
+  const map = resolveCampaignMap(state.scenario, state.mapTravelState.activeMapId);
 
   for (const hero of state.scenario.heroes) {
     if (hero.ownerPlayerId !== state.activePlayerId || hero.availabilityState === "defeated" || hero.mapId !== state.mapTravelState.activeMapId) continue;

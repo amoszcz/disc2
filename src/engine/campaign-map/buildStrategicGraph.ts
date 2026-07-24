@@ -1,0 +1,2 @@
+import type { CampaignConnection, CampaignLocation } from "./types";
+export function buildStrategicGraph(locations: CampaignLocation[]): CampaignConnection[] { return locations.slice(1).map((location, index) => ({ id: `connection-${index}`, fromLocationId: locations[index].id, toLocationId: location.id, path: [locations[index].position, location.position], travelCost: Math.hypot(locations[index].position.x - location.position.x, locations[index].position.y - location.position.y), roadType: index === 0 ? "primary" : "secondary" })); }

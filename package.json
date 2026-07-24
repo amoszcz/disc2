@@ -23,6 +23,8 @@
     "test:controls": "vitest run tests/contract/gameplay-control-layout.contract.test.ts tests/integration/map/mapActionBarFlow.test.ts tests/integration/battle/battleQueuePresentationFlow.test.ts",
     "test:sprite-mapping": "vitest run tests/contract/sprite-mapping.contract.test.ts tests/contract/sprite-mapping-save.contract.test.ts tests/contract/sprite-mapping-export.contract.test.ts tests/integration/developer/spriteMappingReviewFlow.test.ts tests/integration/developer/spriteMappingAlignmentFlow.test.ts tests/integration/developer/spriteMappingEditFlow.test.ts tests/integration/developer/spriteMappingZoomFlow.test.ts tests/integration/developer/spriteMappingSaveFlow.test.ts tests/integration/developer/spriteMappingExportFlow.test.ts",
     "test:submaps": "vitest run tests/contract/scenario-session-state.contract.test.ts tests/integration/foundation/gameStateFlow.test.ts tests/integration/map/mapTurnFlow.test.ts tests/integration/map/routeCommitFlow.test.ts tests/integration/foundation/routePreviewStateFlow.test.ts",
+    "test:campaign-map": "vitest run tests/contract/campaign-map-*.test.ts tests/integration/campaign-map/*.test.ts tests/integration/map/campaignMapRouteFlow.test.ts tests/integration/map/generatedCampaignRouteFlow.test.ts",
+    "test:campaign-map:acceptance": "playwright test tests/acceptance/campaign-map-*.spec.ts",
     "test:acceptance": "playwright test",
     "verify:pathfinding": "npm run test:pathfinding && playwright test tests/acceptance/route-preview.spec.ts tests/acceptance/route-confirmation.spec.ts tests/acceptance/route-persistence.spec.ts",
     "verify:terrain": "npm run test:terrain && playwright test tests/acceptance/advanced-terrain-movement.spec.ts tests/acceptance/blocked-terrain-boundaries.spec.ts tests/acceptance/terrain-readability.spec.ts",
@@ -33,6 +35,7 @@
     "verify:menu": "npm run test:menu && playwright test tests/acceptance/start-menu-selection.spec.ts tests/acceptance/start-menu-return.spec.ts",
     "verify:mobile": "npm run test:mobile && playwright test tests/acceptance/mobile-start-menu.spec.ts tests/acceptance/mobile-gameplay-flow.spec.ts tests/acceptance/mobile-viewport-continuity.spec.ts",
     "verify:submaps": "npm run test:submaps && playwright test tests/acceptance/map-view-interaction.spec.ts tests/acceptance/route-confirmation.spec.ts tests/acceptance/route-persistence.spec.ts",
+    "verify:campaign-map": "npm run test:campaign-map && npm run test:campaign-map:acceptance",
     "verify": "npm run test && npm run test:acceptance"
   },
   "devDependencies": {

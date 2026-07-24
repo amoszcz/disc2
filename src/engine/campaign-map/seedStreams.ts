@@ -1,0 +1,4 @@
+function hash(value: string): number { let h = 2166136261; for (let i = 0; i < value.length; i += 1) h = Math.imul(h ^ value.charCodeAt(i), 16777619); return h >>> 0; }
+export class SeedStream { private state: number; constructor(seed: number) { this.state = seed || 1; } next(): number { let x = this.state; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; this.state = x >>> 0; return this.state / 4294967296; } int(max: number): number { return Math.floor(this.next() * max); } range(min: number, max: number): number { return min + (max - min) * this.next(); } }
+export function deriveSeed(seed: number, name: string): number { return hash(`${seed}:${name}`); }
+export function createSeedStreams(seed: number): Record<string, SeedStream> { return Object.fromEntries(["terrain", "regions", "landmarks", "roads", "rivers", "decoration", "labels", "ambient"].map((name) => [name, new SeedStream(deriveSeed(seed, name))])); }
