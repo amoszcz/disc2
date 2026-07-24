@@ -8,6 +8,8 @@ import { hasMovementObjectRegions } from "../../engine/map/movementObjectLookup"
 import { hasTerrainRegions } from "../../engine/map/terrainLookup";
 import { openSettings } from "../state/gameState";
 import { clearOwnedRoutePreview } from "../../engine/map/heroActions";
+import { resolveCampaignMap } from "../../engine/scenario/loadScenario";
+import { bindCampaignMapDiagnosticsPanel, renderCampaignMapDiagnosticsPanel } from "../../ui/overlays/campaignMapDiagnosticsPanel";
 
 export function renderMapSidebar(store: GameStore, container: HTMLElement, actionContainer: HTMLElement): void {
   const state = store.getState();
@@ -49,6 +51,7 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement, actio
         : null
     )}
     ${renderErrorOverlay(logMessage, travelMessage ?? state.routeFeedback?.blockedReason ?? navigationMessage, overlayTitle)}
+    ${renderCampaignMapDiagnosticsPanel(resolveCampaignMap(state.scenario, state.mapTravelState.activeMapId))}
   `;
   container.querySelector<HTMLButtonElement>('[data-settings-action="open"]')?.addEventListener("click", () => {
     store.update((current) => { openSettings(current); });
@@ -59,6 +62,9 @@ export function renderMapSidebar(store: GameStore, container: HTMLElement, actio
       const result = clearOwnedRoutePreview(current, current.selectedHeroId);
       current.messageLog.push(result.ok ? "Route preview cancelled without spending movement." : result.reason ?? "No route preview is available to cancel.");
     });
+  });
+  bindCampaignMapDiagnosticsPanel(container, resolveCampaignMap(state.scenario, state.mapTravelState.activeMapId), () => {
+    store.update((current) => { current.mapViewState = { ...current.mapViewState }; });
   });
 
   actionContainer.innerHTML = renderMapActionBar(state.activeTraversal !== null);

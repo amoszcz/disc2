@@ -83,7 +83,7 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
         ? resolveTerrainTile(state.scenario, { x, y }).terrainType
         : state.scenario.map.defaultTerrainType ?? "plains";
       const terrainTemplate = resolveTerrainVisualTemplate(terrainType);
-      recordVisualTemplateDiagnostic({ subjectKind: "terrain", subjectType: terrainType, sceneContext: "map" }, terrainTemplate);
+      recordVisualTemplateDiagnostic({ subjectKind: "terrain", subjectType: terrainType, sceneContext: "map" }, terrainTemplate, "semantic-campaign");
 
       const fogState = getFogTileState(state, { x, y });
       const movementObjects = resolveMovementObjectStack(state.scenario, { x, y });
@@ -92,7 +92,8 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
         const primaryTemplate = resolveMovementObjectVisualTemplate(primaryObject.objectType, getMovementObjectVisualState(primaryObject.objectType));
         recordVisualTemplateDiagnostic(
           { subjectKind: "movement-object", subjectType: primaryObject.objectType, sceneContext: "map" },
-          primaryTemplate
+          primaryTemplate,
+          "semantic-campaign"
         );
         drawResolvedVisualTemplate(context, primaryTemplate, {
           x: point.x + tileSize * 0.08,
@@ -108,7 +109,8 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
           );
           recordVisualTemplateDiagnostic(
             { subjectKind: "movement-object", subjectType: movementObjects.effects[1].objectType, sceneContext: "map" },
-            secondaryTemplate
+            secondaryTemplate,
+            "semantic-campaign"
           );
           drawResolvedVisualTemplate(context, secondaryTemplate, {
             x: point.x + tileSize * 0.58,
@@ -169,7 +171,8 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
     const pickupTemplate = resolveResourcePickupVisualTemplate(pickup);
     recordVisualTemplateDiagnostic(
       { subjectKind: "resource-pickup", subjectType: pickup.resourceType, sceneContext: "map" },
-      pickupTemplate
+      pickupTemplate,
+      "semantic-campaign"
     );
     drawResolvedVisualTemplate(context, pickupTemplate, {
       x: point.x + tileSize * 0.2,
@@ -198,7 +201,7 @@ export function renderMapScene(context: CanvasRenderingContext2D, state: GameSta
         ? { stateName: "start-move" as const, direction: getRouteDirection(trackedHeroState, hero.mapPosition, routeOwnedByHero.steps[0]?.position) }
         : trackedHeroState;
     const heroTemplate = resolveHeroVisualTemplate(hero, effectiveHeroState);
-    recordVisualTemplateDiagnostic({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, heroTemplate);
+    recordVisualTemplateDiagnostic({ subjectKind: "hero", subjectType: hero.name, sceneContext: "map" }, heroTemplate, "semantic-campaign");
     drawResolvedVisualTemplate(context, heroTemplate, {
       x: point.x + tileSize * 0.08,
       y: point.y + tileSize * 0.06,

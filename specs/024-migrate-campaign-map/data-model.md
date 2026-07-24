@@ -77,3 +77,5 @@ The latter is existing `GameState` behavior. Semantic route costs are queried wh
 ## Serialization Boundary
 
 No active campaign-save payload currently exists. If one is introduced, store `schemaVersion`, map identity, seed/config fingerprint, semantic map payload or deterministic regeneration recipe, current map ID, hero/route/fog progress, and generator version. Reject unknown incompatible versions with a player-visible migration message; never silently regenerate a different strategic map over progress.
+
+Adapter-backed maps are intentionally retained for legacy world maps and linked submaps. Generated campaign maps are reproducible from the scenario-owned seed and configuration fingerprint; decoration streams never change traversal data.

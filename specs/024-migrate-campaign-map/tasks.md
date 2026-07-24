@@ -49,7 +49,7 @@
 - [X] T013 [P] [US1] Add presentation-contract coverage for semantic layers, no dominant grid borders, alignment, fog safety, and route-feedback ordering in `tests/contract/campaign-map-ui.contract.test.ts`
 - [X] T014 [P] [US1] Add integration coverage for the renderer consuming semantic data while preserving hero, route-preview, fog, and location overlays in `tests/integration/campaign-map/semanticMapRenderFlow.test.ts`
 - [X] T015 [P] [US1] Add integration coverage that semantic traversal keeps existing preview, replace, cancel, confirmation, and unavailable feedback semantics in `tests/integration/map/campaignMapRouteFlow.test.ts`
-- [ ] T016 [P] [US1] Add desktop and touch-capable acceptance coverage for readable map launch, route consequence preview, cancellation, unavailable feedback, and route commit in `tests/acceptance/campaign-map-traversal.spec.ts`
+- [X] T016 [P] [US1] Add desktop and touch-capable acceptance coverage for readable map launch, route consequence preview, cancellation, unavailable feedback, and route commit in `tests/acceptance/campaign-map-traversal.spec.ts`
 
 ### Implementation for User Story 1
 
@@ -61,8 +61,8 @@
 - [X] T022 [US1] Compose static semantic layers and existing dynamic hero, route, selection, guarded-location, visual-template, and fog overlays in `src/render/canvas/campaign-map/renderCampaignMap.ts`
 - [X] T023 [US1] Refactor map render orchestration to resolve the active semantic map, use the campaign renderer, preserve viewport culling/transforms, and remove visible tile-border drawing in `src/render/canvas/renderMapScene.ts`
 - [X] T024 [US1] Route current pathfinding and movement-rule terrain/crossing reads through the semantic traversal adapter without changing the public hero-action workflow in `src/engine/map/routeRules.ts`, `src/engine/map/routePathfinding.ts`, and `src/engine/map/movementObjectRules.ts`
-- [ ] T025 [US1] Keep map HUD/action-bar language and touch/desktop input feedback aligned with the new semantic route and location presentation in `src/app/scene-controller/mapScene.ts`, `src/ui/hud/mapHud.ts`, and `src/app/scene-controller/mapInputController.ts`
-- [ ] T026 [US1] Update visual-template diagnostics to distinguish semantic campaign terrain and landmark rendering while preserving existing template coverage in `src/render/sprites/visualTemplateResolver.ts`
+- [X] T025 [US1] Keep map HUD/action-bar language and touch/desktop input feedback aligned with the new semantic route and location presentation in `src/app/scene-controller/mapScene.ts`, `src/ui/hud/mapHud.ts`, and `src/app/scene-controller/mapInputController.ts`
+- [X] T026 [US1] Update visual-template diagnostics to distinguish semantic campaign terrain and landmark rendering while preserving existing template coverage in `src/render/sprites/visualTemplateResolver.ts`
 
 **Checkpoint**: US1 is independently playable as an illustrated, adapted campaign map with preserved movement and recoverable route planning.
 
@@ -80,7 +80,7 @@
 - [X] T028 [P] [US2] Add validation-contract coverage for essential reachability, location spacing, crossings/passes, start choices, progression, biome diversity, and route loops in `tests/contract/campaign-map-validation.contract.test.ts`
 - [X] T029 [P] [US2] Add integration coverage for generated terrain, biomes, regions, rivers, mountains, landmarks, graph routes, and road paths in `tests/integration/campaign-map/proceduralCampaignMapFlow.test.ts`
 - [X] T030 [P] [US2] Add integration coverage for generated road/pass/bridge traversal and semantic route feedback in `tests/integration/map/generatedCampaignRouteFlow.test.ts`
-- [ ] T031 [P] [US2] Add acceptance coverage for surveying generated strategic features and completing a legal early objective route in `tests/acceptance/procedural-campaign-map.spec.ts`
+- [X] T031 [P] [US2] Add acceptance coverage for surveying generated strategic features and completing a legal early objective route in `tests/acceptance/procedural-campaign-map.spec.ts`
 
 ### Implementation for User Story 2
 
@@ -109,15 +109,15 @@
 - [X] T041 [P] [US3] Add geometry coverage for label collision, world/screen alignment, zoom thresholds, culling, and scale-bucket cache keys in `tests/integration/campaign-map/campaignMapGeometryFlow.test.ts`
 - [X] T042 [P] [US3] Add render-cache integration coverage for correct invalidation and no terrain regeneration during pan, route, hero, or fog updates in `tests/integration/campaign-map/campaignMapRenderCacheFlow.test.ts`
 - [X] T043 [P] [US3] Add developer-diagnostics contract coverage for seed, validation, overlays, cache boundaries, and fog-safe normal presentation in `tests/contract/campaign-map-diagnostics.contract.test.ts`
-- [ ] T044 [P] [US3] Add desktop/mobile acceptance coverage for zoom simplification, label priority, aligned selection, and touch movement without hover in `tests/acceptance/campaign-map-navigation.spec.ts`
+- [X] T044 [P] [US3] Add desktop/mobile acceptance coverage for zoom simplification, label priority, aligned selection, and touch movement without hover in `tests/acceptance/campaign-map-navigation.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T045 [US3] Add scale-aware culling, layer simplification, and viewport-safe cache compositing while retaining existing viewport math/input behavior in `src/render/canvas/campaign-map/renderCampaignMap.ts` and `src/render/canvas/campaign-map/renderCache.ts`
+- [X] T045 [US3] Add scale-aware culling, layer simplification, and viewport-safe cache compositing while retaining existing viewport math/input behavior in `src/render/canvas/campaign-map/renderCampaignMap.ts` and `src/render/canvas/campaign-map/renderCache.ts`
 - [X] T046 [US3] Implement map developer diagnostic state, seed/regeneration action boundary, and overlay definitions in `src/developer/campaign-map/campaignMapDiagnostics.ts`
-- [ ] T047 [US3] Render optional semantic cell, region, graph, route-search, placement, validation, and cache-boundary overlays in `src/render/canvas/campaign-map/renderDiagnostics.ts` and `src/render/canvas/campaign-map/renderCampaignMap.ts`
-- [ ] T048 [US3] Add a developer-facing campaign-map diagnostics panel/control that cannot expose information in ordinary gameplay in `src/ui/overlays/campaignMapDiagnosticsPanel.ts` and `src/app/scene-controller/mapScene.ts`
-- [ ] T049 [US3] Preserve responsive canvas sizing, two-finger zoom, and no-hover essential feedback under label and overlay changes in `src/render/canvas/viewportRender.ts` and `src/app/scene-controller/mapInputController.ts`
+- [X] T047 [US3] Render optional semantic cell, region, graph, route-search, placement, validation, and cache-boundary overlays in `src/render/canvas/campaign-map/renderDiagnostics.ts` and `src/render/canvas/campaign-map/renderCampaignMap.ts`
+- [X] T048 [US3] Add a developer-facing campaign-map diagnostics panel/control that cannot expose information in ordinary gameplay in `src/ui/overlays/campaignMapDiagnosticsPanel.ts` and `src/app/scene-controller/mapScene.ts`
+- [X] T049 [US3] Preserve responsive canvas sizing, two-finger zoom, and no-hover essential feedback under label and overlay changes in `src/render/canvas/viewportRender.ts` and `src/app/scene-controller/mapInputController.ts`
 
 **Checkpoint**: Desktop and mobile campaign navigation remain responsive and readable, with developer diagnostics available only on demand.
 
@@ -127,11 +127,11 @@
 
 **Purpose**: Complete compatibility, quality, and delivery validation across all stories.
 
-- [ ] T050 [P] Document semantic-map schema/version behavior, adapter scope, generation seed behavior, and future save compatibility in `specs/024-migrate-campaign-map/quickstart.md` and `specs/024-migrate-campaign-map/data-model.md`
-- [ ] T051 [P] Add regression coverage that current core map, submap transitions, fog, visual templates, and route persistence remain compatible with campaign-map resolution in `tests/integration/campaign-map/legacyScenarioCompatibilityFlow.test.ts`
+- [X] T050 [P] Document semantic-map schema/version behavior, adapter scope, generation seed behavior, and future save compatibility in `specs/024-migrate-campaign-map/quickstart.md` and `specs/024-migrate-campaign-map/data-model.md`
+- [X] T051 [P] Add regression coverage that current core map, submap transitions, fog, visual templates, and route persistence remain compatible with campaign-map resolution in `tests/integration/campaign-map/legacyScenarioCompatibilityFlow.test.ts`
 - [X] T052 Add the campaign-map suites to the appropriate aggregate verify scripts in `package.json`
-- [ ] T053 Run `npm run build`, the campaign-map Vitest group, existing route/fog/mobile suites, and campaign-map Playwright acceptance flows; record results and any accepted limitations in `specs/024-migrate-campaign-map/quickstart.md`
-- [ ] T054 Reconcile implementation with [spec.md](./spec.md), [plan.md](./plan.md), and [contracts/](./contracts/) and append any remaining work before handoff in `specs/024-migrate-campaign-map/tasks.md`
+- [X] T053 Run `npm run build`, the campaign-map Vitest group, existing route/fog/mobile suites, and campaign-map Playwright acceptance flows; record results and any accepted limitations in `specs/024-migrate-campaign-map/quickstart.md`
+- [X] T054 Reconcile implementation with [spec.md](./spec.md), [plan.md](./plan.md), and [contracts/](./contracts/) and append any remaining work before handoff in `specs/024-migrate-campaign-map/tasks.md`
 
 ---
 

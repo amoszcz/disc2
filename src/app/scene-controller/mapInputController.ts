@@ -122,6 +122,8 @@ function handleMapTap(store: GameStore, point: ScreenPoint, traversalController?
 }
 
 export function bindMapInput(canvas: HTMLCanvasElement, store: GameStore, traversalController?: MapTraversalController): void {
+  // Keep gestures inside the map when an embedding page overrides the stylesheet.
+  canvas.style.touchAction = "none";
   const activeTouchPoints = new Map<number, ScreenPoint>();
   const capturePointer = (pointerId: number): void => {
     try {

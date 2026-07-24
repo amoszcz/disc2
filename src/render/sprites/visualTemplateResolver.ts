@@ -83,6 +83,7 @@ interface RenderDiagnosticEntry {
   stateDirection: FacingDirection | null;
   assetKind: VisualTemplateResolverResult["assetKind"];
   isFallback: boolean;
+  presentationSource: "authored" | "semantic-campaign";
 }
 
 const imageCache = new Map<string, HTMLImageElement | null>();
@@ -347,7 +348,8 @@ export function resetVisualTemplateDiagnostics(sceneContext: VisualSceneContext)
 
 export function recordVisualTemplateDiagnostic(
   subject: VisualSubjectDescriptor,
-  resolvedTemplate: VisualTemplateResolverResult
+  resolvedTemplate: VisualTemplateResolverResult,
+  presentationSource: "authored" | "semantic-campaign" = "authored"
 ): void {
   diagnostics[subject.sceneContext].push({
     subjectKind: subject.subjectKind,
@@ -358,7 +360,8 @@ export function recordVisualTemplateDiagnostic(
     resolvedStateName: resolvedTemplate.resolvedStateName ?? null,
     stateDirection: resolvedTemplate.stateDirection ?? null,
     assetKind: resolvedTemplate.assetKind,
-    isFallback: resolvedTemplate.isFallback
+    isFallback: resolvedTemplate.isFallback,
+    presentationSource
   });
   syncDiagnosticsToWindow();
 }
