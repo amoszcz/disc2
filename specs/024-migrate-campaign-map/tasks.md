@@ -48,7 +48,7 @@
 
 - [ ] T013 [P] [US1] Add presentation-contract coverage for semantic layers, no dominant grid borders, alignment, fog safety, and route-feedback ordering in `tests/contract/campaign-map-ui.contract.test.ts`
 - [X] T014 [P] [US1] Add integration coverage for the renderer consuming semantic data while preserving hero, route-preview, fog, and location overlays in `tests/integration/campaign-map/semanticMapRenderFlow.test.ts`
-- [ ] T015 [P] [US1] Add integration coverage that semantic traversal keeps existing preview, replace, cancel, confirmation, and unavailable feedback semantics in `tests/integration/map/campaignMapRouteFlow.test.ts`
+- [X] T015 [P] [US1] Add integration coverage that semantic traversal keeps existing preview, replace, cancel, confirmation, and unavailable feedback semantics in `tests/integration/map/campaignMapRouteFlow.test.ts`
 - [ ] T016 [P] [US1] Add desktop and touch-capable acceptance coverage for readable map launch, route consequence preview, cancellation, unavailable feedback, and route commit in `tests/acceptance/campaign-map-traversal.spec.ts`
 
 ### Implementation for User Story 1
