@@ -23,7 +23,7 @@
     "test:controls": "vitest run tests/contract/gameplay-control-layout.contract.test.ts tests/integration/map/mapActionBarFlow.test.ts tests/integration/battle/battleQueuePresentationFlow.test.ts",
     "test:sprite-mapping": "vitest run tests/contract/sprite-mapping.contract.test.ts tests/contract/sprite-mapping-save.contract.test.ts tests/contract/sprite-mapping-export.contract.test.ts tests/integration/developer/spriteMappingReviewFlow.test.ts tests/integration/developer/spriteMappingAlignmentFlow.test.ts tests/integration/developer/spriteMappingEditFlow.test.ts tests/integration/developer/spriteMappingZoomFlow.test.ts tests/integration/developer/spriteMappingSaveFlow.test.ts tests/integration/developer/spriteMappingExportFlow.test.ts",
     "test:submaps": "vitest run tests/contract/scenario-session-state.contract.test.ts tests/integration/foundation/gameStateFlow.test.ts tests/integration/map/mapTurnFlow.test.ts tests/integration/map/routeCommitFlow.test.ts tests/integration/foundation/routePreviewStateFlow.test.ts",
-    "test:campaign-map": "vitest run tests/contract/campaign-map-*.test.ts tests/integration/campaign-map/*.test.ts tests/integration/map/campaignMapRouteFlow.test.ts",
+    "test:campaign-map": "vitest run tests/contract/campaign-map-*.test.ts tests/integration/campaign-map/*.test.ts tests/integration/map/campaignMapRouteFlow.test.ts tests/integration/map/generatedCampaignRouteFlow.test.ts",
     "test:campaign-map:acceptance": "playwright test tests/acceptance/campaign-map-*.spec.ts",
     "test:acceptance": "playwright test",
     "verify:pathfinding": "npm run test:pathfinding && playwright test tests/acceptance/route-preview.spec.ts tests/acceptance/route-confirmation.spec.ts tests/acceptance/route-persistence.spec.ts",

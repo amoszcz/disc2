@@ -38,6 +38,11 @@ const SCENARIO_OPTIONS: ScenarioOption[] = [
   }
 ];
 
+// Campaign geometry is immutable for the lifetime of a loaded scenario.  Rendering
+// asks for it every frame, so retain the resolved model instead of re-running the
+// generator and adapter for each paint.
+const resolvedCampaignMaps = new WeakMap<ScenarioDefinition, Map<string, GeneratedCampaignMap>>();
+
 function assert(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
@@ -199,16 +204,27 @@ export function loadScenario(scenarioId: ScenarioId = "core-map-loop"): Scenario
 
 /** Resolves semantic map data without changing authored scenario gameplay state. */
 export function resolveCampaignMap(scenario: ScenarioDefinition, mapId: string): GeneratedCampaignMap {
+  const cachedMaps = resolvedCampaignMaps.get(scenario);
+  const cached = cachedMaps?.get(mapId);
+  if (cached) return cached;
+
   const worldMap = getWorldMapById(scenario, mapId);
   if (!worldMap) throw new Error(`Unknown world map: ${mapId}`);
+  let resolved: GeneratedCampaignMap;
   if (worldMap.campaignGeneration?.enabled) {
     const generated = generateCampaignMap(worldMap.id, { seed: worldMap.campaignGeneration.seed, width: worldMap.map.width, height: worldMap.map.height });
     const authored = adaptScenarioWorldMap(scenario, worldMap);
     generated.locations = authored.locations;
     generated.metadata = { ...generated.metadata, revision: `${generated.metadata.revision}:authored-landmarks` };
-    return generated;
+    resolved = generated;
+  } else {
+    resolved = adaptScenarioWorldMap(scenario, worldMap);
   }
-  return adaptScenarioWorldMap(scenario, worldMap);
+
+  const maps = cachedMaps ?? new Map<string, GeneratedCampaignMap>();
+  maps.set(mapId, resolved);
+  if (!cachedMaps) resolvedCampaignMaps.set(scenario, maps);
+  return resolved;
 }
 
 export function getScenarioOptions(): ScenarioOption[] {

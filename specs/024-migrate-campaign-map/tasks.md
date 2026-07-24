@@ -46,7 +46,7 @@
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Add presentation-contract coverage for semantic layers, no dominant grid borders, alignment, fog safety, and route-feedback ordering in `tests/contract/campaign-map-ui.contract.test.ts`
+- [X] T013 [P] [US1] Add presentation-contract coverage for semantic layers, no dominant grid borders, alignment, fog safety, and route-feedback ordering in `tests/contract/campaign-map-ui.contract.test.ts`
 - [X] T014 [P] [US1] Add integration coverage for the renderer consuming semantic data while preserving hero, route-preview, fog, and location overlays in `tests/integration/campaign-map/semanticMapRenderFlow.test.ts`
 - [X] T015 [P] [US1] Add integration coverage that semantic traversal keeps existing preview, replace, cancel, confirmation, and unavailable feedback semantics in `tests/integration/map/campaignMapRouteFlow.test.ts`
 - [ ] T016 [P] [US1] Add desktop and touch-capable acceptance coverage for readable map launch, route consequence preview, cancellation, unavailable feedback, and route commit in `tests/acceptance/campaign-map-traversal.spec.ts`
@@ -79,7 +79,7 @@
 - [X] T027 [P] [US2] Add deterministic-generation contract coverage for named streams, semantic equality, and decoration isolation in `tests/contract/campaign-map-determinism.contract.test.ts`
 - [X] T028 [P] [US2] Add validation-contract coverage for essential reachability, location spacing, crossings/passes, start choices, progression, biome diversity, and route loops in `tests/contract/campaign-map-validation.contract.test.ts`
 - [X] T029 [P] [US2] Add integration coverage for generated terrain, biomes, regions, rivers, mountains, landmarks, graph routes, and road paths in `tests/integration/campaign-map/proceduralCampaignMapFlow.test.ts`
-- [ ] T030 [P] [US2] Add integration coverage for generated road/pass/bridge traversal and semantic route feedback in `tests/integration/map/generatedCampaignRouteFlow.test.ts`
+- [X] T030 [P] [US2] Add integration coverage for generated road/pass/bridge traversal and semantic route feedback in `tests/integration/map/generatedCampaignRouteFlow.test.ts`
 - [ ] T031 [P] [US2] Add acceptance coverage for surveying generated strategic features and completing a legal early objective route in `tests/acceptance/procedural-campaign-map.spec.ts`
 
 ### Implementation for User Story 2
@@ -129,7 +129,7 @@
 
 - [ ] T050 [P] Document semantic-map schema/version behavior, adapter scope, generation seed behavior, and future save compatibility in `specs/024-migrate-campaign-map/quickstart.md` and `specs/024-migrate-campaign-map/data-model.md`
 - [ ] T051 [P] Add regression coverage that current core map, submap transitions, fog, visual templates, and route persistence remain compatible with campaign-map resolution in `tests/integration/campaign-map/legacyScenarioCompatibilityFlow.test.ts`
-- [ ] T052 Add the campaign-map suites to the appropriate aggregate verify scripts in `package.json`
+- [X] T052 Add the campaign-map suites to the appropriate aggregate verify scripts in `package.json`
 - [ ] T053 Run `npm run build`, the campaign-map Vitest group, existing route/fog/mobile suites, and campaign-map Playwright acceptance flows; record results and any accepted limitations in `specs/024-migrate-campaign-map/quickstart.md`
 - [ ] T054 Reconcile implementation with [spec.md](./spec.md), [plan.md](./plan.md), and [contracts/](./contracts/) and append any remaining work before handoff in `specs/024-migrate-campaign-map/tasks.md`
 
